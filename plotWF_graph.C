@@ -15,13 +15,15 @@ void plotWF_graph(const char * filename){
 
   Float_t amp_max[54];
   int k;
+  Double_t max;
   
-  TCanvas* wf_c =new TCanvas("wf","Plot wf",1000,650);
-  TH1F *hr_amp =new TH1F("hr_amp","histos_ampr",100,0.0,1000);
-  TH1F *hl_amp =new TH1F("hl_amp","histos_ampl",100,0.0,1000);
+  TCanvas* wf_c =new TCanvas("wf","Plot wf",1200,550);
+  wf_c->Divide(2,1);
+  TH1F *hr_amp =new TH1F("hr_amp","histos_ampr",500,0.0,1);
+  TH1F *hl_amp =new TH1F("hl_amp","histos_ampl",500,0.0,1);
 
   digiTree->SetBranchAddress("amp_max",&amp_max);
-  
+  max=digiTree->GetMaximum("amp_max");
 
 
   
@@ -31,17 +33,25 @@ void plotWF_graph(const char * filename){
     digiTree->GetEntry(k);
     
     
-    hr_amp->Fill(amp_max[3]);
-    hl_amp->Fill(amp_max[4]);
+    hr_amp->Fill(amp_max[3]/max);
+    hl_amp->Fill(amp_max[4]/max);
 
   }//chiudo for k   
   
-    
-  cout << "here!"<<endl;
-  
   hl_amp->SetLineColor(kRed);
+
+  
+  
+  wf_c->cd(1);
+  wf_c->cd(1)->SetLogy();
   hr_amp->DrawNormalized();
-  hl_amp->DrawNormalized("same");
-  cout << "here!"<<endl;
+  wf_c->cd(2)->SetLogy();
+  hl_amp->DrawNormalized();
+
+  
+  // wf_c->cd(2)->SetLogy();
+  //hr_amp->Draw();
+  //hl_amp->Draw("same");
+  
 }
 
