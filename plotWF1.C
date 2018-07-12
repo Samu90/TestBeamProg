@@ -20,7 +20,7 @@ void plotWF(const char * filename,int i){
   for(k=0;k<WFTree->GetEntries();k++){
 
     if (i==0) p=k;
-    cout<<p<<endl;
+
     WFTree->GetEntry(p);
     
     for(j=0;j<wf_sample;j++){
@@ -40,10 +40,18 @@ void plotWF(const char * filename,int i){
     }//chiudo for j
     
     
-    wf_c->Update();  
+    wf_c->Update();
     if(i!=0) break;
     gPad->WaitPrimitive();
-   
+  }//chiudo for k
+
+    
+      string c = NULL;
+      cin>> c;
+      cout<< "-"<< c <<endl;
+      if(c=="s") {break;}
+      
+    
   }//chiudo for k
 }
 
