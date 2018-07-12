@@ -24,25 +24,18 @@ void plotWF_graph(const char * filename){
 
   digiTree->SetBranchAddress("amp_max",&amp_max);
   max=digiTree->GetMaximum("amp_max");
-
-
   
   for(k=0;k<digiTree->GetEntries();k++){
-   
     if (k%100==0) cout<<k<<endl;
     digiTree->GetEntry(k);
-    
-    
+
     hr_amp->Fill(amp_max[3]/max);
     hl_amp->Fill(amp_max[4]/max);
-
   }//chiudo for k   
   
   hl_amp->SetLineColor(kRed);
-
   
   
-  wf_c->cd(1);
   wf_c->cd(1)->SetLogy();
   hr_amp->DrawNormalized();
   wf_c->cd(2)->SetLogy();
