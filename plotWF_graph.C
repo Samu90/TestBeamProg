@@ -1,6 +1,3 @@
-#include <iostream>
-#include <Tstring.h>
-
 
 using namespace std;
 void plotWF_graph(const char * filename){
