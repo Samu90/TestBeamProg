@@ -1,3 +1,6 @@
+#include <iostream>
+#include <Tstring.h>
+
 
 using namespace std;
 void plotWF_graph(const char * filename){
@@ -13,6 +16,7 @@ void plotWF_graph(const char * filename){
   
   TCanvas* wf_c =new TCanvas("wf","Plot wf",1200,550);
   wf_c->Divide(2,1);
+
   TH1F *hr_amp =new TH1F("hr_amp","histos_ampr",500,0.0,1);
   TH1F *hl_amp =new TH1F("hl_amp","histos_ampl",500,0.0,1);
 
@@ -35,12 +39,23 @@ void plotWF_graph(const char * filename){
   hl_amp->SetLineColor(kRed);
   
   cout<< max << endl;
+
   wf_c->cd(1)->SetLogy();
   hr_amp->DrawNormalized();
   wf_c->cd(2)->SetLogy();
   hl_amp->DrawNormalized();
+
+
+  TString histoname = "";
+  histoname.Append("histo");
+ histoname.Append(filename);
+
   
-  
+ TFile* f2 = new TFile(histoname.Data(),"recreate");
+  f2->cd();
+  hr_amp->Write();
+  hl_amp->Write();
+  f2->Close();
   // wf_c->cd(2)->SetLogy();
   //hr_amp->Draw();
   //hl_amp->Draw("same");
