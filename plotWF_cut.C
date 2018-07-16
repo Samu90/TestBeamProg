@@ -1,10 +1,27 @@
 //to run with ranges [0.125;2]right, [0.13;2]left on 4.1
 //to run with ranges [0.125;2]right, [0.13;2]left on 1.3
 
-#include <TF1.h>
-#include <TMath.h>
-using namespace std;
-void plotWF_fit(const char * filename){
+
+
+
+TH1F cut(const TH1F&  h, Double_t m){
+
+  int nbins = h.GetNbinsX();
+  float xmin = h.GetXaxis()->GetXmin();
+  float xmax = h.GeXaxis()->GetXmax();
+  TH1F* h1_new = new TH1F("h_cut", "", nbins, xmin, xmax);
+  
+  int i;
+  for (i=0;i<500; i++){
+    if (i < m* 0.8*500 || i> m*3*500){
+      h1_new->SetBinContent(i,0);
+    } else {
+      h1_new->SetBinContent(i,h->GetBinContent(i));
+    }
+  }  return h1_new;
+}
+
+void plotWF_cut(const char * filename){
   
   
   TFile *  file= TFile::Open(filename);
@@ -22,6 +39,8 @@ void plotWF_fit(const char * filename){
   TH1F *hl_amp =new TH1F("hl_amp","histos_ampl",500,0.0,1);
   TF1 *fit_r = new TF1("f_r","landau",0.13,2);
   TF1 *fit_l = new TF1("f_l","landau",0.13,2);
+  
+  // TH1F *hl_cut =new TH1F("hr_cut","histos_cut",500,0.0,1);
   
   digiTree->SetBranchAddress("amp_max",&amp_max);
   
@@ -49,26 +68,19 @@ void plotWF_fit(const char * filename){
   gStyle->SetOptFit();
   wf_c->Divide(2,1);
   wf_c->cd(1)->SetLogy();
-  hr_amp->Fit("f_r","RV"); 
+  hr_amp->Fit("f_r","RV");
+  Double_t mip = fit_r ->GetParameter(1);
+  
+  TH1F hr_cut = cut(hr_amp,mip);
+  hr_cut->Draw("same");
+  
+  
   hr_amp->Draw("");
   wf_c->cd(2)->SetLogy();
   hl_amp->Fit("f_l","RV"); 
   hl_amp->Draw("");
 
-  /*
-  TString histoname = "";
-  histoname.Append("histo");
-  histoname.Append(filename);
 
-  
- TFile* f2 = new TFile(histoname.Data(),"RECREATE");
-  f2->cd();
-  hr_amp->Write();
-  hl_amp->Write();
-  f2->Close();
-  // wf_c->cd(2)->SetLogy();
-  //hr_amp->Draw();
-  //hl_amp->Draw("same");
-  */
 }
+
 
