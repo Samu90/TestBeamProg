@@ -14,11 +14,18 @@ void plotHisto(const char * filename1,const char * filename2){
   c1->Divide(2,1);
   
   c1->cd(1)->SetLogy();
+  
+  hl1->SetLineColor(1);
   hl1->DrawNormalized();
-  hl2->DrawNormalized("same");
 
+  hl2->SetLineColor(2);
+  hl2->DrawNormalized("same");
+  
+  
   c1->cd(2)->SetLogy();
+  hr1->SetLineColor(3);
   hr1->DrawNormalized();
+  hr2->SetLineColor(4);
   hr2->DrawNormalized("same");
   
 }
