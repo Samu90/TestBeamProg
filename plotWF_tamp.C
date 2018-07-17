@@ -13,17 +13,17 @@ void plotWF_tamp(const char * filename){
 
   
   Float_t amp_max[54], time[54];
-  int k,nbin,maxbin_l,maxbin_r;
+  int k,maxbin_l,maxbin_r;
   Float_t rxmin,rxmax,rymin,rymax;
-  bool debug=true;
+  bool debug=false;
   Double_t max=0;
   rxmin=0;
   rxmax=0.5;
-  rymin=7.5;
-  rymax=18;
-  nbin=800;
+  rymin=13;
+  rymax=21;
+  const Int_t  nbin=200;
 
-  Float_t x_r[nbin],y_r[nbin], x_l[nbin],y_l[nbin];
+  Float_t x_r[nbin],y_r[nbin], x_l[nbin],y_l[nbin],rmsy_l[nbin],rmsy_r[nbin];
 
   TH1F *hr_amp =new TH1F("hr_amp","histos_ampr",nbin,0.0,1);
   TH1F *hl_amp =new TH1F("hl_amp","histos_ampl",nbin,0.0,1);
@@ -41,7 +41,7 @@ void plotWF_tamp(const char * filename){
     if (k%10000==0) cout<<"On entry " <<k<<endl;
     if(amp_max[3]>max) {max=amp_max[3];}
     if(amp_max[4]>max) {max=amp_max[4];}
-  }/*chiudo for k*/
+  }/*chiudo for */
   
   for(k=0;k<digiTree->GetEntries();k++){
     if (k%10000==0) cout<<"On entry " <<k<<endl;
@@ -49,7 +49,7 @@ void plotWF_tamp(const char * filename){
     
     hr_amp->Fill(amp_max[3]/max);
     hl_amp->Fill(amp_max[4]/max);
-  }/*chiudo for k*/
+  }/*chiudo for */
    
   hr_amp->Scale(1/(hr_amp->Integral()));
   hl_amp->Scale(1/(hl_amp->Integral()));
@@ -89,9 +89,11 @@ void plotWF_tamp(const char * filename){
     
     x_r[k]=(rxmax-rxmin)/nbin*k;
     y_r[k]=rymin+(rymax-rymin)/nbin*maxbin_r;
+    rmsy_r[k]=histotemp_r->GetRMS();
     
     x_l[k]=(rxmax-rxmin)/nbin*k;
     y_l[k]=rymin+(rymax-rymin)/nbin*maxbin_l;
+    rmsy_l[k]=histotemp_l->GetRMS();
     
     delete histotemp_l;
     delete histotemp_r;
@@ -102,13 +104,20 @@ void plotWF_tamp(const char * filename){
   
   
   TCanvas* wf_c =new TCanvas("wf","Plot wf",1200,550);
-  TGraphErrors* graph_r=new TGraphErrors(nbin-1,x_r,y_r,0,0);
-  TGraphErrors* graph_l=new TGraphErrors(nbin-1,x_l,y_l,0,0);
+  TGraphErrors* graph_r=new TGraphErrors(nbin-1,x_r,y_r,0,erry_r);
+  TGraphErrors* graph_l=new TGraphErrors(nbin-1,x_l,y_l,0,erry_l);
+  TF1* hyp_r = new TF1("hyp_r","[0] + [1]/(x**[3]-[2])",rxmin,rxmax);
+  TF1* hyp_l = new TF1("hyp_l","[0] + [1]/(x**[3]-[2])",rxmin,rxmax);
+  hyp_r->SetParameter(0,7);
+  hyp_l->SetParameter(0,7);
+  hyp_r->SetParameter(1,10);
+  hyp_l->SetParameter(0,10);
   
   wf_c->Divide(2,1);
   
   wf_c->cd(1);
   h2_l->Draw("COLZ");
+  graph_l->Fit("hyp_r","R");
   graph_l->SetMarkerStyle(8);
   graph_l->SetMarkerSize(.5);
   graph_l->Draw("P");
@@ -116,6 +125,7 @@ void plotWF_tamp(const char * filename){
   
   wf_c->cd(2);
   h2_r->Draw("COLZ");
+  graph_r->Fit("hyp_l","R");
   graph_r->SetMarkerStyle(8);
   graph_r->SetMarkerSize(.5);  
   graph_r->Draw("P");
