@@ -49,13 +49,15 @@ void plotWF_cut(const char * filename){
     
     digiTree->GetEntry(k);
     
-    if (0.8*fit_r->GetParameter(1) < amp_max[3]/max && amp_max[3]/max < 3*fit_r->GetParameter(1)) hr_cut->Fill(amp_max[3]/max);
+    if (0.8*fit_l->GetParameter(1) < amp_max[3]/max && amp_max[3]/max < 3*fit_l->GetParameter(1)) hr_cut->Fill(amp_max[3]/max);
     if (0.8*fit_l->GetParameter(1) < amp_max[4]/max && amp_max[4]/max < 3*fit_l->GetParameter(1)) hl_cut->Fill(amp_max[4]/max);
    
   }//chiudo for k
    
-  hr_cut->Scale(hr_amp->Integral((int)0.8*fit_r->GetParameter(1)*500,(int)3*fit_r->GetParameter(1)*500)/(hr_cut->Integral()));
+  hr_cut->Scale(1/(hr_cut->Integral()));
   hl_cut->Scale(1/(hl_cut->Integral()));
+  hr_cut->Scale(hr_amp->Integral(0.8*fit_l->GetParameter(1)*500, 3*fit_l->GetParameter(1)*500)/hr_amp->Integral());
+  hl_cut->Scale(hl_amp->Integral(0.8*fit_l->GetParameter(1)*500, 3*fit_l->GetParameter(1)*500)/hl_amp->Integral());
 
   TCanvas* wf_c =new TCanvas("wf","Plot wf",1200,550);
   wf_c->Clear();
