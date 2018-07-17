@@ -3,24 +3,6 @@
 
 
 
-
-TH1F cut(const TH1F&  h, Double_t m){
-
-  int nbins = h.GetNbinsX();
-  float xmin = h.GetXaxis()->GetXmin();
-  float xmax = h.GeXaxis()->GetXmax();
-  TH1F* h1_new = new TH1F("h_cut", "", nbins, xmin, xmax);
-  
-  int i;
-  for (i=0;i<500; i++){
-    if (i < m* 0.8*500 || i> m*3*500){
-      h1_new->SetBinContent(i,0);
-    } else {
-      h1_new->SetBinContent(i,h->GetBinContent(i));
-    }
-  }  return h1_new;
-}
-
 void plotWF_cut(const char * filename){
   
   
@@ -32,15 +14,12 @@ void plotWF_cut(const char * filename){
   int k;
   Double_t max=0;
   
- 
- 
-
   TH1F *hr_amp =new TH1F("hr_amp","histos_ampr",500,0.0,1);
   TH1F *hl_amp =new TH1F("hl_amp","histos_ampl",500,0.0,1);
   TF1 *fit_r = new TF1("f_r","landau",0.13,2);
   TF1 *fit_l = new TF1("f_l","landau",0.13,2);
-  
-  // TH1F *hl_cut =new TH1F("hr_cut","histos_cut",500,0.0,1);
+  TH1F *hr_cut =new TH1F("hr_cut","histos_cut",500,0.0,1);
+  TH1F *hl_cut =new TH1F("hl_cut","histos_cut ",500,0.0,1);
   
   digiTree->SetBranchAddress("amp_max",&amp_max);
   
@@ -61,25 +40,35 @@ void plotWF_cut(const char * filename){
   hr_amp->Scale(1/(hr_amp->Integral()));
   hl_amp->Scale(1/(hl_amp->Integral()));
 
-  TCanvas* wf_c =new TCanvas("wf","Plot wf",1200,550);
-  wf_c->Clear();
+
   cout<< max << endl;
 
+  hr_amp->Fit("f_r","RV");
+  hl_amp->Fit("f_l","RV");
+  for(k=0;k<digiTree->GetEntries();k++){
+    
+    digiTree->GetEntry(k);
+    
+    if (0.8*fit_l->GetParameter(1) < amp_max[3]/max && amp_max[3]/max < 3*fit_l->GetParameter(1)) hr_cut->Fill(amp_max[3]/max);
+    if (0.8*fit_l->GetParameter(1) < amp_max[4]/max && amp_max[4]/max < 3*fit_l->GetParameter(1)) hl_cut->Fill(amp_max[4]/max);
+   
+  }//chiudo for k
+   
+  hr_cut->Scale(1/(hr_cut->Integral()));
+  hl_cut->Scale(1/(hl_cut->Integral()));
+  hr_cut->Scale(hr_amp->Integral(0.8*fit_l->GetParameter(1)*500, 3*fit_l->GetParameter(1)*500)/hr_amp->Integral());
+  hl_cut->Scale(hl_amp->Integral(0.8*fit_l->GetParameter(1)*500, 3*fit_l->GetParameter(1)*500)/hl_amp->Integral());
+
+  TCanvas* wf_c =new TCanvas("wf","Plot wf",1200,550);
+  wf_c->Clear();
   gStyle->SetOptFit();
   wf_c->Divide(2,1);
   wf_c->cd(1)->SetLogy();
-  hr_amp->Fit("f_r","RV");
-  Double_t mip = fit_r ->GetParameter(1);
-  
-  TH1F hr_cut = cut(hr_amp,mip);
-  hr_cut->Draw("same");
-  
-  
   hr_amp->Draw("");
-  wf_c->cd(2)->SetLogy();
-  hl_amp->Fit("f_l","RV"); 
+  hr_cut->Draw("same");
+  wf_c->cd(2)->SetLogy(); 
   hl_amp->Draw("");
-
+  hl_cut->Draw("same"); 
 
 }
 
