@@ -16,8 +16,8 @@ void plotWF_cut(const char * filename){
   
   TH1F *hr_amp =new TH1F("hr_amp","histos_ampr",500,0.0,1);
   TH1F *hl_amp =new TH1F("hl_amp","histos_ampl",500,0.0,1);
-  TF1 *fit_r = new TF1("f_r","landau",0.13,2);
-  TF1 *fit_l = new TF1("f_l","landau",0.13,2);
+  TF1 *fit_r = new TF1("f_r","landau",0.10,2);
+  TF1 *fit_l = new TF1("f_l","landau",0.10,2);
   TH1F *hr_cut =new TH1F("hr_cut","histos_cut",500,0.0,1);
   TH1F *hl_cut =new TH1F("hl_cut","histos_cut ",500,0.0,1);
   
@@ -42,15 +42,16 @@ void plotWF_cut(const char * filename){
 
 
   cout<< max << endl;
-
-  hr_amp->Fit("f_r","RV");
-  hl_amp->Fit("f_l","RV");
+  
+  hr_amp->Fit("f_r","RQ0");
+  hl_amp->Fit("f_l","RQ0");
+  
   for(k=0;k<digiTree->GetEntries();k++){
     
     digiTree->GetEntry(k);
     
-    if (0.8*fit_l->GetParameter(1) < amp_max[3]/max && amp_max[3]/max < 3*fit_l->GetParameter(1)) hr_cut->Fill(amp_max[3]/max);
-    if (0.8*fit_l->GetParameter(1) < amp_max[4]/max && amp_max[4]/max < 3*fit_l->GetParameter(1)) hl_cut->Fill(amp_max[4]/max);
+    if (0.8*fit_l->GetParameter(1) < amp_max[3]/max && amp_max[3]/max < 3*fit_l->GetParameter(1)){ hr_cut->Fill(amp_max[3]/max);
+    hl_cut->Fill(amp_max[4]/max);}
    
   }//chiudo for k
    
@@ -61,14 +62,20 @@ void plotWF_cut(const char * filename){
 
   TCanvas* wf_c =new TCanvas("wf","Plot wf",1200,550);
   wf_c->Clear();
-  gStyle->SetOptFit();
+  
   wf_c->Divide(2,1);
   wf_c->cd(1)->SetLogy();
-  hr_amp->Draw("");
-  hr_cut->Draw("same");
-  wf_c->cd(2)->SetLogy(); 
-  hl_amp->Draw("");
-  hl_cut->Draw("same"); 
+  gStyle->SetOptFit();
+  
+  hr_amp->Draw("HISTO");
+  fit_r->Draw("same");
+  hr_cut->SetLineColor(3);
+  hr_cut->Draw("HISTO same");
+  wf_c->cd(2)->SetLogy();
+  gStyle->SetOptFit();
+  hl_amp->Draw("HISTO");
+  hr_cut->SetLineColor(3);
+  hl_cut->Draw("HISTO same"); 
 
 }
 
