@@ -95,15 +95,15 @@ void plotWF_su(const char * filename){
     histotemp_l=h2_l->ProjectionY("h2_lprojY",k,k);
     histotemp_r=h2_r->ProjectionY("h2_tprojY",k,k);
    
-    maxbin_r = histotemp_r->GetMaximumBin();
-    maxbin_l = histotemp_l->GetMaximumBin();
+    y_r[k] = histotemp_r->GetMean();
+    y_l[k] = histotemp_l->GetMean();
 
     x_r[k] = x_l[k]=-0.4 +(0.8-(-0.4))/nbinx*k;
-    y_r[k]=rxmin+(Float_t)(rxmax-rxmin)/nbiny*maxbin_r;
-    y_l[k]=rxmin+(Float_t)(rxmax-rxmin)/nbiny*maxbin_l;
+    // y_r[k]=rxmin+(Float_t)(rxmax-rxmin)/nbiny*maxbin_r;
+    // y_l[k]=rxmin+(Float_t)(rxmax-rxmin)/nbiny*maxbin_l;
     rmsy_r[k] = histotemp_r->GetRMS();
     rmsy_l[k] = histotemp_l->GetRMS();
-    cout << maxbin_l << endl;
+    // cout << maxbin_l << endl;
     
     delete histotemp_r;
     delete histotemp_l;
