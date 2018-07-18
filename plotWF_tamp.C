@@ -13,7 +13,8 @@ void plotWF_tamp(const char * filename){
 
   
   Float_t amp_max[54], time[54];
-  int k,maxbin_l,maxbin_r,maxbin_t;
+  int k;
+  Double_t  meanbin_l,meanbin_r,meanbin_t;
   Float_t rxmin,rxmax,rymin_l,rymax_l,rymin_r,rymax_r,tymin,tymax;
   bool debug=false;
   Double_t max=0,tmax=0;
@@ -24,9 +25,9 @@ void plotWF_tamp(const char * filename){
   const Int_t  nbinx=200,nbiny=400;
 
   rymin_l=5;
-  rymax_l=21;
+  rymax_l=18;
   rymin_r=7;
-  rymax_r=17;
+  rymax_r=14;
   tymin=6;
   tymax=17;
  
@@ -106,23 +107,22 @@ void plotWF_tamp(const char * filename){
     histotemp_t=h2_t->ProjectionY("h2_tprojY",k,k);
     
     
-    maxbin_l=histotemp_l->GetMaximumBin();
-    maxbin_r=histotemp_r->GetMaximumBin();
-    maxbin_t=histotemp_t->GetMaximumBin();
+    meanbin_l=histotemp_l->GetMean();
+    meanbin_r=histotemp_r->GetMean();
+    meanbin_t=histotemp_t->GetMean();
     
 
 
     xt[k]=-0.4+(Float_t)(0.8-(-0.4))/nbinx*k;
-    yt[k]=tymin+(Float_t)(tymax-tymin)/nbinx*maxbin_t;
+    yt[k]=meanbin_t;
     rmsyt[k]=histotemp_t->GetRMS();
        
     x_l[k]=(rxmax-rxmin)/nbinx*k;
-    y_l[k]=rymin_l+(rymax_l-rymin_l)/nbiny*maxbin_l;
+    y_l[k]=meanbin_l;
     rmsy_l[k]=histotemp_l->GetRMS();
 
     x_r[k]=(rxmax-rxmin)/nbinx*k;
-    y_r[k]=rymin_r+(rymax_r-rymin_r)/nbiny*maxbin_r;
-
+    y_r[k]=meanbin_r;
     rmsy_r[k]=histotemp_r->GetRMS();
 
     
@@ -137,16 +137,29 @@ void plotWF_tamp(const char * filename){
   
   
   TCanvas* wf_c =new TCanvas("wf","Plot wf",1800,550);
+
   TGraphErrors* graph_r=new TGraphErrors(nbinx-1,x_r,y_r,0,rmsy_r);
   TGraphErrors* graph_l=new TGraphErrors(nbinx-1,x_l,y_l,0,rmsy_l);
   TGraphErrors* graph_t=new TGraphErrors(nbinx-1,xt,yt,0,rmsyt);
+
   TF1* hyp_r = new TF1("hyp_r","[0] - [1]/(x**[3]-[2])",rxmin,rxmax);
   TF1* hyp_l = new TF1("hyp_l","[0] - [1]/(x**[3]-[2])",rxmin,rxmax);
   TF1* hyp_t = new TF1("hyp_t","[0] + [1]*x",-0.5,1);
   //  hyp_r->SetParameter(0,10);
   // hyp_l->SetParameter(0,10);
 
- 
+  /*hyp_r->SetParameter(0,-50);
+  hyp_r->SetParameter(0,-70);
+  hyp_r->SetParameter(0,-0.2);
+  hyp_r->SetParameter(0,0.042);
+
+  hyp_l->SetParameter(0,-50);
+  hyp_l->SetParameter(0,-70);
+  hyp_l->SetParameter(0,-0.2);
+  hyp_l->SetParameter(0,0.042);
+  */
+
+
   // hyp_r->SetParLimits(0,1,8);
   gStyle->SetOptStat("");
   
