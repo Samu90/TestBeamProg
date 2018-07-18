@@ -14,14 +14,18 @@ void plotWF_tamp(const char * filename){
   
   Float_t amp_max[54], time[54];
   int k,maxbin_l,maxbin_r,maxbin_t;
-  Float_t rxmin,rxmax,rymin,rymax;
+  Float_t rxmin,rxmax,rymin_l,rymax_l,rymin_r,rymax_r,tymin,tymax;
   bool debug=false;
   Double_t max=0,tmax=0;
   rxmin=0;
   rxmax=0.5;
-  rymin=13;
-  rymax=21;
-  const Int_t  nbin=200;
+  rymin_l=5;
+  rymax_l=21;
+  rymin_r=7;
+  rymax_r=17;
+  tymin=6;
+  tymax=17;
+  const Int_t  nbin=100;
 
   Float_t x_r[nbin],y_r[nbin], x_l[nbin],y_l[nbin],rmsy_l[nbin],rmsy_r[nbin];
   Float_t xt[nbin],yt[nbin],rmsyt[nbin];
@@ -65,9 +69,9 @@ void plotWF_tamp(const char * filename){
   hr_amp->Fit("f_r","RQ0");
   hl_amp->Fit("f_l","RQ0");
   
-  TH2F* h2_l= new TH2F("h2_l", "histo h2_l",nbin,rxmin,rxmax,nbin,rymin,rymax); 
-  TH2F* h2_r= new TH2F("h2_r", "histo h2_r",nbin,rxmin,rxmax,nbin,rymin,rymax);
-  TH2F* h2_t= new TH2F("h2_t", "histo h2_t",nbin,-0.4,0.8,nbin,12,26); 
+  TH2F* h2_l= new TH2F("h2_l", "histo h2_l",nbin,rxmin,rxmax,nbin,rymin_l,rymax_l); 
+  TH2F* h2_r= new TH2F("h2_r", "histo h2_r",nbin,rxmin,rxmax,nbin,rymin_r,rymax_r);
+  TH2F* h2_t= new TH2F("h2_t", "histo h2_t",nbin,-0.4,0.8,nbin,tymin,tymax); 
  
   for(k=0;k<digiTree->GetEntries();k++){
     
@@ -101,15 +105,15 @@ void plotWF_tamp(const char * filename){
     maxbin_t=histotemp_t->GetMaximumBin();
     
     xt[k]=-0.4+(Float_t)(0.8-(-0.4))/nbin*k;
-    yt[k]=12+(Float_t)(26-12)/nbin*maxbin_t;
+    yt[k]=tymin+(Float_t)(tymax-tymin)/nbin*maxbin_t;
     rmsyt[k]=histotemp_t->GetRMS();
        
     x_l[k]=(rxmax-rxmin)/nbin*k;
-    y_l[k]=rymin+(rymax-rymin)/nbin*maxbin_l;
+    y_l[k]=rymin_l+(rymax_l-rymin_l)/nbin*maxbin_l;
     rmsy_l[k]=histotemp_l->GetRMS();
 
     x_r[k]=(rxmax-rxmin)/nbin*k;
-    y_r[k]=rymin+(rymax-rymin)/nbin*maxbin_r;
+    y_r[k]=rymin_r+(rymax_r-rymin_r)/nbin*maxbin_r;
     rmsy_r[k]=histotemp_r->GetRMS();
 
     
