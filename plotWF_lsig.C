@@ -101,9 +101,9 @@ void plotWF_lsig(const char * filename){
     TH1D* histotemp_r;
     TH1D* histotemp_m;
 
-    histotemp_l=h2_l->ProjectionY("h2_lprojY",120,125);
-    histotemp_r=h2_r->ProjectionY("h2_rprojY",120,125);
-    histotemp_m=h2_m->ProjectionY("h2_tprojY",120,125);
+    histotemp_l=h2_l->ProjectionY("h2_lprojY",0,nbinx);
+    histotemp_r=h2_r->ProjectionY("h2_rprojY",0,nbinx);
+    histotemp_m=h2_m->ProjectionY("h2_tprojY",0,nbinx);
 
 
 
@@ -113,14 +113,14 @@ void plotWF_lsig(const char * filename){
   // TGraphErrors* graph_r=new TGraphErrors(nbinx-1,x_r,y_r,0,rmsy_r);
   // TGraphErrors* graph_l=new TGraphErrors(nbinx-1,x_l,y_l,0,rmsy_l);
   // TGraphErrors* graph_t=new TGraphErrors(nbinx-1,xt,yt,0,rmsyt);
-  TF1* g_r = new TF1("g_r","gaus",14,16);
-  TF1* g_l = new TF1("g_l","gaus",14.5,16);
-  TF1* g_m = new TF1("g_m","gaus",14.5,16);
+  TF1* g_r = new TF1("g_r","gaus",14,21);
+  TF1* g_l = new TF1("g_l","gaus",14.5,21);
+  TF1* g_m = new TF1("g_m","gaus",14.5,21);
   //  hyp_r->SetParameter(0,10);
   // hyp_l->SetParameter(0,10);
-  histotemp_m->Fit("g_m","RQ0");
-  histotemp_l->Fit("g_l","RQ0");
-  histotemp_r->Fit("g_r","RQ0");
+  histotemp_m->Fit("g_m","Q0");
+  histotemp_l->Fit("g_l","Q0");
+  histotemp_r->Fit("g_r","Q0");
 
   // hyp_r->SetParLimits(0,1,8);
   gStyle->SetOptStat("");
@@ -135,9 +135,9 @@ void plotWF_lsig(const char * filename){
   histotemp_m->Draw();
   histotemp_r->Draw("same");
   histotemp_l->Draw("same");
-  g_m->Draw("same");
-  g_r->Draw("same");
   g_l->Draw("same");
+  g_r->Draw("same");
+  g_m->Draw("same");
 
  
 
