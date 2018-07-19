@@ -155,7 +155,7 @@ void plotWF_corr(const char * filename){
   wf_c->Divide(3,2);
 
   wf_c->cd(1);
-  h2_l->Draw("LEGO20");
+  h2_l->Draw("COLZ");
   graph_l->Fit("hyp_l","R");
   graph_l->SetMarkerStyle(8);
   graph_l->SetMarkerSize(.5);
@@ -163,22 +163,22 @@ void plotWF_corr(const char * filename){
 
 
   wf_c->cd(2);
-  h2_r->Draw("LEGOZ");
+  h2_r->Draw("COLZ");
   graph_r->Fit("hyp_r","R");
   graph_r->SetMarkerStyle(8);
   graph_r->SetMarkerSize(.5);
   graph_r->Draw("P");
 
   wf_c->cd(3);
-  h2_t->Draw("LEGOZ");
+  h2_t->Draw("COLZ");
   graph_t->Fit("hyp_t","R");
   graph_t->SetMarkerStyle(8);
   graph_t->SetMarkerSize(.5);
   graph_t->Draw("P");
 
-  TH2F* hc_l= new TH2F("hc_l", "histo hc_l",nbinx,rxmin,rxmax,nbiny,-5,7);
-  TH2F* hc_r= new TH2F("hc_r", "histo hc_r",nbinx,rxmin,rxmax,nbiny,-5,5);
-  TH2F* hc_t= new TH2F("hc_t", "histo hc_t",nbinx,-0.4,0.8,nbinx,-5,5);
+  TH2F* hc_l= new TH2F("hc_l", "histo hc_l",nbinx,rxmin,rxmax,nbiny,10,40);
+  TH2F* hc_r= new TH2F("hc_r", "histo hc_r",nbinx,rxmin,rxmax,nbiny,10,40);
+  TH2F* hc_t= new TH2F("hc_t", "histo hc_t",nbinx,-0.4,0.8,nbinx,10,40);
   
    for(k=0;k<digiTree->GetEntries();k++){
 
@@ -186,9 +186,9 @@ void plotWF_corr(const char * filename){
 
     if (0.8*(fit_l->GetParameter(1)) < (amp_max[3]/max) && (amp_max[3]/max) < (3*fit_l->GetParameter(1)) && (time[3]-time[4])<7 && time[3]-time[4]>0)
       {
-	hc_l->Fill(amp_max[3]/max,time[3]-time[0]-hyp_l->Eval(amp_max[3]/max));
-	hc_r->Fill(amp_max[4]/max,time[4]-time[0]-hyp_r->Eval(amp_max[4]/max));
-	hc_t->Fill((time[3]-time[4])/tmax,(time[3]+time[4])/2-time[0]-(hyp_r->Eval(amp_max[3]/max)+hyp_l->Eval(amp_max[4]/max))/2);
+	hc_l->Fill(amp_max[3]/max,time[3]-time[0]-hyp_l->Eval(amp_max[3]/max)+hyp_l->GetParameter(0));
+	hc_r->Fill(amp_max[4]/max,time[4]-time[0]-hyp_r->Eval(amp_max[4]/max)+hyp_r->GetParameter(0));
+	hc_t->Fill((time[3]-time[4])/tmax,(time[3]+time[4])/2-time[0]-(hyp_r->Eval(amp_max[3]/max)-hyp_r->GetParameter(0)+hyp_l->Eval(amp_max[4]/max)-hyp_r->GetParameter(0))/2);
 
 
 	if(debug) cout << 0.8*fit_l->GetParameter(1) << " < " << amp_max[3]/max << " < " << 3*fit_l->GetParameter(1) << " ////  " << time[4]-time[0] <<endl;
@@ -196,22 +196,23 @@ void plotWF_corr(const char * filename){
 
   }//chiudo for k
 
-   wf_c->cd(4);
-   hc_l->Draw("LEGOZ");
+
+    wf_c->cd(4);
+    hc_l->Draw("COLZ");
   // graph_l->Fit("hyp_l","R");
    //   graph_l->SetMarkerStyle(8);
    // graph_l->SetMarkerSize(.5);
   // graph_l->Draw("P");
 
    wf_c->cd(5);
-   hc_r->Draw("LEGOZ");
+   hc_r->Draw("COLZ");
   // graph_l->Fit("hyp_l","R");
    // graph_l->SetMarkerStyle(8);
    // graph_l->SetMarkerSize(.5);
   // graph_l->Draw("P");
 
    wf_c->cd(6);
-   hc_t->Draw("LEGOZ");
+   hc_t->Draw("COLZ");
   // graph_l->Fit("hyp_l","R");
   // graph_l->SetMarkerStyle(8);
   // graph_l->SetMarkerSize(.5);
