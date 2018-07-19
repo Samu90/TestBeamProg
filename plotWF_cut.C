@@ -74,7 +74,7 @@ void plotWF_cut(const char * filename){
   wf_c->cd(2)->SetLogy();
   gStyle->SetOptFit();
   hl_amp->Draw("HISTO");
-  hr_cut->SetLineColor(3);
+  hr_cut->SetLineColor(7);
   hl_cut->Draw("HISTO same"); 
 
 }
