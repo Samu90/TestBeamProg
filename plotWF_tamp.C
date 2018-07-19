@@ -1,6 +1,6 @@
 //to run with ranges [0.125;2]right, [0.13;2]left on 4.1
 //to run with ranges [0.125;2]right, [0.13;2]left on 1.3
-
+//binnaggio-> 100 x800 sembra essere ottimale
 
 
 void plotWF_tamp(const char * filename){
@@ -19,6 +19,7 @@ void plotWF_tamp(const char * filename){
   Double_t max=0,tmax=0;
   rxmin=0;
   rxmax=0.5;
+
 
 
   const Int_t  nbinx=200,nbiny=400;
@@ -77,6 +78,7 @@ void plotWF_tamp(const char * filename){
 
   TH2F* h2_l= new TH2F("h2_l", "histo h2_l",nbinx,rxmin,rxmax,nbiny,rymin_l,rymax_l);
   TH2F* h2_r= new TH2F("h2_r", "histo h2_r",nbinx,rxmin,rxmax,nbiny,rymin_r,rymax_r);
+
   TH2F* h2_t= new TH2F("h2_t", "histo h2_t",nbinx,-0.4,0.8,nbinx,tymin,tymax);
 
   for(k=0;k<digiTree->GetEntries();k++){
@@ -175,6 +177,7 @@ void plotWF_tamp(const char * filename){
   graph_t->SetMarkerStyle(8);
   graph_t->SetMarkerSize(.5);
   graph_t->Draw("P");
+
 
 
 
