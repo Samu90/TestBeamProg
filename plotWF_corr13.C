@@ -3,7 +3,7 @@
 
 
 
-void plotWF_corr(const char * filename){
+void plotWF_corr13(const char * filename){
 
 
   TFile*  file= TFile::Open(filename);
@@ -14,7 +14,7 @@ void plotWF_corr(const char * filename){
 
   Float_t amp_max[54], time[54];
   int k,maxbin_l,maxbin_r,maxbin_t;
-  Float_t rxmin,rxmax,rymin_l,rymax_l,rymin_r,rymax_r,tymin,tymax,txmin,txmax,rymin_lc,rymax_lc,rymin_rc,rymax_rc;
+  Float_t rxmin,rxmax,rymin_l,rymax_l,rymin_r,rymax_r,tymin,tymax,txmin,txmax,tymin_c,tymax_c,rymin_lc,rymax_lc,rymin_rc,rymax_rc;
   bool debug=false;
   Double_t max=0;
   Int_t LED300,LED100,LED50,LED30;
@@ -25,21 +25,24 @@ void plotWF_corr(const char * filename){
 
   const Int_t  nbinx=100,nbiny=600;
 
-  rymin_l=2;
-  rymax_l=7;
-  rymin_r=0;
-  rymax_r=7;
+  rymin_l=7.7;
+  rymax_l=9.4;
+  rymin_r=8;
+  rymax_r=9.5;
   
-  rymin_lc=-5;
-  rymax_lc=5;
-  rymin_rc=-5;
-  rymax_rc=5;
+  rymin_lc=2.8;
+  rymax_lc=4;
+  rymin_rc=-9;
+  rymax_rc=-8;
 
-  tymin=1.5;
-  tymax=7;
+  tymin=6;
+  tymax=12;
+  
+  tymin_c=-11;
+  tymax_c=-6;
 
-  txmin=0;
-  txmax=3;
+  txmin=-1;
+  txmax=1.2;
 
 
   Float_t x_r[nbinx],y_r[nbiny], x_l[nbinx],y_l[nbiny],rmsy_l[nbiny],rmsy_r[nbiny];
@@ -158,7 +161,7 @@ void plotWF_corr(const char * filename){
   TGraphErrors* graph_t=new TGraphErrors(nbinx-1,xt,yt,0,rmsyt);
   TF1* hyp_r = new TF1("hyp_r","[0]-[1]/(x**[2]+[3])",0.125,0.35);
   TF1* hyp_l = new TF1("hyp_l","[0]-[1]/(x**[2]+[3])",0.135,0.35);
-  TF1* hyp_t = new TF1("hyp_t","[0]*x+[1]",0.7,txmax);
+  TF1* hyp_t = new TF1("hyp_t","[0]*x+[1]",-0.6,0.6);
   
   gStyle->SetOptStat("");
 
@@ -190,7 +193,7 @@ void plotWF_corr(const char * filename){
 
   TH2F* hc_l= new TH2F("hc_l", "histo hc_l",nbinx,rxmin,rxmax,nbiny,rymin_lc,rymax_lc);
   TH2F* hc_r= new TH2F("hc_r", "histo hc_r",nbinx,rxmin,rxmax,nbiny,rymin_rc,rymax_rc);
-  TH2F* hc_t= new TH2F("hc_t", "histo hc_t",nbinx,txmin,txmax,nbiny,-3,4.5);
+  TH2F* hc_t= new TH2F("hc_t", "histo hc_t",nbinx,txmin,txmax,nbiny,tymin_c,tymax_c);
 
 
   
