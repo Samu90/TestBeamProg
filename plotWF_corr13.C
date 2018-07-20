@@ -30,16 +30,16 @@ void plotWF_corr13(const char * filename){
   rymin_r=8;
   rymax_r=9.5;
   
-  rymin_lc=2.8;
-  rymax_lc=4;
-  rymin_rc=-9;
-  rymax_rc=-8;
+  rymin_lc=0;
+  rymax_lc=3;
+  rymin_rc=-11.5;
+  rymax_rc=-9;
 
   tymin=6;
   tymax=12;
   
   tymin_c=-11;
-  tymax_c=-6;
+  tymax_c=-9.6;
 
   txmin=-1;
   txmax=1.2;
@@ -133,16 +133,16 @@ void plotWF_corr13(const char * filename){
 
     xt[k]=txmin+(Float_t)(txmax-(txmin))/nbinx*k;
     yt[k]=tymin+(Float_t)(tymax-tymin)/nbiny*maxbin_t;
-    rmsyt[k]=histotemp_t->GetRMS();
+    rmsyt[k]=histotemp_t->GetMeanError();
 
     x_l[k]=(rxmax-rxmin)/nbinx*k;
     y_l[k]=rymin_l+(rymax_l-rymin_l)/nbiny*maxbin_l;
-    rmsy_l[k]=histotemp_l->GetRMS();
+    rmsy_l[k]=histotemp_l->GetMeanError();
 
     x_r[k]=(rxmax-rxmin)/nbinx*k;
     y_r[k]=rymin_r+(rymax_r-rymin_r)/nbiny*maxbin_r;
 
-    rmsy_r[k]=histotemp_r->GetRMS();
+    rmsy_r[k]=histotemp_r->GetMeanError();
 
 
 
@@ -165,6 +165,17 @@ void plotWF_corr13(const char * filename){
   
   gStyle->SetOptStat("");
 
+  //SetParameters
+  hyp_l->SetParameter(0, 3.36);
+  hyp_l->SetParameter(1, -3.77);
+  hyp_l->SetParameter(2, 1.83e-1);
+  hyp_l->SetParameter(3, -1.43e-4);
+
+  hyp_r->SetParameter(0, -8.51);
+  hyp_r->SetParameter(1, -1.54e1);
+  hyp_r->SetParameter(2, 4.28e-2);
+  hyp_r->SetParameter(3, -2.43e-2);
+  
 
 
   wf_c->Divide(3,2);
