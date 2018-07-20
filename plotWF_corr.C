@@ -14,22 +14,32 @@ void plotWF_corr(const char * filename){
 
   Float_t amp_max[54], time[54];
   int k,maxbin_l,maxbin_r,maxbin_t;
-  Float_t rxmin,rxmax,rymin_l,rymax_l,rymin_r,rymax_r,tymin,tymax;
+  Float_t rxmin,rxmax,rymin_l,rymax_l,rymin_r,rymax_r,tymin,tymax,txmin,txmax,rymin_lc,rymax_lc,rymin_rc,rymax_rc;
   bool debug=false;
-  Double_t max=0,tmax=0;
+  Double_t max=0;
+  Int_t LED300,LED100,LED50,LED30;
+  Int_t LEDi;
   rxmin=0;
   rxmax=0.5;
 
 
-  const Int_t  nbinx=200,nbiny=1000;
+  const Int_t  nbinx=100,nbiny=600;
 
-  rymin_l=11;
-  rymax_l=25;
-  rymin_r=11;
-  rymax_r=23;
-  tymin= 13;
-  tymax=20;
+  rymin_l=3;
+  rymax_l=7;
+  rymin_r=0;
+  rymax_r=7;
+  
+  rymin_lc=-5;
+  rymax_lc=5;
+  rymin_rc=-5;
+  rymax_rc=5;
 
+  tymin=1.5;
+  tymax=7;
+
+  txmin=0;
+  txmax=3;
 
 
   Float_t x_r[nbinx],y_r[nbiny], x_l[nbinx],y_l[nbiny],rmsy_l[nbiny],rmsy_r[nbiny];
@@ -45,17 +55,23 @@ void plotWF_corr(const char * filename){
 
   digiTree->SetBranchAddress("amp_max",&amp_max);
   digiTree->SetBranchAddress("time",&time);
-  // digiTree->SetBranchAddress("LED30",&LED30);
-  //digiTree->SetBranchAddress("LED50",&LED50);
+  digiTree->SetBranchAddress("LED300",&LED300);
+  digiTree->SetBranchAddress("LED100",&LED100);
+  digiTree->SetBranchAddress("LED50",&LED50);
+  digiTree->SetBranchAddress("LED30",&LED30);
 
-  for(k=0; k<digiTree->GetEntries(); k++){
+  digiTree->GetEntry(3);
+  LEDi=LED100;
+  
+  max=4096;
+  /*for(k=0; k<digiTree->GetEntries(); k++){
     digiTree->GetEntry(k);
     if (k%10000==0) cout<<"On entry " <<k<<endl;
     if(amp_max[3]>max) {max=amp_max[3];}
     if(amp_max[4]>max) {max=amp_max[4];}
-    if(time[3]-time[4]>tmax && time[3]-time[4]<10) {tmax = time[3]-time[4];}
+  //if(time[3]-time[4]>tmax && time[3]-time[4]<10) {tmax = time[3]-time[4];}
 
-  }/*chiudo for */
+  } chiudo for */
 
   for(k=0;k<digiTree->GetEntries();k++){
     if (k%10000==0) cout<<"On entry " <<k<<endl;
@@ -68,7 +84,7 @@ void plotWF_corr(const char * filename){
   hr_amp->Scale(1/(hr_amp->Integral()));
   hl_amp->Scale(1/(hl_amp->Integral()));
 
-  cout << tmax <<endl;
+  //cout << tmax <<endl;
   cout<< max << endl;
 
   hr_amp->Fit("f_r","RQ0");
@@ -77,21 +93,21 @@ void plotWF_corr(const char * filename){
 
   TH2F* h2_l= new TH2F("h2_l", "histo h2_l",nbinx,rxmin,rxmax,nbiny,rymin_l,rymax_l);
   TH2F* h2_r= new TH2F("h2_r", "histo h2_r",nbinx,rxmin,rxmax,nbiny,rymin_r,rymax_r);
-  TH2F* h2_t= new TH2F("h2_t", "histo h2_t",nbinx,-0.4,0.8,nbinx,tymin,tymax);
+  TH2F* h2_t= new TH2F("h2_t", "histo h2_t",nbinx,txmin,txmax,nbiny,tymin,tymax);
 
   for(k=0;k<digiTree->GetEntries();k++){
 
     digiTree->GetEntry(k);
 
-    if (0.8*(fit_l->GetParameter(1)) < (amp_max[3]/max) && (amp_max[3]/max) < (3*fit_l->GetParameter(1)) && (time[3]-time[4])<7 && time[3]-time[4]>0)
+    if (0.8*(fit_l->GetParameter(1)) < (amp_max[3]/max) && (amp_max[3]/max) < (3*fit_l->GetParameter(1)))
       {
-	h2_l->Fill(amp_max[3]/max,time[3]-time[0]);
-	h2_r->Fill(amp_max[4]/max,time[4]-time[0]);
-	h2_t->Fill((time[3]-time[4])/tmax,(time[3]+time[4])/2-time[0]);
+	h2_l->Fill(amp_max[3]/max,time[3+LEDi]-time[0]);
+	h2_r->Fill(amp_max[4]/max,time[4+LEDi]-time[0]);
+	h2_t->Fill((time[3+LEDi]-time[4+LEDi]),(time[3+LEDi]+time[4+LEDi])/2-time[0]);
 
-
-	if(debug) cout << 0.8*fit_l->GetParameter(1) << " < " << amp_max[3]/max << " < " << 3*fit_l->GetParameter(1) << " ////  " << time[4]-time[0] <<endl;
-      }
+      }//chiudo if
+	if(debug) cout << 0.8*fit_l->GetParameter(1) << " < " << amp_max[3]/max << " < " << 3*fit_l->GetParameter(1) << " ////  " << time[4+LEDi]-time[0] <<endl;
+      
 
   }//chiudo for k
 
@@ -112,8 +128,8 @@ void plotWF_corr(const char * filename){
 
 
 
-    xt[k]=-0.4+(Float_t)(0.8-(-0.4))/nbinx*k;
-    yt[k]=tymin+(Float_t)(tymax-tymin)/nbinx*maxbin_t;
+    xt[k]=txmin+(Float_t)(txmax-(txmin))/nbinx*k;
+    yt[k]=tymin+(Float_t)(tymax-tymin)/nbiny*maxbin_t;
     rmsyt[k]=histotemp_t->GetRMS();
 
     x_l[k]=(rxmax-rxmin)/nbinx*k;
@@ -140,14 +156,10 @@ void plotWF_corr(const char * filename){
   TGraphErrors* graph_r=new TGraphErrors(nbinx-1,x_r,y_r,0,rmsy_r);
   TGraphErrors* graph_l=new TGraphErrors(nbinx-1,x_l,y_l,0,rmsy_l);
   TGraphErrors* graph_t=new TGraphErrors(nbinx-1,xt,yt,0,rmsyt);
-  TF1* hyp_r = new TF1("hyp_r","[0] - [1]*x",rxmin,rxmax);
-  TF1* hyp_l = new TF1("hyp_l","[0] - [1]*x",rxmin,rxmax);
-  TF1* hyp_t = new TF1("hyp_t","[0] + [1]*x",-0.5,1);
-  //  hyp_r->SetParameter(0,10);
-  // hyp_l->SetParameter(0,10);
-
-
-  // hyp_r->SetParLimits(0,1,8);
+  TF1* hyp_r = new TF1("hyp_r","[0]*log([1]*x+1)+[2]",0.13,0.40);
+  TF1* hyp_l = new TF1("hyp_l","[0]*log([1]*x+1)+[2]",0.13,0.40);
+  TF1* hyp_t = new TF1("hyp_t","[0]*x+[1]",0.7,txmax);
+  
   gStyle->SetOptStat("");
 
 
@@ -176,22 +188,24 @@ void plotWF_corr(const char * filename){
   graph_t->SetMarkerSize(.5);
   graph_t->Draw("P");
 
-  TH2F* hc_l= new TH2F("hc_l", "histo hc_l",nbinx,rxmin,rxmax,nbiny,10,40);
-  TH2F* hc_r= new TH2F("hc_r", "histo hc_r",nbinx,rxmin,rxmax,nbiny,10,40);
-  TH2F* hc_t= new TH2F("hc_t", "histo hc_t",nbinx,-0.4,0.8,nbinx,10,40);
+  TH2F* hc_l= new TH2F("hc_l", "histo hc_l",nbinx,rxmin,rxmax,nbiny,rymin_lc,rymax_lc);
+  TH2F* hc_r= new TH2F("hc_r", "histo hc_r",nbinx,rxmin,rxmax,nbiny,rymin_rc,rymax_rc);
+  TH2F* hc_t= new TH2F("hc_t", "histo hc_t",nbinx,txmin,txmax,nbiny,-10,10);
+
+
   
    for(k=0;k<digiTree->GetEntries();k++){
 
     digiTree->GetEntry(k);
 
-    if (0.8*(fit_l->GetParameter(1)) < (amp_max[3]/max) && (amp_max[3]/max) < (3*fit_l->GetParameter(1)) && (time[3]-time[4])<7 && time[3]-time[4]>0)
+    if (0.8*(fit_l->GetParameter(1)) < (amp_max[3]/max) && (amp_max[3]/max) < (3*fit_l->GetParameter(1)))
       {
-	hc_l->Fill(amp_max[3]/max,time[3]-time[0]-hyp_l->Eval(amp_max[3]/max)+hyp_l->GetParameter(0));
-	hc_r->Fill(amp_max[4]/max,time[4]-time[0]-hyp_r->Eval(amp_max[4]/max)+hyp_r->GetParameter(0));
-	hc_t->Fill((time[3]-time[4])/tmax,(time[3]+time[4])/2-time[0]-(hyp_r->Eval(amp_max[3]/max)-hyp_r->GetParameter(0)+hyp_l->Eval(amp_max[4]/max)-hyp_r->GetParameter(0))/2);
+	hc_l->Fill(amp_max[3]/max,time[3+LEDi]-time[0]-hyp_l->Eval(amp_max[3]/max)+hyp_l->GetParameter(0));
+	hc_r->Fill(amp_max[4]/max,time[4+LEDi]-time[0]-hyp_r->Eval(amp_max[4]/max)+hyp_r->GetParameter(0));
+	hc_t->Fill((time[3+LEDi]-time[4+LEDi]),(time[3+LEDi]+time[4+LEDi])/2-time[0]-(hyp_r->Eval(amp_max[3]/max)-hyp_r->GetParameter(0)+hyp_l->Eval(amp_max[4]/max)-hyp_r->GetParameter(0))/2);
 
 
-	if(debug) cout << 0.8*fit_l->GetParameter(1) << " < " << amp_max[3]/max << " < " << 3*fit_l->GetParameter(1) << " ////  " << time[4]-time[0] <<endl;
+	if(debug) cout << 0.8*fit_l->GetParameter(1) << " < " << amp_max[3]/max << " < " << 3*fit_l->GetParameter(1) << " ////  " << time[4+LEDi]-time[0] <<endl;
       }
 
   }//chiudo for k
@@ -221,14 +235,13 @@ void plotWF_corr(const char * filename){
    TH1D* histo_cl;
    TH1D* histo_cr;
    TH1D* histo_ct;
-   TF1* gaus_cl = new TF1("gaus_cl","gaus",-2,2);
-   TF1* gaus_cr = new TF1("gaus_cr","gaus",-2,2);
-   TF1* gaus_ct = new TF1("gaus_ct","gaus",-2,2);
-   histo_cl = hc_l->ProjectionY("histo_cl",85,90);
-   histo_cr = hc_r->ProjectionY("histo_cr",85,90);
-   histo_ct = hc_t->ProjectionY("histo_ct",85,90);
+   TF1* gaus_cl = new TF1("gaus_cl","gaus",-2.5,-0.7);
+   TF1* gaus_cr = new TF1("gaus_cr","gaus",-2.5,-0.7);
+   TF1* gaus_ct = new TF1("gaus_ct","gaus",-2.5,-0.7);
+   histo_cl = hc_l->ProjectionY("histo_cl",0,nbinx);
+   histo_cr = hc_r->ProjectionY("histo_cr",0,nbinx);
+   histo_ct = hc_t->ProjectionY("histo_ct",nbinx/2-15,nbinx/2+15);
 
-   histo_ct->Rebin(4);
 
    histo_ct->SetLineColor(kBlack);
    histo_cl->SetLineColor(kBlue);
@@ -246,5 +259,5 @@ void plotWF_corr(const char * filename){
   
    histo_cl->Draw("same");
    
-}
+  }
 
