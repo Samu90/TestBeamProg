@@ -23,23 +23,23 @@ void plotWF_corr13(const char * filename){
   rxmax=0.5;
 
 
-  const Int_t  nbinx=100,nbiny=600;
+  const Int_t  nbinx=150,nbiny=600;
 
   rymin_l=7.7;
   rymax_l=9.4;
   rymin_r=8;
   rymax_r=9.5;
   
-  rymin_lc=0;
-  rymax_lc=3;
-  rymin_rc=-11.5;
-  rymax_rc=-9;
+  rymin_lc=-10;
+  rymax_lc=-4;
+  rymin_rc=-11;
+  rymax_rc=-6;
 
   tymin=6;
   tymax=12;
   
-  tymin_c=-11;
-  tymax_c=-9.6;
+  tymin_c=-10;
+  tymax_c=-5.5;
 
   txmin=-1;
   txmax=1.2;
@@ -166,10 +166,10 @@ void plotWF_corr13(const char * filename){
   gStyle->SetOptStat("");
 
   //SetParameters
-  hyp_l->SetParameter(0, 3.36);
-  hyp_l->SetParameter(1, -3.77);
-  hyp_l->SetParameter(2, 1.83e-1);
-  hyp_l->SetParameter(3, -1.43e-4);
+  hyp_l->SetParameter(0, -8.51);
+  hyp_l->SetParameter(1, -1.54e1);
+  hyp_l->SetParameter(2, 4.28e-2);
+  hyp_l->SetParameter(3, -2.43e-2);
 
   hyp_r->SetParameter(0, -8.51);
   hyp_r->SetParameter(1, -1.54e1);
@@ -216,7 +216,7 @@ void plotWF_corr13(const char * filename){
       {
 	if(amp_max[3]/max<0.35) hc_l->Fill(amp_max[3]/max,time[3+LEDi]-time[0]-hyp_l->Eval(amp_max[3]/max)+hyp_l->GetParameter(0));
 	if(amp_max[4]/max<0.35) hc_r->Fill(amp_max[4]/max,time[4+LEDi]-time[0]-hyp_r->Eval(amp_max[4]/max)+hyp_r->GetParameter(0));
-	hc_t->Fill((time[3+LEDi]-time[4+LEDi]),(time[3+LEDi]+time[4+LEDi])/2-time[0]-(hyp_r->Eval(amp_max[3]/max)-hyp_r->GetParameter(0)+hyp_l->Eval(amp_max[4]/max)-hyp_r->GetParameter(0))/2);
+	hc_t->Fill((time[3+LEDi]-time[4+LEDi]),(time[3+LEDi]+time[4+LEDi])/2-time[0]-(hyp_r->Eval(amp_max[3]/max)-hyp_r->GetParameter(0)+hyp_l->Eval(amp_max[4]/max)-hyp_l->GetParameter(0))/2);
 
 
 	if(debug) cout << 0.8*fit_l->GetParameter(1) << " < " << amp_max[3]/max << " < " << 3*fit_l->GetParameter(1) << " ////  " << time[4+LEDi]-time[0] <<endl;
