@@ -26,7 +26,7 @@ void plotWF_graph(const char * filename){
   }//chiudo for k
   
   for(k=0;k<digiTree->GetEntries();k++){
-    if (k%100==0) cout<<k<<endl;
+    if (k%10000==0) cout<<k<<endl;
     digiTree->GetEntry(k);
     
     hr_amp->Fill(amp_max[3]/max);

@@ -3,7 +3,7 @@
 
 
 
-void plotWF_corr(const char * filename){
+void plotWF_corr13(const char * filename){
 
 
   TFile*  file= TFile::Open(filename);
