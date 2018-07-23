@@ -30,16 +30,16 @@ void plotWF_corr13(const char * filename){
   rymin_r=8;
   rymax_r=9.5;
   
-  rymin_lc=-10;
-  rymax_lc=10;
-  rymin_rc=-10;
-  rymax_rc=10;
+  rymin_lc=6.5;
+  rymax_lc=8.5;
+  rymin_rc=6.5;
+  rymax_rc=8.5;
 
   tymin=6;
   tymax=12;
   
-  tymin_c=-10;
-  tymax_c=10;
+  tymin_c=6.5;
+  tymax_c=9.5;
 
   txmin=-1;
   txmax=1.2;
@@ -184,7 +184,10 @@ void plotWF_corr13(const char * filename){
   wf_c->Divide(3,2);
 
   wf_c->cd(1);
+  h2_l->GetYaxis()->SetTitle("t_left-t_MCP [ns]");
+  h2_l->GetXaxis()->SetTitle("max.amplitude [mV]");
   h2_l->Draw("COLZ");
+  
   graph_l->Fit("hyp_l","RL");
   graph_l->SetMarkerStyle(8);
   graph_l->SetMarkerSize(.5);
@@ -192,6 +195,8 @@ void plotWF_corr13(const char * filename){
 
 
   wf_c->cd(2);
+  h2_r->GetYaxis()->SetTitle("t_right-t_MCP [ns]");
+  h2_r->GetXaxis()->SetTitle("max.amplitude [mV]");
   h2_r->Draw("COLZ");
   graph_r->Fit("hyp_r","RL");
   graph_r->SetMarkerStyle(8);
@@ -199,6 +204,8 @@ void plotWF_corr13(const char * filename){
   graph_r->Draw("P");
 
   wf_c->cd(3);
+  h2_t->GetYaxis()->SetTitle("t_left-t_right [ns]");
+  h2_t->GetXaxis()->SetTitle("max.amplitude [mV]");
   h2_t->Draw("COLZ");
   graph_t->Fit("hyp_t","RL");
   graph_t->SetMarkerStyle(8);
@@ -256,12 +263,7 @@ void plotWF_corr13(const char * filename){
 
   for(k=0;k<nbinx;k++){
     for(j=0;j<nbiny;j++){
-      //      if (k>20 && k<70) cout <<"  "<< rymin_l+(rymax_l-rymin_l)/nbiny*j << "<" << y_l[k]-3*RMS[0][k] <<"     "<< rymin_l+(rymax_l-rymin_l)/nbiny*j << ">" << y_l[k]+3*RMS[0][k] <<endl; 
-      if (rymin_lc+(rymax_lc-rymin_lc)/nbiny*j < y_l[k]-3*RMS[0][k] || rymin_lc+(rymax_lc-rymin_lc)/nbiny*j > y_l[k]+3*RMS[0][k] ){
-
-	hc_l->SetBinContent(k,j,0);
-
-      }
+      if (rymin_lc+(rymax_lc-rymin_lc)/nbiny*j < y_l[k]-3*RMS[0][k] || rymin_lc+(rymax_lc-rymin_lc)/nbiny*j > y_l[k]+3*RMS[0][k] ) hc_l->SetBinContent(k,j,0);
       if (rymin_rc+(rymax_rc- rymin_rc)/nbiny*j < y_r[k]-3*RMS[1][k] || rymin_rc+(rymax_rc-rymin_rc)/nbiny*j > y_r[k]+3*RMS[1][k] ) hc_r->SetBinContent(k,j,0);
       if (tymin_c+(tymax_c-tymin_c)/nbiny*j < yt[k]-3*RMS[2][k] || tymin_c+(tymax_c-tymin_c)/nbiny*j > yt[k]+3*RMS[2][k] ) hc_t->SetBinContent(k,j,0);
     }
@@ -269,6 +271,8 @@ void plotWF_corr13(const char * filename){
    
 
     wf_c->cd(4);
+    hc_l->GetYaxis()->SetTitle("t_left-t_MCP [ns]");
+    hc_l->GetXaxis()->SetTitle("max.amplitude [mV]");
     hc_l->Draw("COLZ");
   // graph_l->Fit("hyp_l","R");
    //   graph_l->SetMarkerStyle(8);
@@ -276,6 +280,8 @@ void plotWF_corr13(const char * filename){
   // graph_l->Draw("P");
 
    wf_c->cd(5);
+   hc_r->GetYaxis()->SetTitle("t_right-t_MCP [ns]");
+   hc_r->GetXaxis()->SetTitle("max.amplitude [mV]");
    hc_r->Draw("COLZ");
   // graph_l->Fit("hyp_l","R");
    // graph_l->SetMarkerStyle(8);
@@ -283,6 +289,8 @@ void plotWF_corr13(const char * filename){
   // graph_l->Draw("P");
 
    wf_c->cd(6);
+   hc_t->GetYaxis()->SetTitle("t_left-t_right [ns]");
+   hc_t->GetXaxis()->SetTitle("max.amplitude [mV]");
    hc_t->Draw("COLZ");
   // graph_l->Fit("hyp_l","R");
   // graph_l->SetMarkerStyle(8);
@@ -306,15 +314,15 @@ void plotWF_corr13(const char * filename){
 
    TCanvas * timeres = new TCanvas("timeres","plot_timeres",600,550);
    gStyle->SetOptStat("");
-   histo_ct->Draw();
+   histo_ct->Draw("P");
    gaus_ct->SetParameter(0,500);
    histo_cl->Fit("gaus_cl");
    histo_cr->Fit("gaus_cr");
    histo_ct->Fit("gaus_ct");
 
-   histo_cr->Draw("same");
+   histo_cr->Draw("same P");
   
-   histo_cl->Draw("same");
+   histo_cl->Draw("same P");
    
   }
 
