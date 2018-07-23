@@ -23,12 +23,13 @@ void plotWF_cut(const char * filename){
   
   digiTree->SetBranchAddress("amp_max",&amp_max);
   
-  for(k=0;k<digiTree->GetEntries();k++){
+  /*  for(k=0;k<digiTree->GetEntries();k++){
     digiTree->GetEntry(k);
     if(amp_max[3]>max) {max=amp_max[3];}
     if(amp_max[4]>max) {max=amp_max[4];}
   }//chiudo for k
-  
+  */
+  max=4096;
   for(k=0;k<digiTree->GetEntries();k++){
     if (k%3000==0) cout<<"On entry " <<k<<endl;
     digiTree->GetEntry(k);
@@ -43,40 +44,50 @@ void plotWF_cut(const char * filename){
 
   cout<< max << endl;
   
-  hr_amp->Fit("f_r","RQ0");
-  hl_amp->Fit("f_l","RQ0");
+  hr_amp->Fit("f_r","R0");
+  hl_amp->Fit("f_l","R0");
   
   for(k=0;k<digiTree->GetEntries();k++){
     
     digiTree->GetEntry(k);
     
-    if (0.8*fit_l->GetParameter(1) < amp_max[3]/max && amp_max[3]/max < 3*fit_l->GetParameter(1)){ hr_cut->Fill(amp_max[3]/max);
-    hl_cut->Fill(amp_max[4]/max);}
-   
+    if (0.8*fit_l->GetParameter(1) < amp_max[4]/max && amp_max[4]/max < 3*fit_l->GetParameter(1)){
+
+      hr_cut->Fill(amp_max[3]/max);
+      hl_cut->Fill(amp_max[4]/max);}
+    
   }//chiudo for k
    
   hr_cut->Scale(1/(hr_cut->Integral()));
   hl_cut->Scale(1/(hl_cut->Integral()));
-  hr_cut->Scale(hr_amp->Integral(0.8*fit_l->GetParameter(1)*500, 3*fit_l->GetParameter(1)*500)/hr_amp->Integral());
+  hr_cut->Scale(hr_amp->Integral(0.8*fit_r->GetParameter(1)*500, 3*fit_r->GetParameter(1)*500)/hr_amp->Integral());
   hl_cut->Scale(hl_amp->Integral(0.8*fit_l->GetParameter(1)*500, 3*fit_l->GetParameter(1)*500)/hl_amp->Integral());
 
   TCanvas* wf_c =new TCanvas("wf","Plot wf",1200,550);
   wf_c->Clear();
   
   wf_c->Divide(2,1);
-  wf_c->cd(1)->SetLogy();
-  gStyle->SetOptFit();
-  
-  hr_amp->Draw("HISTO");
-  fit_r->Draw("same");
-  hr_cut->SetLineColor(3);
-  hr_cut->Draw("HISTO same");
-  wf_c->cd(2)->SetLogy();
-  gStyle->SetOptFit();
-  hl_amp->Draw("HISTO");
-  hr_cut->SetLineColor(7);
-  hl_cut->Draw("HISTO same"); 
 
+  wf_c->cd(1)->SetLogy();
+  //gStyle->SetOptFit();
+  hr_amp->SetLineColor(4);
+  hr_amp->GetXaxis()->SetTitle("max.amplitude [mV]");
+  hr_amp->GetYaxis()->SetTitle("counts");
+  hr_amp->Draw("HISTO"); 
+  fit_r->Draw("same");
+  hr_cut->SetLineColor(kBlack);
+  hr_cut->Draw("HISTO same");
+  
+  wf_c->cd(2)->SetLogy();
+  hl_amp->SetLineColor(4);
+  hl_amp->GetXaxis()->SetTitle("max.amplitude [mV]");
+  hl_amp->GetYaxis()->SetTitle("counts");
+  //gStyle->SetOptFit();
+  hl_amp->Draw("HISTO");
+  hl_cut->SetLineColor(kBlack);
+  fit_l->Draw("same");
+  hl_cut->Draw("HISTO same"); 
+  
 }
 
 

@@ -37,6 +37,10 @@ void plotWF(const char * filename,int i){
     for (j=0;j<6;j++){  
       graph[j] = new TGraph(wf_sample/6,wf_time,ch[j]);
       wf_c->cd(j+1);
+      //graph[j]->GetXaxis()->SetTitleSize(10);
+      graph[j]->GetXaxis()->SetTitle("time [ns]");
+      //graph[j]->GetYaxis()->SetTitleSize(10);
+      graph[j]->GetYaxis()->SetTitle("amplitude [mV]");
       graph[j]->Draw();
     }//chiudo for j
     

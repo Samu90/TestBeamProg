@@ -15,7 +15,7 @@ void plotWF_fit(const char * filename){
 
   TH1F *hr_amp =new TH1F("hr_amp","histos_ampr",500,0.0,1);
   TH1F *hl_amp =new TH1F("hl_amp","histos_ampl",500,0.0,1);
-  TF1 *fit_r = new TF1("f_r","landau",0.13,2);
+  TF1 *fit_r = new TF1("f_r","landau",0.137,2);
   TF1 *fit_l = new TF1("f_l","landau",0.13,2);
   
   digiTree->SetBranchAddress("amp_max",&amp_max);
@@ -43,13 +43,24 @@ void plotWF_fit(const char * filename){
 
   gStyle->SetOptFit();
   wf_c->Divide(2,1);
+  
   wf_c->cd(1)->SetLogy();
-  hr_amp->Fit("f_r","RV"); 
-  hr_amp->Draw("");
-  wf_c->cd(2)->SetLogy();
-  hl_amp->Fit("f_l","RV"); 
-  hl_amp->Draw("");
 
+  hr_amp->SetLineColor(kBlue);
+  hr_amp->GetXaxis()->SetTitle("max.amplitude [mV]");
+  hr_amp->GetYaxis()->SetTitle("counts");
+  hr_amp->Draw("HISTO");
+  hr_amp->Fit("f_r","R");
+  fit_r->DrawF1(0,1,"same");
+
+  wf_c->cd(2)->SetLogy();
+
+  hl_amp->SetLineColor(kBlue);
+  hl_amp->GetXaxis()->SetTitle("max.amplitude [mV]");
+  hl_amp->GetYaxis()->SetTitle("counts");
+  hl_amp->Draw("HISTO");
+  hl_amp->Fit("f_l","R");
+  fit_l->DrawF1(0,1,"same");
   /*
   TString histoname = "";
   histoname.Append("histo");
