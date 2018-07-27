@@ -24,7 +24,7 @@ void plotWF_corr13V2(const char * filename){
   rxmax=0.5;
 
 
-  const Int_t  nbinx=100,nbiny=500;
+  const Int_t  nbinx=100,nbiny=120;
 
   rymin_l=7.6;
   rymax_l=8.8;
@@ -54,6 +54,7 @@ void plotWF_corr13V2(const char * filename){
   TH1F *hr_amp =new TH1F("hr_amp","histos_ampr",nbinx,0.0,1);
   TH1F *hl_amp =new TH1F("hl_amp","histos_ampl",nbinx,0.0,1);
   TH1F *mcp_amp =new TH1F("mcp_amp","histomcp_ampl",nbinx,0.0,1);
+  TH1F *mcp_t =new TH1F("mcp_t","histomcp_t",300,0.0,40);
 
   TF1 *fit_r = new TF1("f_r","landau",0.14,1);
   TF1 *fit_l = new TF1("f_l","landau",0.14,1);
@@ -86,11 +87,14 @@ void plotWF_corr13V2(const char * filename){
     hr_amp->Fill(amp_max[3]/max);
     hl_amp->Fill(amp_max[4]/max);
     mcp_amp->Fill(amp_max[0]/max);
+    mcp_t->Fill(time[0]);
   }/*chiudo for */
-
+  cout << mcp_t->GetMean() << "  " << mcp_t->GetMeanError() <<endl;
   hr_amp->Scale(1/(hr_amp->Integral()));
   hl_amp->Scale(1/(hl_amp->Integral()));
 
+  TCanvas* t_mcp = new TCanvas ("t_mcp","plot t_mcp",550,600);
+  mcp_t->Draw();
   //cout << tmax <<endl;
   cout<< max << endl;
 
@@ -106,7 +110,7 @@ void plotWF_corr13V2(const char * filename){
 
     digiTree->GetEntry(k);
 
-    if (0.8*(fit_l->GetParameter(1)) < (amp_max[4]/max) && (amp_max[4]/max) < (3*fit_l->GetParameter(1)) && amp_max[0]/max > mcp_amp->GetMean()-1*mcp_amp->GetRMS() && amp_max[0]/max < mcp_amp->GetMean()+1*mcp_amp->GetRMS())
+    if (0.8*(fit_l->GetParameter(1)) < (amp_max[4]/max) && (amp_max[4]/max) < (3*fit_l->GetParameter(1)) && amp_max[0]/max > 0.28  && amp_max[0]/max < 0.75)
       {
 	h2_l->Fill(amp_max[3]/max,time[1+LEDi]-time[0]);
 	if (amp_max[4]/max < 0.35)h2_r->Fill(amp_max[4]/max,time[2+LEDi]-time[0]);
@@ -165,30 +169,30 @@ void plotWF_corr13V2(const char * filename){
   TGraphErrors* graph_r=new TGraphErrors(nbinx-1,x_r,y_r,0,rmsy_r);
   TGraphErrors* graph_l=new TGraphErrors(nbinx-1,x_l,y_l,0,rmsy_l);
   TGraphErrors* graph_t=new TGraphErrors(nbinx-1,xt,yt,0,rmsyt);
-  TF1* hyp_r = new TF1("hyp_r","[0]+[1]/(x+[2])+[3]/(x**2+[4])+[5]/(x**3+[6])",0.135,0.35);
-  TF1* hyp_l = new TF1("hyp_l","[0]+[1]/(x+[2])+[3]/(x**2+[4])+[5]/(x**3+[6])",0.11,0.35);
+  TF1* hyp_r = new TF1("hyp_r","[0]+[2]*log(x+[1])",0.135,0.35);
+  TF1* hyp_l = new TF1("hyp_l","[0]+[2]*log(x+[1])",0.11,0.35);
   TF1* hyp_t = new TF1("hyp_t","[1]*x**2+[2]*x+[0]",-0.1,0.65);
   
   gStyle->SetOptStat("");
 
-  /*SetParameters
-  hyp_l->SetParameter(0, -8.51);
-  hyp_l->SetParameter(1, -1.54e1);
-  hyp_l->SetParameter(2, 4.28e-2);
-  hyp_l->SetParameter(3, -2.43e-2);
+  /* SetParameters*/
+  hyp_l->SetParameter(0, 8.51);
+  hyp_l->SetParameter(1, 0.1);
+  hyp_l->SetParameter(2, 5);
+  /* hyp_l->SetParameter(3, -2.43e-2);
   */
-  hyp_r->SetParameter(0, -8.51);
-  hyp_r->SetParameter(1, -1.54e1);
+  hyp_r->SetParameter(0, 8.51);
+  /* hyp_r->SetParameter(1, -1.54e1);
   hyp_r->SetParameter(2, 4.28e-2);
   hyp_r->SetParameter(3, -2.43e-2);
-  
+  */
  
 
   wf_c->Divide(3,2);
 
   wf_c->cd(1);
   h2_l->Draw("COLZ");
-  graph_l->Fit("hyp_l","RL");
+  graph_l->Fit("hyp_l","MRL");
   graph_l->SetMarkerStyle(8);
   graph_l->SetMarkerSize(.5);
   graph_l->Draw("P");
@@ -205,7 +209,7 @@ void plotWF_corr13V2(const char * filename){
   
   wf_c->cd(3);
   h2_t->Draw("COLZ");
-  graph_t->Fit("hyp_t","RL");
+  graph_t->Fit("hyp_t","MRL");
   graph_t->SetMarkerStyle(8);
   graph_t->SetMarkerSize(.5);
   graph_t->Draw("P");
@@ -222,7 +226,7 @@ void plotWF_corr13V2(const char * filename){
    for(k=0;k<digiTree->GetEntries();k++){
 
     digiTree->GetEntry(k);
-    if (0.8*(fit_l->GetParameter(1)) < (amp_max[4]/max) && (amp_max[4]/max) < (3*fit_l->GetParameter(1)) && amp_max[0]/max > mcp_amp->GetMean()-1.5*mcp_amp->GetRMS() && amp_max[0]/max < mcp_amp->GetMean()+1.5*mcp_amp->GetRMS())
+    if (0.8*(fit_l->GetParameter(1)) < (amp_max[4]/max) && (amp_max[4]/max) < (3*fit_l->GetParameter(1)) && amp_max[0]/max > 0.28 && amp_max[0]/max < 0.75)
    
       {
 	hc_l->Fill(amp_max[3]/max,time[1+LEDi]-time[0]-hyp_l->Eval(amp_max[3]/max)+hyp_l->GetParameter(0));
