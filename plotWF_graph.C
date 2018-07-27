@@ -34,7 +34,7 @@ void plotWF_graph(const char * filename){
     hl_amp->Fill(amp_max[4]/max);
   }//chiudo for k   
   
-  hl_amp->SetLineColor(kRed);
+  //hl_amp->SetLineColor();
   
   cout<< max << endl;
 

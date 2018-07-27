@@ -23,23 +23,23 @@ void plotWF_corr13(const char * filename){
   rxmax=0.5;
 
 
-  const Int_t  nbinx=150,nbiny=500;
+  const Int_t  nbinx=100,nbiny=500;
 
   rymin_l=7.7;
   rymax_l=9.4;
   rymin_r=8;
   rymax_r=9.5;
   
-  rymin_lc=-10;
-  rymax_lc=10;
-  rymin_rc=-10;
-  rymax_rc=10;
+  rymin_lc=6.5;
+  rymax_lc=8.5;
+  rymin_rc=7.4;
+  rymax_rc=8.8;
 
   tymin=6;
   tymax=12;
   
-  tymin_c=-10;
-  tymax_c=10;
+  tymin_c=6.5;
+  tymax_c=9.5;
 
   txmin=-1;
   txmax=1.2;
@@ -110,7 +110,7 @@ void plotWF_corr13(const char * filename){
 	if ((time[3+LEDi]-time[4+LEDi])>-.5 && (time[3+LEDi]-time[4+LEDi])<.5)h2_t->Fill((time[3+LEDi]-time[4+LEDi]),(time[3+LEDi]+time[4+LEDi])/2-time[0]);
 
       }//chiudo if
-	if(debug) cout << 0.8*fit_l->GetParameter(1) << " < " << amp_max[3]/max << " < " << 3*fit_l->GetParameter(1) << " ////  " << time[4+LEDi]-time[0] <<endl;
+
       
 
   }//chiudo for k
@@ -148,13 +148,13 @@ void plotWF_corr13(const char * filename){
 
     if(k%20==0) cout << k << " / " << nbinx << endl;
   }//chiudo for k
-  /*
-  for(k=0;k<nbinx;k++){
+  
+  /* for(k=0;k<nbinx;k++){
     for(j=0;j<nbiny;j++){
       //      if (k>20 && k<70) cout <<"  "<< rymin_l+(rymax_l-rymin_l)/nbiny*j << "<" << y_l[k]-3*RMS[0][k] <<"     "<< rymin_l+(rymax_l-rymin_l)/nbiny*j << ">" << y_l[k]+3*RMS[0][k] <<endl; 
       if (rymin_l+(rymax_l-rymin_l)/nbiny*j < y_l[k]-3*RMS[0][k] || rymin_l+(rymax_l-rymin_l)/nbiny*j > y_l[k]+3*RMS[0][k] )h2_l->SetBinContent(k,j,0);
       if (rymin_r+(rymax_r- rymin_r)/nbiny*j < y_r[k]-3*RMS[1][k] || rymin_r+(rymax_r-rymin_r)/nbiny*j > y_r[k]+3*RMS[1][k] ) h2_r->SetBinContent(k,j,0);
-      // if (tymin+(tymax-tymin)/nbiny*j < yt[k]-3*RMS[2][k] || tymin+(tymax-tymin)/nbiny*j > yt[k]+3*RMS[2][k] ) h2_t->SetBinContent(k,j,0);
+       if (tymin+(tymax-tymin)/nbiny*j < yt[k]-3*RMS[2][k] || tymin+(tymax-tymin)/nbiny*j > yt[k]+3*RMS[2][k] ) h2_t->SetBinContent(k,j,0);
     }
     }*/
   
@@ -184,7 +184,10 @@ void plotWF_corr13(const char * filename){
   wf_c->Divide(3,2);
 
   wf_c->cd(1);
+  h2_l->GetYaxis()->SetTitle("t_left-t_MCP [ns]");
+  h2_l->GetXaxis()->SetTitle("max.amplitude [mV]");
   h2_l->Draw("COLZ");
+  
   graph_l->Fit("hyp_l","RL");
   graph_l->SetMarkerStyle(8);
   graph_l->SetMarkerSize(.5);
@@ -192,6 +195,8 @@ void plotWF_corr13(const char * filename){
 
 
   wf_c->cd(2);
+  h2_r->GetYaxis()->SetTitle("t_right-t_MCP [ns]");
+  h2_r->GetXaxis()->SetTitle("max.amplitude [mV]");
   h2_r->Draw("COLZ");
   graph_r->Fit("hyp_r","RL");
   graph_r->SetMarkerStyle(8);
@@ -199,6 +204,8 @@ void plotWF_corr13(const char * filename){
   graph_r->Draw("P");
 
   wf_c->cd(3);
+  h2_t->GetYaxis()->SetTitle("t_ave-t_MCP [ns]");
+  h2_t->GetXaxis()->SetTitle("t_left-t_right [ns]");
   h2_t->Draw("COLZ");
   graph_t->Fit("hyp_t","RL");
   graph_t->SetMarkerStyle(8);
@@ -227,63 +234,77 @@ void plotWF_corr13(const char * filename){
 
   }//chiudo for k
 
-     for(k=0;k<nbinx;k++){
-    TH1D* histotemp_l;
-    TH1D* histotemp_r;
-    TH1D* histotemp_t;
-
-    histotemp_l=hc_l->ProjectionY("hc_lprojY",k,k);
-    histotemp_r=hc_r->ProjectionY("hc_rprojY",k,k);
-    histotemp_t=hc_t->ProjectionY("hc_tprojY",k,k);
-   
-   
-    yt[k]=histotemp_t->GetMean();
-    RMS[2][k]= histotemp_t->GetRMS();
-
-    y_l[k]=histotemp_l->GetMean();
-    RMS[0][k]= histotemp_l->GetRMS();
+   for(k=0;k<nbinx;k++){
+     TH1D* histotemp_l;
+     TH1D* histotemp_r;
+     TH1D* histotemp_t;
+     
+     histotemp_l=hc_l->ProjectionY("hc_lprojY",k,k);
+     histotemp_r=hc_r->ProjectionY("hc_rprojY",k,k);
+     histotemp_t=hc_t->ProjectionY("hc_tprojY",k,k);
+     
+     
+     yt[k]=histotemp_t->GetMean();
+     RMS[2][k]= histotemp_t->GetMeanError();
+     
+     y_l[k]=histotemp_l->GetMean();
+     RMS[0][k]= histotemp_l->GetMeanError();
+     
+     y_r[k]=histotemp_r->GetMean();
+     RMS[1][k]= histotemp_r->GetMeanError();
+     
+     
+     delete histotemp_l;
+     delete histotemp_r;
+     delete histotemp_t;
     
-    y_r[k]=histotemp_r->GetMean();
-    RMS[1][k]= histotemp_r->GetRMS();
-
-
-    delete histotemp_l;
-    delete histotemp_r;
-    delete histotemp_t;
-
     
-  }//chiudo for k
-
-  for(k=0;k<nbinx;k++){
-    for(j=0;j<nbiny;j++){
-      //      if (k>20 && k<70) cout <<"  "<< rymin_l+(rymax_l-rymin_l)/nbiny*j << "<" << y_l[k]-3*RMS[0][k] <<"     "<< rymin_l+(rymax_l-rymin_l)/nbiny*j << ">" << y_l[k]+3*RMS[0][k] <<endl; 
-      if (rymin_lc+(rymax_lc-rymin_lc)/nbiny*j < y_l[k]-3*RMS[0][k] || rymin_lc+(rymax_lc-rymin_lc)/nbiny*j > y_l[k]+3*RMS[0][k] ){
-
-	hc_l->SetBinContent(k,j,0);
-
+   }//chiudo for k
+   
+   /* for(k=0;k<nbinx;k++){
+      for(j=0;j<nbiny;j++){
+	if (rymin_lc+(rymax_lc-rymin_lc)/nbiny*j < y_l[k]-3*RMS[0][k] || rymin_lc+(rymax_lc-rymin_lc)/nbiny*j > y_l[k]+3*RMS[0][k] ) hc_l->SetBinContent(k,j,0);
+	if (rymin_rc+(rymax_rc- rymin_rc)/nbiny*j < y_r[k]-3*RMS[1][k] || rymin_rc+(rymax_rc-rymin_rc)/nbiny*j > y_r[k]+3*RMS[1][k] ) hc_r->SetBinContent(k,j,0);
+	if (tymin_c+(tymax_c-tymin_c)/nbiny*j < yt[k]-3*RMS[2][k] || tymin_c+(tymax_c-tymin_c)/nbiny*j > yt[k]+3*RMS[2][k] ) hc_t->SetBinContent(k,j,0);
       }
-      if (rymin_rc+(rymax_rc- rymin_rc)/nbiny*j < y_r[k]-3*RMS[1][k] || rymin_rc+(rymax_rc-rymin_rc)/nbiny*j > y_r[k]+3*RMS[1][k] ) hc_r->SetBinContent(k,j,0);
-      if (tymin_c+(tymax_c-tymin_c)/nbiny*j < yt[k]-3*RMS[2][k] || tymin_c+(tymax_c-tymin_c)/nbiny*j > yt[k]+3*RMS[2][k] ) hc_t->SetBinContent(k,j,0);
-    }
-  }
+      }*/
+
+   TGraphErrors* graph_lc = new TGraphErrors(nbinx-1,x_l,y_l,0,RMS[0]);
+   TGraphErrors* graph_rc = new TGraphErrors(nbinx-1,x_r,y_r,0,RMS[1]);
+   TGraphErrors* graph_tc = new TGraphErrors(nbinx-1,xt,yt,0,RMS[2]);
    
 
     wf_c->cd(4);
+    hc_l->GetYaxis()->SetTitle("t_left-t_MCP [ns]");
+    hc_l->GetXaxis()->SetTitle("max.amplitude [mV]");
     hc_l->Draw("COLZ");
+    graph_lc->SetMarkerStyle(8);
+    graph_lc->SetMarkerSize(.5);
+    graph_lc->Draw("P");
   // graph_l->Fit("hyp_l","R");
    //   graph_l->SetMarkerStyle(8);
    // graph_l->SetMarkerSize(.5);
   // graph_l->Draw("P");
 
    wf_c->cd(5);
+   hc_r->GetYaxis()->SetTitle("t_right-t_MCP [ns]");
+   hc_r->GetXaxis()->SetTitle("max.amplitude [mV]");
    hc_r->Draw("COLZ");
+   graph_rc->SetMarkerStyle(8);
+   graph_rc->SetMarkerSize(.5);
+   graph_rc->Draw("P");
   // graph_l->Fit("hyp_l","R");
    // graph_l->SetMarkerStyle(8);
    // graph_l->SetMarkerSize(.5);
   // graph_l->Draw("P");
 
    wf_c->cd(6);
+   hc_t->GetYaxis()->SetTitle("t_ave-t_MCP [ns]");
+   hc_t->GetXaxis()->SetTitle("t_left-t_right [ns]");
    hc_t->Draw("COLZ");
+   graph_tc->SetMarkerStyle(8);
+   graph_tc->SetMarkerSize(.5);
+   graph_tc->Draw("P");
   // graph_l->Fit("hyp_l","R");
   // graph_l->SetMarkerStyle(8);
   // graph_l->SetMarkerSize(.5);
@@ -304,10 +325,18 @@ void plotWF_corr13(const char * filename){
    histo_cl->SetLineColor(kBlue);
    histo_cr->SetLineColor(kRed);
 
+
    TCanvas * timeres = new TCanvas("timeres","plot_timeres",600,550);
+   TLegend* l1=new TLegend(0.1,0.7,0.48,0.9);
+   l1->SetHeader("time stamps","C");
+   l1->AddEntry(histo_cl,"t_left-t_MCP");
+   l1->AddEntry(histo_cr,"t_right-t_MCP");
+   l1->AddEntry(histo_cr,"t_ave-t_MCP");
    gStyle->SetOptStat("");
-   histo_ct->Draw();
+   histo_ct->Draw("");
    gaus_ct->SetParameter(0,500);
+   histo_cl->SetLineColor(kBlue);
+   histo_ct->GetYaxis()->SetTitle("counts");
    histo_cl->Fit("gaus_cl");
    histo_cr->Fit("gaus_cr");
    histo_ct->Fit("gaus_ct");
@@ -315,6 +344,6 @@ void plotWF_corr13(const char * filename){
    histo_cr->Draw("same");
   
    histo_cl->Draw("same");
-   
+   l1->Draw();
   }
 

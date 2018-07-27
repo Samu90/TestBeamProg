@@ -16,8 +16,8 @@ void plotWF_cut(const char * filename){
   
   TH1F *hr_amp =new TH1F("hr_amp","histos_ampr",500,0.0,1);
   TH1F *hl_amp =new TH1F("hl_amp","histos_ampl",500,0.0,1);
-  TF1 *fit_r = new TF1("f_r","landau",0.10,2);
-  TF1 *fit_l = new TF1("f_l","landau",0.10,2);
+  TF1 *fit_r = new TF1("f_r","landau",0.14,1);
+  TF1 *fit_l = new TF1("f_l","landau",0.14,1);
   TH1F *hr_cut =new TH1F("hr_cut","histos_cut",500,0.0,1);
   TH1F *hl_cut =new TH1F("hl_cut","histos_cut ",500,0.0,1);
   
@@ -74,7 +74,7 @@ void plotWF_cut(const char * filename){
   hr_amp->GetXaxis()->SetTitle("max.amplitude [mV]");
   hr_amp->GetYaxis()->SetTitle("counts");
   hr_amp->Draw("HISTO"); 
-  fit_r->Draw("same");
+  fit_r->DrawF1(0,1,"same");
   hr_cut->SetLineColor(kBlack);
   hr_cut->Draw("HISTO same");
   
@@ -85,7 +85,7 @@ void plotWF_cut(const char * filename){
   //gStyle->SetOptFit();
   hl_amp->Draw("HISTO");
   hl_cut->SetLineColor(kBlack);
-  fit_l->Draw("same");
+  fit_l->DrawF1(0,1,"same");
   hl_cut->Draw("HISTO same"); 
   
 }
