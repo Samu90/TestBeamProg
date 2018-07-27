@@ -21,7 +21,7 @@ void plotWF_lsig(const char * filename){
   rxmax=0.5;
 
 
-  const Int_t  nbinx=200,nbiny=400;
+  const Int_t  nbinx=100,nbiny=500;
 
   rymin_l=5;
   rymax_l=21;
@@ -48,15 +48,17 @@ void plotWF_lsig(const char * filename){
   // digiTree->SetBranchAddress("LED30",&LED30);
   //digiTree->SetBranchAddress("LED50",&LED50);
 
-  for(k=0; k<digiTree->GetEntries(); k++){
+  /*  for(k=0; k<digiTree->GetEntries(); k++){
     digiTree->GetEntry(k);
     if (k%10000==0) cout<<"On entry " <<k<<endl;
     if(amp_max[3]>max) {max=amp_max[3];}
     if(amp_max[4]>max) {max=amp_max[4];}
     if(time[3]-time[4]>tmax && time[3]-time[4]<10) {tmax = time[3]-time[4];}
 
-  }/*chiudo for */
+  }
+*/
 
+  max=4096;
   for(k=0;k<digiTree->GetEntries();k++){
     if (k%10000==0) cout<<"On entry " <<k<<endl;
     digiTree->GetEntry(k);
@@ -77,17 +79,17 @@ void plotWF_lsig(const char * filename){
 
   TH2F* h2_l= new TH2F("h2_l", "histo h2_l",nbinx,rxmin,rxmax,nbiny,rymin_l,rymax_l);
   TH2F* h2_r= new TH2F("h2_r", "histo h2_r",nbinx,rxmin,rxmax,nbiny,rymin_r,rymax_r);
-  TH2F* h2_m= new TH2F("h2_m", "histo h2_m",nbinx,rxmin,rxmax,nbinx,rymin_r,rymax_r);
+  TH2F* h2_m= new TH2F("h2_m", "histo h2_m",nbinx,rxmin,rxmax,nbiny,rymin_r,rymax_r);
 
   for(k=0;k<digiTree->GetEntries();k++){
 
     digiTree->GetEntry(k);
 
-    if (0.8*(fit_l->GetParameter(1)) < (amp_max[3]/max) && (amp_max[3]/max) < (3*fit_l->GetParameter(1)) && (time[3]-time[4])<7 && time[3]-time[4]>0)
+    if (0.8*(fit_l->GetParameter(1)) < (amp_max[3]/max) && (amp_max[3]/max) < (3*fit_l->GetParameter(1)))
       {
-	h2_l->Fill(amp_max[3]/max,time[3]-time[0]);
-	h2_r->Fill(amp_max[4]/max,time[4]-time[0]);
-	h2_m->Fill((amp_max[3]+amp_max[4])/(2*max),(time[3]+time[4])/2-time[0]);
+	h2_l->Fill(amp_max[3]/max,time[3+6]-time[0]);
+	h2_r->Fill(amp_max[4]/max,time[4+6]-time[0]);
+	h2_m->Fill((amp_max[3]+amp_max[4])/(2*max),(time[3+6]+time[4+6])/2-time[0]);
 
 
 	if(debug) cout << 0.8*fit_l->GetParameter(1) << " < " << amp_max[3]/max << " < " << 3*fit_l->GetParameter(1) << " ////  " << time[4]-time[0] <<endl;
@@ -113,24 +115,26 @@ void plotWF_lsig(const char * filename){
   // TGraphErrors* graph_r=new TGraphErrors(nbinx-1,x_r,y_r,0,rmsy_r);
   // TGraphErrors* graph_l=new TGraphErrors(nbinx-1,x_l,y_l,0,rmsy_l);
   // TGraphErrors* graph_t=new TGraphErrors(nbinx-1,xt,yt,0,rmsyt);
-  TF1* g_r = new TF1("g_r","gaus",14,21);
-  TF1* g_l = new TF1("g_l","gaus",14.5,21);
-  TF1* g_m = new TF1("g_m","gaus",14.5,21);
+  TF1* g_r = new TF1("g_r","gaus",0,21);
+  TF1* g_l = new TF1("g_l","gaus",0,21);
+  TF1* g_m = new TF1("g_m","gaus",0,21);
   //  hyp_r->SetParameter(0,10);
   // hyp_l->SetParameter(0,10);
-  histotemp_m->Fit("g_m","Q0");
-  histotemp_l->Fit("g_l","Q0");
-  histotemp_r->Fit("g_r","Q0");
+  histotemp_m->Fit("g_m","0");
+  histotemp_l->Fit("g_l","0");
+  histotemp_r->Fit("g_r","0");
 
   // hyp_r->SetParLimits(0,1,8);
   gStyle->SetOptStat("");
   gStyle->SetOptFit();
   histotemp_r->SetLineColor(kRed);
   histotemp_l->SetLineColor(kBlue);
-  histotemp_m->SetAxisRange(13,22);
+  
 
  
 
+  histotemp_m->GetXaxis()->SetTitle("t_ave-t_MCP");
+  histotemp_m->GetYaxis()->SetTitle("counts");
   
   histotemp_m->Draw();
   histotemp_r->Draw("same");
