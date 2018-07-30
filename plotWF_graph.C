@@ -18,13 +18,14 @@ void plotWF_graph(const char * filename){
   TH1F *hl_amp =new TH1F("hl_amp","histos_ampl",500,0.0,1);
 
   digiTree->SetBranchAddress("amp_max",&amp_max);
-  
+  /*
   for(k=0;k<digiTree->GetEntries();k++){
     digiTree->GetEntry(k);
     if(amp_max[3]>max) {max=amp_max[3];}
     if(amp_max[4]>max) {max=amp_max[4];}
   }//chiudo for k
-  
+  */
+  max=4096;
   for(k=0;k<digiTree->GetEntries();k++){
     if (k%10000==0) cout<<k<<endl;
     digiTree->GetEntry(k);
@@ -33,19 +34,23 @@ void plotWF_graph(const char * filename){
     hl_amp->Fill(amp_max[4]/max);
   }//chiudo for k   
   
-  hl_amp->SetLineColor(kRed);
+  //hl_amp->SetLineColor();
   
   cout<< max << endl;
 
   wf_c->cd(1)->SetLogy();
+  hr_amp->GetXaxis()->SetTitle("max.amplitude [mV]");
+  hr_amp->GetYaxis()->SetTitle("counts");
   hr_amp->DrawNormalized();
   wf_c->cd(2)->SetLogy();
+  hl_amp->GetXaxis()->SetTitle("max.amplitude [mV]");
+  hl_amp->GetYaxis()->SetTitle("counts");
   hl_amp->DrawNormalized();
 
 
   TString histoname = "";
   histoname.Append("histo");
- histoname.Append(filename);
+  histoname.Append(filename);
 
   
  TFile* f2 = new TFile(histoname.Data(),"recreate");
