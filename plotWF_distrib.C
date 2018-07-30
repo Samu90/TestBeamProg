@@ -35,10 +35,10 @@ void plotWF_distrib(const char * filename){
 
     histo2->Fill(time[1+LED300]-time[5]);
 
-    if(time[0]<1000 && time[0]>-1000){x[i]=time[5];}
+    if(time[0]<1000 && time[0]>-1000){x[i]=time[0];}
     else{x[i]=0;}
     
-    if(time[0]<1000 && time[0]>-1000) {y[i]=time[0];}
+    if(time[0]<1000 && time[0]>-1000) {y[i]=amp_max[0];}
     else{y[i]=0;}
     
     if(i % 10000==0)cout << i << " / " << digiTree->GetEntries()<< endl; 
