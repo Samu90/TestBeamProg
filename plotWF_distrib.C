@@ -22,8 +22,8 @@ void plotWF_distrib(const char * filename){
 
 
   
-  TH1D* histo1 = new TH1D("myhisto1","Histo_1",200,0,80);
-  TH1D* histo2 = new TH1D("myhisto2","Histo_2",500,-100,100);
+  TH1D* histo1 = new TH1D("myhisto1","Histo_1",200,0,50);
+  TH1D* histo2 = new TH1D("myhisto2","Histo_2",500,-120, -60);
   
   
   
@@ -31,9 +31,9 @@ void plotWF_distrib(const char * filename){
     
     digiTree->GetEntry(i);
     
-    histo1->Fill(time[1+LED300]);
+    histo1->Fill(time[2+LED300]-time[0]);
 
-    histo2->Fill(time[1+LED300]-time[5]);
+    histo2->Fill(time[2+LED300]-time[5]-time[0]);
 
     if(time[0]<1000 && time[0]>-1000){x[i]=time[0];}
     else{x[i]=0;}
