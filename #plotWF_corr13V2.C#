@@ -174,10 +174,10 @@ void plotWF_corr13V2(const char * filename){
   TGraphErrors* graph_l=new TGraphErrors(nbinx-1,x_l,y_l,0,rmsy_l);
   TGraphErrors* graph_t=new TGraphErrors(nbinx-1,xt,yt,0,rmsyt);
 
-  TF1* hyp_r = new TF1("hyp_r","[0]+[2]*log(x+[1])",0.135,0.35);
-  TF1* hyp_l = new TF1("hyp_l","[0]+[2]*log(x+[1])",0.11,0.35);
+  TF1* hyp_r = new TF1("hyp_r","[0]-[2]*log(x+[1])",0.135,0.35);
+  TF1* hyp_l = new TF1("hyp_l","[0]-[2]*log(x+[1])",0.11,0.35);
 
-  TF1* hyp_t = new TF1("hyp_t","[1]*x**2+[2]*x+[0]",-0.1,0.65);
+  TF1* hyp_t = new TF1("hyp_t","[1]*x+[0]",-0.1,0.65);
   
   gStyle->SetOptStat("");
 
@@ -208,7 +208,7 @@ void plotWF_corr13V2(const char * filename){
   graph_l->Fit("hyp_l","0RL");
   graph_l->SetMarkerStyle(8);
   graph_l->SetMarkerSize(.5);
-  graph_l->Draw("SAMEP");
+  graph_l->Draw("P");
   hyp_l->DrawF1(0,1,"same");
 
 
@@ -216,20 +216,20 @@ void plotWF_corr13V2(const char * filename){
   h2_r->GetYaxis()->SetTitle("t_right-t_MCP [ns]");
   h2_r->GetXaxis()->SetTitle("max.amplitude [mV]");
   h2_r->Draw("COLZ");
-  graph_r->Fit("hyp_r","R0L");
+  graph_r->Fit("hyp_r","0RL");
   graph_r->SetMarkerStyle(8);
   graph_r->SetMarkerSize(.5);
-  graph_r->Draw("SAMEP");
+  graph_r->Draw("P");
   hyp_r->DrawF1(0,1,"same");
   
   wf_c->cd(3);
   h2_t->GetYaxis()->SetTitle("t_ave-t_MCP [ns]");
   h2_t->GetXaxis()->SetTitle("t_left-t_right [ns]");
   h2_t->Draw("COLZ");
-  graph_t->Fit("hyp_t","RL0");
+  graph_t->Fit("hyp_t","0RL");
   graph_t->SetMarkerStyle(8);
   graph_t->SetMarkerSize(.5);
-  graph_t->Draw("SAMEP");
+  graph_t->Draw("P");
   hyp_t->DrawF1(txmin,txmax,"same");
 
 
