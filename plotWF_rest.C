@@ -1,19 +1,17 @@
 //to run with ranges [0.125;2]right, [0.13;2]left on 4.1
-//to run with ranges [0.125;2]right, [0.13;2]left on 1.3
+//to run with ranges [0.125;2]right, [0.13;2]left on 1.
 
+void  plotWF_rest(const char * filename){
 
-
-void plotWF_corr13V2(const char * filename){
 
 
   TFile*  file= TFile::Open(filename);
   //TTree * WFTree = (TTree*)file->Get("wf");
   TTree* digiTree = (TTree*)file->Get("digi");
 
-
-
+ 
   Float_t amp_max[54], time[54];
-  int k,j,maxbin_l,maxbin_r,maxbin_t,i;
+  int k,j,maxbin_l,maxbin_r,maxbin_t;
   Float_t rxmin,rxmax,rymin_l,rymax_l,rymin_r,rymax_r,tymin,tymax,txmin,txmax,tymin_c,tymax_c,rymin_lc,rymax_lc,rymin_rc,rymax_rc;
   bool debug=false;
   bool blind=true;
@@ -25,7 +23,7 @@ void plotWF_corr13V2(const char * filename){
 
 
 
-  const Int_t  nbinx=100,nbiny=120;
+  const Int_t  nbinx=200,nbiny=150;
 
 
   rymin_l=7.6;
@@ -39,17 +37,18 @@ void plotWF_corr13V2(const char * filename){
   rymax_rc=8.5;
 
   tymin=7.7;
-  tymax=8.8;
+  tymax=8.4;
   
   tymin_c=6.8;
-  tymax_c=8.5;
+
+  tymax_c=8.9;
 
 
   txmin=-0.3;
   txmax=0.8;
 
 
-  Double_t x_r[nbinx],y_r[nbiny], x_l[nbinx],y_l[nbiny],rmsy_l[nbiny],rmsy_r[nbiny];
+  Double_t x_r[nbinx],y_r[nbinx], x_l[nbinx],y_l[nbinx],rmsy_l[nbinx],rmsy_r[nbinx];
   Double_t xt[nbinx],yt[nbinx],rmsyt[nbinx];
   Double_t RMS[3][nbinx];
 
@@ -82,7 +81,7 @@ void plotWF_corr13V2(const char * filename){
   //if(time[3]-time[4]>tmax && time[3]-time[4]<10) {tmax = time[3]-time[4];}
 
   } chiudo for */
-
+  cout << "here!" << endl;
   for(k=0;k<digiTree->GetEntries();k++){
     if (k%10000==0) cout<<"On entry " <<k<<endl;
     digiTree->GetEntry(k);
@@ -100,8 +99,8 @@ void plotWF_corr13V2(const char * filename){
   //cout << tmax <<endl;
   cout<< max << endl;
 
-  hr_amp->Fit("f_r","R0");
-  hl_amp->Fit("f_l","R0");
+  hr_amp->Fit("f_r","RQ0");
+  hl_amp->Fit("f_l","RQ0");
 
 
   TH2F* h2_l= new TH2F("h2_l", "histo h2_l",nbinx,rxmin,rxmax,nbiny,rymin_l,rymax_l);
@@ -113,8 +112,7 @@ void plotWF_corr13V2(const char * filename){
     digiTree->GetEntry(k);
 
 
-    if (0.8*(fit_l->GetParameter(1)) < (amp_max[4]/max) && (amp_max[4]/max) < (3*fit_l->GetParameter(1)) && amp_max[0]/max > mcp_amp->GetMean()-1*mcp_amp->GetRMS() && amp_max[0]/max < mcp_amp->GetMean()+1*mcp_amp->GetRMS())
-    //if (0.8*() < (amp_max[4]/max) && (amp_max[4]/max) < (3) && amp_max[0]/max > mcp_amp->GetMean()-1*mcp_amp->GetRMS() && amp_max[0]/max < mcp_amp->GetMean()+1*mcp_amp->GetRMS())
+    if (0.8*(fit_l->GetParameter(1)) < (amp_max[4]/max) && (amp_max[4]/max) < (3*fit_l->GetParameter(1)) && amp_max[0]/max > 0.28 && amp_max[0]/max < 0.75)
       {
 	h2_l->Fill(amp_max[3]/max,time[1+LEDi]-time[0]);
 	if (amp_max[4]/max < 0.35)h2_r->Fill(amp_max[4]/max,time[2+LEDi]-time[0]);
@@ -169,7 +167,7 @@ void plotWF_corr13V2(const char * filename){
     }
     }*/
   
-  TCanvas* wf_c =new TCanvas("wf","Plot wf",1800,1100);
+  // TCanvas* wf_c =new TCanvas("wf","Plot wf",1800,1100);
   TGraphErrors* graph_r=new TGraphErrors(nbinx-1,x_r,y_r,0,rmsy_r);
   TGraphErrors* graph_l=new TGraphErrors(nbinx-1,x_l,y_l,0,rmsy_l);
   TGraphErrors* graph_t=new TGraphErrors(nbinx-1,xt,yt,0,rmsyt);
@@ -179,17 +177,18 @@ void plotWF_corr13V2(const char * filename){
 
   TF1* hyp_t = new TF1("hyp_t","[1]*x**2+[2]*x+[0]",-0.1,0.65);
   
-  gStyle->SetOptStat("");
+  //  gStyle->SetOptStat("");
 
 
   /* SetParameters*/
   hyp_l->SetParameter(0, 8.51);
-  hyp_l->SetParameter(1, 5);
   hyp_l->SetParameter(2, 1.2);
+  hyp_l->SetParameter(1, 5);
   /* hyp_l->SetParameter(3, -2.43e-2);
   */
   hyp_r->SetParameter(0, 8.51);
-
+  hyp_r->SetParameter(2, 1.2);
+  hyp_r->SetParameter(1, 5);
 
   /* hyp_r->SetParameter(1, -1.54e1);
   hyp_r->SetParameter(2, 4.28e-2);
@@ -197,40 +196,40 @@ void plotWF_corr13V2(const char * filename){
   */
 
  
- wf_c->Divide(3,2);
+  // wf_c->Divide(3,2);
 
-  wf_c->cd(1);
+ // wf_c->cd(1);
 
   h2_l->GetYaxis()->SetTitle("t_left-t_MCP [ns]");
 
    h2_l->GetXaxis()->SetTitle("max.amplitude [mV]");
-  h2_l->Draw("COLZ");
+   // h2_l->Draw("COLZ");
   graph_l->Fit("hyp_l","0RL");
   graph_l->SetMarkerStyle(8);
   graph_l->SetMarkerSize(.5);
-  graph_l->Draw("SAMEP");
-  hyp_l->DrawF1(0,1,"same");
+  // graph_l->Draw("SAMEP");
+  // hyp_l->Draw("same");
 
 
-  wf_c->cd(2);
+  // wf_c->cd(2);
   h2_r->GetYaxis()->SetTitle("t_right-t_MCP [ns]");
   h2_r->GetXaxis()->SetTitle("max.amplitude [mV]");
-  h2_r->Draw("COLZ");
+  //  h2_r->Draw("COLZ");
   graph_r->Fit("hyp_r","R0L");
   graph_r->SetMarkerStyle(8);
   graph_r->SetMarkerSize(.5);
-  graph_r->Draw("SAMEP");
-  hyp_r->DrawF1(0,1,"same");
+  // graph_r->Draw("SAMEP");
+  // hyp_r->Draw("same");
   
-  wf_c->cd(3);
+  // wf_c->cd(3);
   h2_t->GetYaxis()->SetTitle("t_ave-t_MCP [ns]");
   h2_t->GetXaxis()->SetTitle("t_left-t_right [ns]");
-  h2_t->Draw("COLZ");
+  // h2_t->Draw("COLZ");
   graph_t->Fit("hyp_t","RL0");
   graph_t->SetMarkerStyle(8);
   graph_t->SetMarkerSize(.5);
-  graph_t->Draw("SAMEP");
-  hyp_t->DrawF1(txmin,txmax,"same");
+  // graph_t->Draw("SAMEP");
+  // hyp_t->Draw("same");
 
 
 
@@ -238,18 +237,20 @@ void plotWF_corr13V2(const char * filename){
   TH2F* hc_l= new TH2F("hc_l", "histo hc_l",nbinx,rxmin,rxmax,nbiny,rymin_lc,rymax_lc);
   TH2F* hc_r= new TH2F("hc_r", "histo hc_r",nbinx,rxmin,rxmax,nbiny,rymin_rc,rymax_rc);
   TH2F* hc_t= new TH2F("hc_t", "histo hc_t",nbinx,txmin,txmax,nbiny,tymin_c,tymax_c);
-
+  TH2F* hc_tdiff= new TH2F("hc_t", "histo hc_t",nbinx,txmin,txmax,nbiny,tymin_c,tymax_c);
+  
 
   
    for(k=0;k<digiTree->GetEntries();k++){
 
     digiTree->GetEntry(k);
 
-    if (0.8*(fit_l->GetParameter(1)) < (amp_max[4]/max) && (amp_max[4]/max) < (3*fit_l->GetParameter(1)) && amp_max[0]/max > mcp_amp->GetMean()-1.5*mcp_amp->GetRMS() && amp_max[0]/max < mcp_amp->GetMean()+1.5*mcp_amp->GetRMS())
+    if (0.8*(fit_l->GetParameter(1)) < (amp_max[4]/max) && (amp_max[4]/max) < (3*fit_l->GetParameter(1)) && amp_max[0]/max > 0.28 && amp_max[0]/max < 0.75)
       {
 	hc_l->Fill(amp_max[3]/max,time[1+LEDi]-time[0]-hyp_l->Eval(amp_max[3]/max)+hyp_l->GetParameter(0));
         hc_r->Fill(amp_max[4]/max,time[2+LEDi]-time[0]-hyp_r->Eval(amp_max[4]/max)+hyp_r->GetParameter(0));
-	hc_t->Fill((time[1+LEDi]-time[2+LEDi]),(time[1+LEDi]+time[2+LEDi])/2-time[0]-(hyp_r->Eval(amp_max[3]/max)-hyp_r->GetParameter(0)+hyp_l->Eval(amp_max[4]/max)-hyp_l->GetParameter(0))/2);
+	hc_t->Fill((time[1+LEDi]-time[2+LEDi]),(time[1+LEDi]+time[2+LEDi])/2-time[0]-(hyp_r->Eval(amp_max[4]/max)-hyp_r->GetParameter(0)+hyp_r->Eval(amp_max[4]/max)-hyp_r->GetParameter(0))/2);
+	hc_tdiff->Fill((time[1+LEDi]-time[2+LEDi]),(time[1+LEDi]+time[2+LEDi])/2-hyp_t->Eval(time[1+LEDi]-time[2+LEDi])+hyp_t->GetParameter(0)-time[0]-(hyp_r->Eval(amp_max[4]/max)-hyp_r->GetParameter(0)+hyp_r->Eval(amp_max[4]/max)-hyp_r->GetParameter(0))/2);
 
 	if(debug) cout << 0.8*fit_l->GetParameter(1) << " < " << amp_max[3]/max << " < " << 3*fit_l->GetParameter(1) << " ////  " << time[4+LEDi]-time[0] <<endl;
       }
@@ -287,51 +288,44 @@ void plotWF_corr13V2(const char * filename){
    TGraphErrors* graph_lc = new TGraphErrors(nbinx-1,x_l,y_l,0,RMS[0]);
    TGraphErrors* graph_rc = new TGraphErrors(nbinx-1,x_r,y_r,0,RMS[1]);
    TGraphErrors* graph_tc = new TGraphErrors(nbinx-1,xt,yt,0,RMS[2]);
-   TF1* corr_tc= new TF1("corr_tc","[0]*x+[1]",-0.2,0.8);
 
-    wf_c->cd(4);
+   // wf_c->cd(4);
      hc_l->GetYaxis()->SetTitle("t_left-t_MCP [ns]");
     hc_l->GetXaxis()->SetTitle("max.amplitude [mV]");
-    hc_l->Draw("COLZ");
+    // hc_l->Draw("COLZ");
     graph_lc->SetMarkerStyle(8);
     graph_lc->SetMarkerSize(.5);
-    graph_lc->Draw("P");
+    // graph_lc->Draw("P");
 
   // graph_l->Fit("hyp_l","R");
    //   graph_l->SetMarkerStyle(8);
    // graph_l->SetMarkerSize(.5);
   // graph_l->Draw("P");
 
-   wf_c->cd(5);
+  // wf_c->cd(5);
 
-    hc_r->GetYaxis()->SetTitle("t_right-t_MCP [ns]");
+   hc_r->GetYaxis()->SetTitle("t_right-t_MCP [ns]");
    hc_r->GetXaxis()->SetTitle("max.amplitude [mV]");
-   hc_r->Draw("COLZ");
+   // hc_r->Draw("COLZ");
    graph_rc->SetMarkerStyle(8);
    graph_rc->SetMarkerSize(.5);
-   graph_rc->Draw("P");
+   // graph_rc->Draw("P");
 
-  // graph_l->Fit("hyp_l","R");
-   // graph_l->SetMarkerStyle(8);
-   // graph_l->SetMarkerSize(.5);
-  // graph_l->Draw("P");
+   graph_l->Fit("hyp_l","R");
+    graph_l->SetMarkerStyle(8);
+    graph_l->SetMarkerSize(.5);
+   graph_l->Draw("P");
 
-   wf_c->cd(6);
+   //  wf_c->cd(6);
 
    hc_t->GetYaxis()->SetTitle("t_ave-t_MCP [ns]");
    hc_t->GetXaxis()->SetTitle("t_left-t_right [ns]");
-   
-
-
    hc_t->Draw("COLZ");
    graph_tc->SetMarkerStyle(8);
    graph_tc->SetMarkerSize(.5);
    graph_tc->Draw("P");
-   graph_tc->Fit("corr_tc","R");
-   corr_tc->Draw("SAME");
 
-
-  // graph_l->Fit("hyp_l","R");
+   graph_l->Fit("hyp_l","R");
   // graph_l->SetMarkerStyle(8);
   // graph_l->SetMarkerSize(.5);
   // graph_l->Draw("P");
@@ -339,40 +333,77 @@ void plotWF_corr13V2(const char * filename){
    TH1D* histo_cl;
    TH1D* histo_cr;
    TH1D* histo_ct;
+   TH1D* histo_ctdiff;
    TF1* gaus_cl = new TF1("gaus_cl","gaus",-2.5,-0.7);
    TF1* gaus_cr = new TF1("gaus_cr","gaus",-2.5,-0.7);
    TF1* gaus_ct = new TF1("gaus_ct","gaus",-2.5,-0.7);
+   TF1* gaus_ctdiff = new TF1("gaus_ctdiff","gaus",-2.5,-0.7);
    histo_cl = hc_l->ProjectionY("histo_cl",0,nbinx);
    histo_cr = hc_r->ProjectionY("histo_cr",0,nbinx);
    histo_ct = hc_t->ProjectionY("histo_ct",0,nbinx);
+   histo_ctdiff = hc_tdiff->ProjectionY("histo_ctdiff",0,nbinx);
 
 
    histo_ct->SetLineColor(kBlack);
    histo_cl->SetLineColor(kBlue);
    histo_cr->SetLineColor(kRed);
+   gaus_ct->SetLineColor(kBlack);
 
-   TCanvas * timeres = new TCanvas("timeres","plot_timeres",600,550);
+   // TCanvas * timeres = new TCanvas("timeres","plot_timeres",600,550);
 
-   TLegend* l1=new TLegend(0.1,0.7,0.48,0.9);
-   l1->SetHeader("time stamps","C");
+    TLegend* l1=new TLegend(0.1,0.7,0.48,0.9);
+   l1->SetHeader("time stamps");
    l1->AddEntry(histo_cl,"t_left-t_MCP");
    l1->AddEntry(histo_cr,"t_right-t_MCP");
    l1->AddEntry(histo_cr,"t_ave-t_MCP");
    
    gStyle->SetOptStat("");
-   histo_ct->Draw();
+   // histo_ct->Draw();
    gaus_ct->SetParameter(0,500);
    histo_ct->GetYaxis()->SetTitle("counts");
    histo_cl->SetLineColor(kBlue);
 
-   histo_cl->Fit("gaus_cl");
-   histo_cr->Fit("gaus_cr");
-   if (blind==true) histo_ct->Fit("gaus_ct");
+   histo_cl->Fit("gaus_cl","0");
+   histo_cr->Fit("gaus_cr","0");
+   histo_ct->Fit("gaus_ct");
+   s= gaus_ct->GetParameter(2);
+   e=gaus_ct->GetParError(2);
 
-   histo_cr->Draw("same");
+   // histo_cr->Draw("same");
   
-   histo_cl->Draw("same");
+   // histo_cl->Draw("same");
 
-   l1->Draw();
+   // l1->Draw();
+
+   //  TCanvas* tdiff = new TCanvas("tdiff","plot_tdiff",600,550);
+    TLegend* l2=new TLegend(0.1,0.7,0.48,0.9);
+   l2->SetHeader("time stamps");
+   l2->AddEntry(histo_ct,"t_ave-t_MCP");
+   l2->AddEntry(histo_ctdiff,"t_ave-t_MCP(tdiff corr)");
+   gaus_ctdiff->SetLineColor(kGreen);
+   histo_ctdiff->Fit("gaus_ctdiff","0");
+   histo_ctdiff->SetLineColor(kGreen);
+   // histo_ctdiff->Draw("same");
+   // histo_ct->Draw();
+   //l2->Draw();
+   const int n=22;
+  
+
+}
+
+/*void plotWF_rest(const char* filename){
+  int n= 11,i;
+  Float_t c;
+  Float_t sigma[11],err[11],cut[11];
+  Float_t s, e;
+ 
+  for (i=0;i<11;i++){
+
+    c =-0.15+(Float_t)(0.5+0.15)*i/n;
+
+    plotWF_tdiff(filename,c,s,e);
    
-  }
+  }*/
+
+
+
