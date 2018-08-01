@@ -257,14 +257,18 @@ void plotWF_time(const char * filename){
     if(k%20==0) cout << k << " / " << nbinx << endl;
   }//chiudo for k
   
+
   TCanvas* time_p =new TCanvas("time","Plot time",600,550);
+  TLegend* l1= new TLegend(0.1,0.7,0.48,0.9);
   TGraphErrors* graph_r=new TGraphErrors(nbinx-1,x_r,y_r,0,rmsy_r);
   TGraphErrors* graph_l=new TGraphErrors(nbinx-1,x_l,y_l,0,rmsy_l);
   TGraphErrors* graph_t=new TGraphErrors(nbinx-1,xt,yt,0,rmsyt);
 
    
    
-   
+  l1->AddEntry(graph_l,"t_{left}-t_{MCP}","P");
+  l1->AddEntry(graph_r,"t_{right}-t_{MCP}","P");
+  l1->AddEntry(graph_t,"t_{ave}-t_{MCP}","P");
   graph_l->GetYaxis()->SetRangeUser(7.5,8.6);
   graph_l->GetXaxis()->SetRangeUser(-0.08,0.6);
   graph_l->GetYaxis()->SetTitle("t-t_{MCP}(ns)");
@@ -286,7 +290,7 @@ void plotWF_time(const char * filename){
   graph_t->SetMarkerSize(.5);
   graph_t->Draw("SAMEP");
 
-  
+  l1->Draw();
   
    TH2F* ht_l= new TH2F("hc_l", "histo hc_l",nbinx,txmin,txmax,nbiny,tymin,tymax);
    TH2F* ht_r= new TH2F("hc_r", "histo hc_r",nbinx,txmin,txmax,nbiny,tymin,tymax);
@@ -346,13 +350,16 @@ void plotWF_time(const char * filename){
 
 
   TCanvas* time_pc =new TCanvas("timecorr","Plot timecorr",600,550);
+  TLegend* l2= new TLegend(0.1,0.7,0.48,0.9);
   TGraphErrors* g_r=new TGraphErrors(nbinx-1,x_r,y_r,0,rmsy_r);
   TGraphErrors* g_l=new TGraphErrors(nbinx-1,x_l,y_l,0,rmsy_l);
   TGraphErrors* g_t=new TGraphErrors(nbinx-1,xt,yt,0,rmsyt);
 
    
    
-   
+  l2->AddEntry(graph_l,"t_{left}-t_{MCP}","P");
+  l2->AddEntry(graph_r,"t_{right}-t_{MCP}","P");
+  l2->AddEntry(graph_t,"t_{ave}-t_{MCP}","P"); 
   g_l->GetYaxis()->SetRangeUser(7.3,8.6);
   g_l->GetXaxis()->SetRangeUser(-0.08,0.6);
   g_l->GetYaxis()->SetTitle("t-t_{MCP}(amp.walk corr)(ns)");
@@ -373,7 +380,7 @@ void plotWF_time(const char * filename){
   g_t->SetMarkerStyle(8);
   g_t->SetMarkerSize(.5);
   g_t->Draw("SAMEP");
-  
+  l2->Draw();
     /*  TH1D* histo_cl;
    TH1D* histo_cr;
    TH1D* histo_ct;
