@@ -34,22 +34,23 @@ void GraficiTdiff(const char * filename){
   rymin_r=7.6;
   rymax_r=8.8;
   
-  rymin_lc=6.8;
-  rymax_lc=8.5;
-  rymin_rc=6.8;
-  rymax_rc=8.5;
+  rymin_lc=7.4;
+  rymax_lc=8;
+  rymin_rc=7.4;
+  rymax_rc=8;
 
+  
   tymin=7.7;
   tymax=8.4;
   
-  tymin_c=6.8;
+  tymin_c=7.4;
 
-  tymax_c=8.9;
+  tymax_c=8;
 
-
-  txmin=-0.3;
-  txmax=0.8;
-
+    txmin=-0.3;
+    txmax=0.8;
+  
+  
 
   Double_t x_r[nbinx],y_r[nbinx], x_l[nbinx],y_l[nbinx],rmsy_l[nbinx],rmsy_r[nbinx];
   Double_t xt[nbinx],yt[nbinx],rmsyt[nbinx];
@@ -236,12 +237,12 @@ void GraficiTdiff(const char * filename){
 
 
   
-  TH2F* hc_l= new TH2F("hc_l", "histo hc_l",nbinx,rxmin,rxmax,nbiny,rymin_lc,rymax_lc);
-  TH2F* hc_r= new TH2F("hc_r", "histo hc_r",nbinx,rxmin,rxmax,nbiny,rymin_rc,rymax_rc);
+  TH2F* hc_l= new TH2F("hc_l", "histo hc_l",nbinx,txmin,txmax,nbiny,rymin_lc,rymax_lc);
+  TH2F* hc_r= new TH2F("hc_r", "histo hc_r",nbinx,txmin,txmax,nbiny,rymin_rc,rymax_rc);
   TH2F* hc_t= new TH2F("hc_t", "histo hc_t",nbinx,txmin,txmax,nbiny,tymin_c,tymax_c);
   TH2F* hc_tdiff= new TH2F("hc_t", "histo hc_t",nbinx,txmin,txmax,nbiny,tymin_c,tymax_c);
   
-
+  
   
    for(k=0;k<digiTree->GetEntries();k++){
 
@@ -267,13 +268,15 @@ void GraficiTdiff(const char * filename){
     histotemp_r=hc_r->ProjectionY("hc_rprojY",k,k);
     histotemp_t=hc_t->ProjectionY("hc_tprojY",k,k);
    
-   
+    xt[k]=txmin+(txmax-txmin)/nbinx*k;
     yt[k]=histotemp_t->GetMean();
     RMS[2][k]= histotemp_t->GetMeanError();
-
+    
+    x_l[k]=txmin+(txmax-txmin)/nbinx*k;
     y_l[k]=histotemp_l->GetMean();
     RMS[0][k]= histotemp_l->GetMeanError();
     
+    x_r[k]=txmin+(txmax-txmin)/nbinx*k;
     y_r[k]=histotemp_r->GetMean();
     RMS[1][k]= histotemp_r->GetMeanError();
 
@@ -290,9 +293,14 @@ void GraficiTdiff(const char * filename){
    TGraphErrors* graph_rc = new TGraphErrors(nbinx-1,x_r,y_r,0,RMS[1]);
    TGraphErrors* graph_tc = new TGraphErrors(nbinx-1,xt,yt,0,RMS[2]);
    TF1* fit_tdiff = new TF1("fit_tdiff","[0]+[1]*x",-0.1,0.65);
+   TF1* fit_lc = new TF1("fit_lc","[0]+[1]*x",-0.1,0.65);
+   TF1* fit_rc = new TF1("fit_rc","[0]+[1]*x",-0.1,0.65);
   
-   graph_tc->Fit("fit_tdiff");
-   
+   graph_tc->Fit("fit_tdiff","R");
+   graph_rc->Fit("fit_rc","R");
+   graph_lc->Fit("fit_lc","R");
+
+
    for(k=0;k<digiTree->GetEntries();k++){
 
     digiTree->GetEntry(k);
@@ -365,6 +373,30 @@ void GraficiTdiff(const char * filename){
   // graph_l->SetMarkerSize(.5);
   // graph_l->Draw("P");
 
+   TCanvas* plottini = new TCanvas("altroCanvas","",800,600);
+   plottini->Divide(2,1);
+   hc_r->Reset();
+   hc_l->Reset();
+   
+   for(k=0;k<digiTree->GetEntries();k++){
+     digiTree->GetEntry(k);
+     
+     if (0.8*(fit_l->GetParameter(1)) < (amp_max[4]/max) && (amp_max[4]/max) < (3*fit_l->GetParameter(1)) && amp_max[0]/max > 0.4 && amp_max[0]/max < 0.75)
+       {
+	 hc_l->Fill((time[1+LEDi]-hyp_l->Eval(amp_max[3]/max)+hyp_l->GetParameter(0)-(time[2+LEDi]-hyp_r->Eval(amp_max[4]/max)+hyp_r->GetParameter(0))),time[1+LEDi]-time[0]-hyp_l->Eval(amp_max[3]/max)+hyp_l->GetParameter(0)-fit_lc->Eval((time[1+LEDi]-hyp_l->Eval(amp_max[3]/max)+hyp_l->GetParameter(0)-(time[2+LEDi]-hyp_r->Eval(amp_max[4]/max)+hyp_r->GetParameter(0))))+fit_lc->GetParameter(0));
+	 
+	 hc_r->Fill((time[1+LEDi]-hyp_l->Eval(amp_max[3]/max)+hyp_l->GetParameter(0)-(time[2+LEDi]-hyp_r->Eval(amp_max[4]/max)+hyp_r->GetParameter(0))),time[2+LEDi]-time[0]-hyp_r->Eval(amp_max[4]/max)+hyp_r->GetParameter(0)-fit_rc->Eval((time[1+LEDi]-hyp_l->Eval(amp_max[3]/max)+hyp_l->GetParameter(0)-(time[2+LEDi]-hyp_r->Eval(amp_max[4]/max)+hyp_r->GetParameter(0))))+fit_rc->GetParameter(0));
+	 
+	 if(debug) cout << 0.8*fit_l->GetParameter(1) << " < " << amp_max[3]/max << " < " << 3*fit_l->GetParameter(1) << " ////  " << time[4+LEDi]-time[0] <<endl;
+       }
+     
+   }//chiudo for k
+   
+   plottini->cd(1);
+   hc_l->Draw("COLZ");
+   plottini->cd(2);
+   hc_r->Draw("COLZ");
+   
    TH1D* histo_cl;
    TH1D* histo_cr;
    TH1D* histo_ct;
@@ -441,9 +473,9 @@ void GraficiTdiff(const char * filename){
      fittino[1][i] = new TF1("xzcbxcn"+i ,"gaus",6,8);
      fittino[2][i] = new TF1("jklnjbm"+i ,"gaus",6,8);
      
-     istogrammi[0][i]=hc_tdiff->ProjectionY("ghijklxz"+i, hc_tdiff->GetXaxis()->FindBin(0.0), hc_tdiff->GetXaxis()->FindBin(cut[i]));
-     istogrammi[1][i]=hc_l->ProjectionY("abcdefuv"+i, hc_tdiff->GetXaxis()->FindBin(0.0), hc_tdiff->GetXaxis()->FindBin(cut[i]));
-     istogrammi[2][i]=hc_r->ProjectionY("mnopqrst"+i, hc_tdiff->GetXaxis()->FindBin(0.0), hc_tdiff->GetXaxis()->FindBin(cut[i]));
+     istogrammi[0][i]=hc_tdiff->ProjectionY("ghijklxz"+i,0 /*hc_tdiff->GetXaxis()->FindBin(0.0)*/, hc_tdiff->GetXaxis()->FindBin(cut[i]));
+     istogrammi[1][i]=hc_l->ProjectionY("abcdefuv"+i, 0/*hc_tdiff->GetXaxis()->FindBin(0.0)*/, hc_tdiff->GetXaxis()->FindBin(cut[i]));
+     istogrammi[2][i]=hc_r->ProjectionY("mnopqrst"+i, 0/*hc_tdiff->GetXaxis()->FindBin(0.0)*/, hc_tdiff->GetXaxis()->FindBin(cut[i]));
 
      istogrammi[0][i]->SetLineColor(kBlack);
      istogrammi[1][i]->SetLineColor(kBlue);
@@ -452,9 +484,9 @@ void GraficiTdiff(const char * filename){
      cout<<"__________________"<< hc_tdiff->GetXaxis()->FindBin(0.0)<<"     "<<hc_tdiff->GetXaxis()->FindBin(cut[i])<<endl;
 
      //canvino->cd(i+1);
-     istogrammi[0][i]->Fit("ghijklxz"+i,"R0");
-     istogrammi[1][i]->Fit("abcdefuv"+i,"R0");
-     istogrammi[2][i]->Fit("mnopqrst"+i,"R0");
+     istogrammi[0][i]->Fit("argaerg"+i,"R0");
+     istogrammi[1][i]->Fit("xzcbxcn"+i,"R0");
+     istogrammi[2][i]->Fit("jklnjbm"+i,"R0");
      
      //istogrammi[0][i]->Draw();
      //istogrammi[1][i]->Draw("SAME");
