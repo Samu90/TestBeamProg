@@ -14,7 +14,7 @@ void TResAmp(const char * filename){
 
   Float_t amp_max[54], time[54];
   int k,j,maxbin_l,maxbin_r,maxbin_t;
-  Float_t rxmin,rxmax,rymin_l,rymax_l,rymin_r,rymax_r,tymin,tymax,txmin,txmax,tymin_c,tymax_c,rymin_lc,rymax_lc,rymin_rc,rymax_rc;
+  Double_t rxmin,rxmax,rymin_l,rymax_l,rymin_r,rymax_r,tymin,tymax,txmin,txmax,tymin_c,tymax_c,rymin_lc,rymax_lc,rymin_rc,rymax_rc;
   bool debug=false;
   bool blind=true;
   Double_t max=0;
@@ -56,9 +56,9 @@ void TResAmp(const char * filename){
   Double_t RMS[3][nbinx];
 
 
-  TH1F *hr_amp =new TH1F("hr_amp","histos_ampr",nbinx,0.0,1);
-  TH1F *hl_amp =new TH1F("hl_amp","histos_ampl",nbinx,0.0,1);
-  TH1F *mcp_amp =new TH1F("mcp_amp","histomcp_ampl",nbinx,0.0,1);
+  TH1D *hr_amp =new TH1D("hr_amp","histos_ampr",nbinx,0.0,1);
+  TH1D *hl_amp =new TH1D("hl_amp","histos_ampl",nbinx,0.0,1);
+  TH1D *mcp_amp =new TH1D("mcp_amp","histomcp_ampl",nbinx,0.0,1);
 
 
   TF1 *fit_r = new TF1("f_r","landau",0.14,1);
@@ -106,9 +106,9 @@ void TResAmp(const char * filename){
   hl_amp->Fit("f_l","RQ0");
 
 
-  TH2F* h2_l= new TH2F("h2_l", "histo h2_l",nbinx,rxmin,rxmax,nbiny,rymin_l,rymax_l);
-  TH2F* h2_r= new TH2F("h2_r", "histo h2_r",nbinx,rxmin,rxmax,nbiny,rymin_r,rymax_r);
-  TH2F* h2_t= new TH2F("h2_t", "histo h2_tot",nbinx,txmin,txmax,nbiny,tymin,tymax);
+  TH2D* h2_l= new TH2D("h2_l", "histo h2_l",nbinx,rxmin,rxmax,nbiny,rymin_l,rymax_l);
+  TH2D* h2_r= new TH2D("h2_r", "histo h2_r",nbinx,rxmin,rxmax,nbiny,rymin_r,rymax_r);
+  TH2D* h2_t= new TH2D("h2_t", "histo h2_tot",nbinx,txmin,txmax,nbiny,tymin,tymax);
 
   for(k=0;k<digiTree->GetEntries();k++){
 
@@ -126,7 +126,8 @@ void TResAmp(const char * filename){
 	
 
   }//chiudo for k
-   for(k=0;k<nbinx;k++){
+cout<<"HERE"<<endl;
+  for(k=0;k<nbinx;k++){
     TH1D* histotemp_l;
     TH1D* histotemp_r;
     TH1D* histotemp_t;
@@ -158,6 +159,7 @@ void TResAmp(const char * filename){
 
     if(k%20==0) cout << k << " / " << nbinx << endl;
   }//chiudo for k
+  cout<<"HERE"<<endl;
   /*
   for(k=0;k<nbinx;k++){
     for(j=0;j<nbiny;j++){
@@ -168,7 +170,7 @@ void TResAmp(const char * filename){
     }
     }*/
   
-  TCanvas* wf_c =new TCanvas("wf","Plot wf",1800,1100);
+  TCanvas* wf_c =new TCanvas("wf_altro","Plot wf",1800,1100);
   TGraphErrors* graph_r=new TGraphErrors(nbinx-1,x_r,y_r,0,rmsy_r);
   TGraphErrors* graph_l=new TGraphErrors(nbinx-1,x_l,y_l,0,rmsy_l);
   TGraphErrors* graph_t=new TGraphErrors(nbinx-1,xt,yt,0,rmsyt);
@@ -234,13 +236,13 @@ void TResAmp(const char * filename){
 
 
   
-  TH2F* hc_l= new TH2F("hc_l", "histo hc_l",nbinx,rxmin,rxmax,nbiny,rymin_lc,rymax_lc);
-  TH2F* hc_r= new TH2F("hc_r", "histo hc_r",nbinx,rxmin,rxmax,nbiny,rymin_rc,rymax_rc);
-  TH2F* hc_t= new TH2F("hc_t", "histo hc_t",nbinx,txmin,txmax,nbiny,tymin_c,tymax_c);
-  TH2F* hc_tdiff= new TH2F("hc_t", "histo hc_t",nbinx,txmin,txmax,nbiny,tymin_c,tymax_c);
+  TH2D* hc_l= new TH2D("hc_l", "histo hc_l",nbinx,rxmin,rxmax,nbiny,rymin_lc,rymax_lc);
+  TH2D* hc_r= new TH2D("hc_r", "histo hc_r",nbinx,rxmin,rxmax,nbiny,rymin_rc,rymax_rc);
+  TH2D* hc_t= new TH2D("hc_t", "histo hc_t",nbinx,txmin,txmax,nbiny,tymin_c,tymax_c);
+  TH2D* hc_tdiff= new TH2D("hc_tdiff", "histo hc_t",nbinx,txmin,txmax,nbiny,tymin_c,tymax_c);
   TH2D* hc_tl= new TH2D("hc_tl", "histo hc_tl",nbinx,0.8,3,nbiny,rymin_lc,rymax_lc);
   TH2D* hc_tr= new TH2D("hc_tr", "histo hc_tr",nbinx,0.8,3,nbiny,rymin_lc,rymax_lc);
-  TH2D* hc_tot= new TH2D("hc_tr", "histo hc_tr",nbinx,0.8,3,nbiny,rymin_lc,rymax_lc);
+  TH2D* hc_tot= new TH2D("hc_tot", "histo hc_tot",nbinx,0.8,3,nbiny,rymin_lc,rymax_lc);
     
   
    for(k=0;k<digiTree->GetEntries();k++){
@@ -359,10 +361,11 @@ void TResAmp(const char * filename){
 
   }//chiudo for k
     hc_tot->Add(hc_tl,hc_tr);
-  
+    
    for (i=0;i<nbinx/10;i++){
      cut[i] =0.8+(Float_t)(1.5-0.8)*(i*10)/nbinx;  
    }
+
    for (i=0;i<nbinx/10;i++){
      TF1* fit = new TF1("fit","gaus",-1,2);
      TH1D* histotemp_t;
@@ -370,7 +373,7 @@ void TResAmp(const char * filename){
      cout << "____________" << hc_tot->GetXaxis()->FindBin(cut[i]) << hc_tot->GetXaxis()->FindBin(cut[i+1]) << endl;
      
     histotemp_t->Fit("fit","0");
-    sigma[i]=sqrt((fit->GetParameter(2))**2-0.015**2);
+    sigma[i]=sqrt((fit->GetParameter(2))*(fit->GetParameter(2))-0.015*0.015);
     erry[i]=fit->GetParError(2);
     errx[i]= (1.5-0.8)*10/(2*nbinx);
     
@@ -378,8 +381,10 @@ void TResAmp(const char * filename){
     delete fit;
     // delete fit;
    }
+
+   
 				     
-   TCanvas* c_TresAmp = new TCanvas("c_rest","c_rest_plot",600,550);
+   TCanvas* c_TresAmp = new TCanvas("c_TresAmp","c_rest_plot",600,550);
    TGraphErrors* TResAmp = new TGraphErrors(nbinx/10,cut,sigma,errx,erry);
    TF1* fitramp = new TF1("fitramp","[0]+[1]/sqrt(x)",rxmin,rxmax-0.06);
    gStyle->SetOptFit(1111);
@@ -387,111 +392,14 @@ void TResAmp(const char * filename){
    fitramp->SetParameter(1,1e-2);
    TResAmp->Fit("fitramp","L0R");
    TResAmp ->GetXaxis()->SetTitle("amp/mip peak");
-   TResAmp ->GetYaxis()->SetTitle("\sigma_{t_{ave}}(ns)");
+   TResAmp ->GetYaxis()->SetTitle("sigma_{t_{ave}}(ns)");
    TResAmp ->SetMarkerStyle(8);
    TResAmp ->SetMarkerSize(.8);
+   TResAmp->GetXaxis()->SetLimits(0.0,3.0);
+   TResAmp->GetYaxis()->SetLimits(0.03,0.044);
    
-  
    TResAmp ->Draw("AP");
-   fitramp->DrawF1(rxmin,3,"same");
-   // graph_l->Fit("hyp_l","R");
-   // graph_l->SetMarkerStyle(8);
-   // graph_l->SetMarkerSize(.5);
-  // graph_l->Draw("P");
-
-  
-  // graph_l->Fit("hyp_l","R");
-  // graph_l->SetMarkerStyle(8);
-  // graph_l->SetMarkerSize(.5);
-  // graph_l->Draw("P");
-
-   TH1D* histo_cl;
-   TH1D* histo_cr;
-   TH1D* histo_ct;
-   TH1D* histo_ctdiff;
-   TF1* gaus_cl = new TF1("gaus_cl","gaus",-2.5,-0.7);
-   TF1* gaus_cr = new TF1("gaus_cr","gaus",-2.5,-0.7);
-   TF1* gaus_ct = new TF1("gaus_ct","gaus",-2.5,-0.7);
-   TF1* gaus_ctdiff = new TF1("gaus_ctdiff","gaus",6,8);
-   histo_cl = hc_l->ProjectionY("histo_cl",0,nbinx);
-   histo_cr = hc_r->ProjectionY("histo_cr",0,nbinx);
-   histo_ct = hc_t->ProjectionY("histo_ct",0,nbinx);
-   histo_ctdiff = hc_tdiff->ProjectionY("histo_ctdiff",0,nbinx);
-
-
-   histo_ct->SetLineColor(kBlack);
-   histo_cl->SetLineColor(kBlue);
-   histo_cr->SetLineColor(kRed);
-   gaus_ct->SetLineColor(kBlack);
-   
-   /*
-    // delete fit;
-   
-    
-	      
-  
-   }
-   TCanvas* c_rest = new TCanvas("c_rest","c_rest_plot",600,550);
-   TGraphErrors* rest = new TGraphErrors(nbinx/10,cut,sigma,errx,erry);
-
-   rest->GetXaxis()->SetTitle("t_{left}-t_{right}(ns)");
-   rest->GetYaxis()->SetTitle("\sigma_{t_{ave}}(ns)");
-   rest->SetMarkerStyle(8);
-   rest->SetMarkerSize(.8);
-   rest->Draw("AP");
-
-    wf_c->cd(6);
-
-   hc_tdiff->GetYaxis()->SetTitle("t_ave-t_MCP [ns]");
-   hc_tdiff->GetXaxis()->SetTitle("t_left-t_right [ns]");
-   hc_tdiff->Draw("LEGO");
-   graph_tcdiff->SetMarkerStyle(8);
-   graph_tcdiff->SetMarkerSize(.5);
-   graph_tcdiff->Draw("P");
-
-
+   fitramp->DrawF1(0,3,"same");
 
       
-   TCanvas * timeres = new TCanvas("timeres","plot_timeres",600,550);
-
-   TLegend* l1=new TLegend(0.1,0.7,0.48,0.9);
-   l1->SetHeader("time stamps");
-   l1->AddEntry(histo_cl,"t_left-t_MCP");
-   l1->AddEntry(histo_cr,"t_right-t_MCP");
-   l1->AddEntry(histo_ct,"t_ave-t_MCP");
-   
-   gStyle->SetOptStat("");
-   histo_ct->Draw();
-   gaus_ct->SetParameter(0,500);
-   histo_ct->GetYaxis()->SetTitle("counts");
-   histo_ct->GetXaxis()->SetTitle("t_{ave}-t_{MCP}(ns)");
-   histo_cl->SetLineColor(kBlue);
-
-   histo_cl->Fit("gaus_cl");
-   histo_cr->Fit("gaus_cr");
-   cout << "_____________________________" << endl;
-   histo_ct->Fit("gaus_ct");
-
-   histo_cr->Draw("same");
-  
-   histo_cl->Draw("same");
-
-   l1->Draw("SAME");
-
-  
-
-
-   TCanvas* tdiff = new TCanvas("tdiff","plot_tdiff",600,550);
-   TLegend* l2=new TLegend(0.1,0.7,0.48,0.9);
-   l2->SetHeader("time stamps");
-   l2->AddEntry(histo_ct,"t_ave-t_MCP");
-   l2->AddEntry(histo_ctdiff,"t_ave-t_MCP(tdiff corr)");
-   gaus_ctdiff->SetLineColor(kGreen);
-
-   histo_ctdiff->Fit("gaus_ctdiff");
-
-   histo_ctdiff->SetLineColor(kGreen);
-   histo_ct->Draw();
-   histo_ctdiff->Draw("same");
-   l2->Draw("SAME");*/
-   }
+}

@@ -13,7 +13,7 @@ void plotWF_corr13V2(const char * filename){
 
 
   Float_t amp_max[54], time[54];
-  int k,j,maxbin_l,maxbin_r,maxbin_t;
+  int k,j,maxbin_l,maxbin_r,maxbin_t,i;
   Float_t rxmin,rxmax,rymin_l,rymax_l,rymin_r,rymax_r,tymin,tymax,txmin,txmax,tymin_c,tymax_c,rymin_lc,rymax_lc,rymin_rc,rymax_rc;
   bool debug=false;
   bool blind=true;
@@ -42,7 +42,6 @@ void plotWF_corr13V2(const char * filename){
   tymax=8.8;
   
   tymin_c=6.8;
-
   tymax_c=8.5;
 
 
@@ -101,8 +100,8 @@ void plotWF_corr13V2(const char * filename){
   //cout << tmax <<endl;
   cout<< max << endl;
 
-  hr_amp->Fit("f_r","RQ0");
-  hl_amp->Fit("f_l","RQ0");
+  hr_amp->Fit("f_r","R0");
+  hl_amp->Fit("f_l","R0");
 
 
   TH2F* h2_l= new TH2F("h2_l", "histo h2_l",nbinx,rxmin,rxmax,nbiny,rymin_l,rymax_l);
@@ -115,6 +114,7 @@ void plotWF_corr13V2(const char * filename){
 
 
     if (0.8*(fit_l->GetParameter(1)) < (amp_max[4]/max) && (amp_max[4]/max) < (3*fit_l->GetParameter(1)) && amp_max[0]/max > mcp_amp->GetMean()-1*mcp_amp->GetRMS() && amp_max[0]/max < mcp_amp->GetMean()+1*mcp_amp->GetRMS())
+    //if (0.8*() < (amp_max[4]/max) && (amp_max[4]/max) < (3) && amp_max[0]/max > mcp_amp->GetMean()-1*mcp_amp->GetRMS() && amp_max[0]/max < mcp_amp->GetMean()+1*mcp_amp->GetRMS())
       {
 	h2_l->Fill(amp_max[3]/max,time[1+LEDi]-time[0]);
 	if (amp_max[4]/max < 0.35)h2_r->Fill(amp_max[4]/max,time[2+LEDi]-time[0]);
@@ -249,7 +249,7 @@ void plotWF_corr13V2(const char * filename){
       {
 	hc_l->Fill(amp_max[3]/max,time[1+LEDi]-time[0]-hyp_l->Eval(amp_max[3]/max)+hyp_l->GetParameter(0));
         hc_r->Fill(amp_max[4]/max,time[2+LEDi]-time[0]-hyp_r->Eval(amp_max[4]/max)+hyp_r->GetParameter(0));
-	hc_t->Fill((time[1+LEDi]-time[2+LEDi]),(time[1+LEDi]+time[2+LEDi])/2-hyp_t->Eval(time[1+LEDi]-time[2+LEDi])+hyp_t->GetParameter(0)-time[0]-(hyp_r->Eval(amp_max[3]/max)-hyp_r->GetParameter(0)+hyp_l->Eval(amp_max[4]/max)-hyp_l->GetParameter(0))/2);
+	hc_t->Fill((time[1+LEDi]-time[2+LEDi]),(time[1+LEDi]+time[2+LEDi])/2-time[0]-(hyp_r->Eval(amp_max[3]/max)-hyp_r->GetParameter(0)+hyp_l->Eval(amp_max[4]/max)-hyp_l->GetParameter(0))/2);
 
 	if(debug) cout << 0.8*fit_l->GetParameter(1) << " < " << amp_max[3]/max << " < " << 3*fit_l->GetParameter(1) << " ////  " << time[4+LEDi]-time[0] <<endl;
       }
@@ -287,6 +287,7 @@ void plotWF_corr13V2(const char * filename){
    TGraphErrors* graph_lc = new TGraphErrors(nbinx-1,x_l,y_l,0,RMS[0]);
    TGraphErrors* graph_rc = new TGraphErrors(nbinx-1,x_r,y_r,0,RMS[1]);
    TGraphErrors* graph_tc = new TGraphErrors(nbinx-1,xt,yt,0,RMS[2]);
+   TF1* corr_tc= new TF1("corr_tc","[0]*x+[1]",-0.2,0.8);
 
     wf_c->cd(4);
      hc_l->GetYaxis()->SetTitle("t_left-t_MCP [ns]");
@@ -319,10 +320,16 @@ void plotWF_corr13V2(const char * filename){
 
    hc_t->GetYaxis()->SetTitle("t_ave-t_MCP [ns]");
    hc_t->GetXaxis()->SetTitle("t_left-t_right [ns]");
+   
+
+
    hc_t->Draw("COLZ");
    graph_tc->SetMarkerStyle(8);
    graph_tc->SetMarkerSize(.5);
    graph_tc->Draw("P");
+   graph_tc->Fit("corr_tc","R");
+   corr_tc->Draw("SAME");
+
 
   // graph_l->Fit("hyp_l","R");
   // graph_l->SetMarkerStyle(8);
