@@ -365,6 +365,7 @@ cout<<"HERE"<<endl;
    for (i=0;i<nbinx/10;i++){
      cut[i] =0.8+(Float_t)(1.5-0.8)*(i*10)/nbinx;  
    }
+
    for (i=0;i<nbinx/10;i++){
      TF1* fit = new TF1("fit","gaus",-1,2);
      TH1D* histotemp_t;
@@ -380,6 +381,8 @@ cout<<"HERE"<<endl;
     delete fit;
     // delete fit;
    }
+
+   
 				     
    TCanvas* c_TresAmp = new TCanvas("c_TresAmp","c_rest_plot",600,550);
    TGraphErrors* TResAmp = new TGraphErrors(nbinx/10,cut,sigma,errx,erry);
@@ -392,39 +395,11 @@ cout<<"HERE"<<endl;
    TResAmp ->GetYaxis()->SetTitle("sigma_{t_{ave}}(ns)");
    TResAmp ->SetMarkerStyle(8);
    TResAmp ->SetMarkerSize(.8);
-   //TResAmp->GetXaxis()->SetRange(0.0,3.0);
+   TResAmp->GetXaxis()->SetLimits(0.0,3.0);
+   TResAmp->GetYaxis()->SetLimits(0.03,0.044);
    
    TResAmp ->Draw("AP");
    fitramp->DrawF1(0,3,"same");
 
-   // graph_l->Fit("hyp_l","R");
-   // graph_l->SetMarkerStyle(8);
-   // graph_l->SetMarkerSize(.5);
-  // graph_l->Draw("P");
-
-  
-  // graph_l->Fit("hyp_l","R");
-  // graph_l->SetMarkerStyle(8);
-  // graph_l->SetMarkerSize(.5);
-  // graph_l->Draw("P");
-
-   TH1D* histo_cl;
-   TH1D* histo_cr;
-   TH1D* histo_ct;
-   TH1D* histo_ctdiff;
-   TF1* gaus_cl = new TF1("gaus_cl","gaus",-2.5,-0.7);
-   TF1* gaus_cr = new TF1("gaus_cr","gaus",-2.5,-0.7);
-   TF1* gaus_ct = new TF1("gaus_ct","gaus",-2.5,-0.7);
-   TF1* gaus_ctdiff = new TF1("gaus_ctdiff","gaus",6,8);
-   histo_cl = hc_l->ProjectionY("histo_cl",0,nbinx);
-   histo_cr = hc_r->ProjectionY("histo_cr",0,nbinx);
-   histo_ct = hc_t->ProjectionY("histo_ct",0,nbinx);
-   histo_ctdiff = hc_tdiff->ProjectionY("histo_ctdiff",0,nbinx);
-
-
-   histo_ct->SetLineColor(kBlack);
-   histo_cl->SetLineColor(kBlue);
-   histo_cr->SetLineColor(kRed);
-   gaus_ct->SetLineColor(kBlack);
-   
+      
 }

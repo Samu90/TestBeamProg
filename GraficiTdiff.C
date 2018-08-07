@@ -480,6 +480,12 @@ void GraficiTdiff(const char * filename){
      istogrammi[0][i]->SetLineColor(kBlack);
      istogrammi[1][i]->SetLineColor(kBlue);
      istogrammi[2][i]->SetLineColor(kRed);
+     istogrammi[0][i]->GetXaxis()->SetTitle("t_{ave}-t_{MCP}");
+     istogrammi[0][i]->GetYaxis()->SetTitle("counts");
+     istogrammi[1][i]->GetXaxis()->SetTitle("t_{ave}-t_{MCP}");
+     istogrammi[1][i]->GetYaxis()->SetTitle("counts");
+     istogrammi[2][i]->GetXaxis()->SetTitle("t_{ave}-t_{MCP}");
+     istogrammi[2][i]->GetYaxis()->SetTitle("counts");
      
      cout<<"__________________"<< hc_tdiff->GetXaxis()->FindBin(0.0)<<"     "<<hc_tdiff->GetXaxis()->FindBin(cut[i])<<endl;
 
@@ -499,49 +505,51 @@ void GraficiTdiff(const char * filename){
 
    canvino->cd(1);
    istogrammi[0][0]->Draw();
-   istogrammi[1][0]->Draw("SAME");
-   istogrammi[2][0]->Draw("SAME");
+   //   istogrammi[1][0]->Draw("SAME");
+   // istogrammi[2][0]->Draw("SAME");
    fittino[0][0]->Draw("SAME");
-   fittino[1][0]->Draw("SAME");
-   fittino[2][0]->Draw("SAME");
+   //fittino[1][0]->Draw("SAME");
+   //fittino[2][0]->Draw("SAME");
    
    canvino->cd(2);
+   
+   //istogrammi[1][1]->Draw("SAME");
+   //istogrammi[2][1]->Draw("SAME");
    istogrammi[0][1]->Draw();
-   istogrammi[1][1]->Draw("SAME");
-   istogrammi[2][1]->Draw("SAME");
    fittino[0][1]->Draw("SAME");
-   fittino[1][1]->Draw("SAME");
-   fittino[2][1]->Draw("SAME");
+   //fittino[1][1]->Draw("SAME");
+   //fittino[2][1]->Draw("SAME");
    
    canvino->cd(3);
+   
+   //istogrammi[1][2]->Draw("SAME");
+   // istogrammi[2][2]->Draw("SAME");
    istogrammi[0][2]->Draw();
-   istogrammi[1][2]->Draw("SAME");
-   istogrammi[2][2]->Draw("SAME");
    fittino[0][2]->Draw("SAME");
-   fittino[1][2]->Draw("SAME");
-   fittino[2][2]->Draw("SAME");
+   //fittino[1][2]->Draw("SAME");
+   //fittino[2][2]->Draw("SAME");
    
    canvino->cd(4);
-   istogrammi[1][3]->Draw();
-   istogrammi[2][3]->Draw("SAME");
+   //istogrammi[1][3]->Draw();
+   // istogrammi[2][3]->Draw("SAME");
    istogrammi[0][3]->Draw("SAME");
    fittino[0][3]->Draw("SAME");
-   fittino[1][3]->Draw("SAME");
-   fittino[2][3]->Draw("SAME");
+   //fittino[1][3]->Draw("SAME");
+   //fittino[2][3]->Draw("SAME");
    
    canvino->cd(5);
-   istogrammi[1][4]->Draw();
-   istogrammi[2][4]->Draw("SAME");
+   //istogrammi[1][4]->Draw();
+   //istogrammi[2][4]->Draw("SAME");
    istogrammi[0][4]->Draw("SAME");
    fittino[0][4]->Draw("SAME");
-   fittino[1][4]->Draw("SAME");
-   fittino[2][4]->Draw("SAME");
+   //fittino[1][4]->Draw("SAME");
+   //fittino[2][4]->Draw("SAME");
    
    canvino->cd(6);
-   istogrammi[1][5]->Draw();
-   istogrammi[2][5]->Draw("SAME");
+   //istogrammi[1][5]->Draw();
+   //istogrammi[2][5]->Draw("SAME");
    istogrammi[0][5]->Draw("SAME");
    fittino[0][5]->Draw("SAME");
-   fittino[1][5]->Draw("SAME");
-   fittino[2][5]->Draw("SAME");
+   //fittino[1][5]->Draw("SAME");
+   //fittino[2][5]->Draw("SAME");
 }

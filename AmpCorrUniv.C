@@ -3,17 +3,16 @@
 
 
 
-void plotWF_ASU13(const char * filename){
-
-
+void AmpCorrUniv(const char * filename){
+  
+  
   TFile*  file= TFile::Open(filename);
-  //TTree * WFTree = (TTree*)file->Get("wf");
   TTree* digiTree = (TTree*)file->Get("digi");
 
-
+  
 
   Float_t amp_max[54], time[54];
-  int k,j,maxbin_l,maxbin_r,maxbin_t;
+  int k,j,maxbin_l,maxbin_r,maxbin_t,i;
   Float_t rxmin,rxmax,rymin_l,rymax_l,rymin_r,rymax_r,tymin,tymax,txmin,txmax,tymin_c,tymax_c,rymin_lc,rymax_lc,rymin_rc,rymax_rc;
   bool debug=false;
   bool blind=true;
@@ -22,48 +21,29 @@ void plotWF_ASU13(const char * filename){
   Int_t LEDi;
   rxmin=0;
   rxmax=0.5;
-
-
-
+  
+  
+  
   const Int_t  nbinx=100,nbiny=120;
-
-
-  rymin_l=7.6;
-  rymax_l=8.8;
-  rymin_r=7.6;
-  rymax_r=8.8;
   
-  rymin_lc=6.8;
-  rymax_lc=8.5;
-  rymin_rc=6.8;
-  rymax_rc=8.5;
-
-  tymin=7.7;
-  tymax=8.8;
   
-  tymin_c=6.8;
-
-  tymax_c=8.5;
-
-
-  txmin=-0.3;
-  txmax=0.8;
-
-
+  
+  
   Double_t x_r[nbinx],y_r[nbiny], x_l[nbinx],y_l[nbiny],rmsy_l[nbiny],rmsy_r[nbiny];
   Double_t xt[nbinx],yt[nbinx],rmsyt[nbinx];
   Double_t RMS[3][nbinx];
-
-
+  Int_t nentries=digiTree->GetEntries();
+  Float_t Times1[nentries],Times2[nentries],Times3[nentries];
+  
   TH1F *hr_amp =new TH1F("hr_amp","histos_ampr",nbinx,0.0,1);
   TH1F *hl_amp =new TH1F("hl_amp","histos_ampl",nbinx,0.0,1);
   TH1F *mcp_amp =new TH1F("mcp_amp","histomcp_ampl",nbinx,0.0,1);
-
-
+  
+  
   TF1 *fit_r = new TF1("f_r","landau",0.14,1);
   TF1 *fit_l = new TF1("f_l","landau",0.14,1);
-
-
+  
+  
   digiTree->SetBranchAddress("amp_max",&amp_max);
   digiTree->SetBranchAddress("time",&time);
   digiTree->SetBranchAddress("LED300",&LED300);
@@ -74,20 +54,52 @@ void plotWF_ASU13(const char * filename){
   digiTree->GetEntry(3);
   LEDi=LED300;
   
-  max=4096;
-  /*for(k=0; k<digiTree->GetEntries(); k++){
+  for(k=0;k<digiTree->GetEntries();k++){
     digiTree->GetEntry(k);
-    if (k%10000==0) cout<<"On entry " <<k<<endl;
-    if(amp_max[3]>max) {max=amp_max[3];}
-    if(amp_max[4]>max) {max=amp_max[4];}
-  //if(time[3]-time[4]>tmax && time[3]-time[4]<10) {tmax = time[3]-time[4];}
+    //cout<<"HERE"<<endl;
+    if(time[1+LEDi]-time[0]<50 && time[1+LEDi]-time[0]>0) {Times1[k]=time[1+LEDi]-time[0];}
+    else{Times1[k]=Times2[k-1];}
+    if(time[2+LEDi]-time[0]<50 && time[2+LEDi]-time[0]>0) {Times2[k]=time[2+LEDi]-time[0];}
+    else{Times2[k]=Times2[k-1];}  
+    if((time[1+LEDi]+time[2+LEDi])/2-time[0]<50 && (time[1+LEDi]+time[2+LEDi])/2-time[0]>-10) {Times3[k]=(time[1+LEDi]+time[2+LEDi])/2-time[0];}
+    else{Times3[k]=Times3[k-1];}
+  }
+  
+  Double_t mean1=TMath::Mean(nentries,Times1)-1.2;
+  Double_t rms1=TMath::RMS(nentries,Times1);
+  
+  Double_t mean2=TMath::Mean(nentries,Times2)-1.2;
+  Double_t rms2=TMath::RMS(nentries,Times2);
+  
+  Double_t mean3=TMath::Mean(nentries,Times3)-1.2;
+  Double_t rms3=TMath::RMS(nentries,Times3);
+  
+  rymin_l=mean1-0.5*rms1;
+  rymax_l=mean1+0.5*rms1;
+  rymin_r=mean2-0.5*rms2;
+  rymax_r=mean2+0.5*rms2;
+    
+  
 
-  } chiudo for */
+  tymin=mean3-0.5*rms3;
+  tymax=mean3+0.5*rms3;
+  
+  
+
+
+  txmin=-0.3;
+  txmax=0.8;
+  
+
+  
+  max=4096;
+
+  
 
   for(k=0;k<digiTree->GetEntries();k++){
     if (k%10000==0) cout<<"On entry " <<k<<endl;
     digiTree->GetEntry(k);
-
+    //    cout<<"HEREEE"<<endl;
     hr_amp->Fill(amp_max[3]/max);
     hl_amp->Fill(amp_max[4]/max);
     mcp_amp->Fill(amp_max[0]/max);
@@ -101,8 +113,8 @@ void plotWF_ASU13(const char * filename){
   //cout << tmax <<endl;
   cout<< max << endl;
 
-  hr_amp->Fit("f_r","RQ0");
-  hl_amp->Fit("f_l","RQ0");
+  hr_amp->Fit("f_r","R0");
+  hl_amp->Fit("f_l","R0");
 
 
   TH2F* h2_l= new TH2F("h2_l", "histo h2_l",nbinx,rxmin,rxmax,nbiny,rymin_l,rymax_l);
@@ -115,13 +127,14 @@ void plotWF_ASU13(const char * filename){
 
 
     if (0.8*(fit_l->GetParameter(1)) < (amp_max[4]/max) && (amp_max[4]/max) < (3*fit_l->GetParameter(1)) && amp_max[0]/max > mcp_amp->GetMean()-1*mcp_amp->GetRMS() && amp_max[0]/max < mcp_amp->GetMean()+1*mcp_amp->GetRMS())
+    //if (0.8*() < (amp_max[4]/max) && (amp_max[4]/max) < (3) && amp_max[0]/max > mcp_amp->GetMean()-1*mcp_amp->GetRMS() && amp_max[0]/max < mcp_amp->GetMean()+1*mcp_amp->GetRMS())
       {
 	h2_l->Fill(amp_max[3]/max,time[1+LEDi]-time[0]);
 	if (amp_max[4]/max < 0.35)h2_r->Fill(amp_max[4]/max,time[2+LEDi]-time[0]);
 	h2_t->Fill((time[1+LEDi]-time[2+LEDi]),(time[1+LEDi]+time[2+LEDi])/2-time[0]);
 
       }//chiudo if
-	if(debug) cout << 0.8*fit_l->GetParameter(1) << " < " << amp_max[3]/max << " < " << 3*fit_l->GetParameter(1) << " ////  " << time[4+LEDi]-time[0] <<endl;
+	
       
 
   }//chiudo for k
@@ -184,29 +197,28 @@ void plotWF_ASU13(const char * filename){
 
   /* SetParameters*/
   hyp_l->SetParameter(0, 8.51);
-  hyp_l->SetParameter(1, 0.1);
-  hyp_l->SetParameter(2, 5);
+  hyp_l->SetParameter(1, 5);
+  hyp_l->SetParameter(2, 1.2);
   /* hyp_l->SetParameter(3, -2.43e-2);
   */
-  hyp_r->SetParameter(0, 8.51);
-  /* hyp_r->SetParameter(1, -1.54e1);
-  hyp_r->SetParameter(2, 4.28e-2);
-  hyp_r->SetParameter(3, -2.43e-2);
-  */
+  hyp_r->SetParameter(0, 7);
+  hyp_r->SetParameter(1, -9e-2);
+  hyp_r->SetParameter(2, -1e-1);
+  
 
  
-
-  wf_c->Divide(3,2);
+ wf_c->Divide(3,2);
 
   wf_c->cd(1);
 
   h2_l->GetYaxis()->SetTitle("t_left-t_MCP [ns]");
-  h2_l->GetXaxis()->SetTitle("max.amplitude [mV]");
+
+   h2_l->GetXaxis()->SetTitle("max.amplitude [mV]");
   h2_l->Draw("COLZ");
   graph_l->Fit("hyp_l","0RL");
   graph_l->SetMarkerStyle(8);
   graph_l->SetMarkerSize(.5);
-  graph_l->Draw("P");
+  graph_l->Draw("SAMEP");
   hyp_l->DrawF1(0,1,"same");
 
 
@@ -217,7 +229,7 @@ void plotWF_ASU13(const char * filename){
   graph_r->Fit("hyp_r","R0L");
   graph_r->SetMarkerStyle(8);
   graph_r->SetMarkerSize(.5);
-  graph_r->Draw("P");
+  graph_r->Draw("SAMEP");
   hyp_r->DrawF1(0,1,"same");
   
   wf_c->cd(3);
@@ -227,14 +239,21 @@ void plotWF_ASU13(const char * filename){
   graph_t->Fit("hyp_t","RL0");
   graph_t->SetMarkerStyle(8);
   graph_t->SetMarkerSize(.5);
-  graph_t->Draw("P");
+  graph_t->Draw("SAMEP");
   hyp_t->DrawF1(txmin,txmax,"same");
 
 
+  rymin_lc=rymin_l-hyp_l->Eval(0.25)+hyp_l->GetParameter(0);
+  rymax_lc=rymax_l-hyp_l->Eval(0.25)+hyp_l->GetParameter(0);
+  rymin_rc=rymin_r-hyp_r->Eval(0.25)+hyp_r->GetParameter(0);
+  rymax_rc=rymax_r-hyp_r->Eval(0.25)+hyp_r->GetParameter(0);
+  tymin_c=tymin;
+  tymax_c=tymax;
 
-  
-  TH2F* hc_l= new TH2F("hc_l", "histo hc_l",nbinx,-1,1,nbiny,0,1);
-  TH2F* hc_r= new TH2F("hc_r", "histo hc_r",nbinx,-1,1,nbiny,0,1);
+
+
+  TH2F* hc_l= new TH2F("hc_l", "histo hc_l",nbinx,rxmin,rxmax,nbiny,rymin_lc,rymax_lc);
+  TH2F* hc_r= new TH2F("hc_r", "histo hc_r",nbinx,rxmin,rxmax,nbiny,rymin_rc,rymax_rc);
   TH2F* hc_t= new TH2F("hc_t", "histo hc_t",nbinx,txmin,txmax,nbiny,tymin_c,tymax_c);
 
 
@@ -242,82 +261,113 @@ void plotWF_ASU13(const char * filename){
    for(k=0;k<digiTree->GetEntries();k++){
 
     digiTree->GetEntry(k);
-    
-    if (0.8*(fit_l->GetParameter(1)) < (amp_max[4]/max) && (amp_max[4]/max) < (3*fit_l->GetParameter(1)) && amp_max[0]/max > mcp_amp->GetMean()-1.5*mcp_amp->GetRMS() && amp_max[0]/max < mcp_amp->GetMean()+1.5*mcp_amp->GetRMS())
-     {
-	hc_l->Fill(time[2+LEDi]-hyp_r->Eval(amp_max[4]/max)+hyp_r->GetParameter(0)-(time[1+LEDi]-hyp_l->Eval(amp_max[3]/max)+hyp_l->GetParameter(0)), amp_max[3]/max);
-	hc_r->Fill(time[2+LEDi]-hyp_r->Eval(amp_max[4]/max)+hyp_r->GetParameter(0)-(time[1+LEDi]-hyp_l->Eval(amp_max[3]/max)+hyp_l->GetParameter(0)), amp_max[4]/max);
-    }
-    
-   }//chiudo for k
-   cout<<"_______________________________________"<<hc_r->GetEntries()<<endl;
-   wf_c->cd(4);
-   hc_l->Draw("COLZ");
-   wf_c->cd(5);
-   hc_r->Draw("COLZ");
-   
-   Float_t xmin,xmax;
-   xmin=-1;
-   xmax=1;
-   
-   TH1D* histotemp_l;
-   TH1D* histotemp_r;
-   
-   int newbin=nbinx;
 
-for(k=0;k<newbin;k++){
+    if (0.8*(fit_l->GetParameter(1)) < (amp_max[4]/max) && (amp_max[4]/max) < (3*fit_l->GetParameter(1)) && amp_max[0]/max > mcp_amp->GetMean()-1.5*mcp_amp->GetRMS() && amp_max[0]/max < mcp_amp->GetMean()+1.5*mcp_amp->GetRMS())
+      {
+	hc_l->Fill(amp_max[3]/max,time[1+LEDi]-time[0]-hyp_l->Eval(amp_max[3]/max)+hyp_l->GetParameter(0));
+        hc_r->Fill(amp_max[4]/max,time[2+LEDi]-time[0]-hyp_r->Eval(amp_max[4]/max)+hyp_r->GetParameter(0));
+	hc_t->Fill((time[1+LEDi]-time[2+LEDi]),(time[1+LEDi]+time[2+LEDi])/2-time[0]-(hyp_r->Eval(amp_max[3]/max)-hyp_r->GetParameter(0)+hyp_l->Eval(amp_max[4]/max)-hyp_l->GetParameter(0))/2);
+
+	if(debug) cout << 0.8*fit_l->GetParameter(1) << " < " << amp_max[3]/max << " < " << 3*fit_l->GetParameter(1) << " ////  " << time[4+LEDi]-time[0] <<endl;
+      }
+
+  }//chiudo for k
+
+     for(k=0;k<nbinx;k++){
+    TH1D* histotemp_l;
+    TH1D* histotemp_r;
+    TH1D* histotemp_t;
 
     histotemp_l=hc_l->ProjectionY("hc_lprojY",k,k);
     histotemp_r=hc_r->ProjectionY("hc_rprojY",k,k);
-     
-    x_l[k]=xmin+(xmax-xmin)/newbin*k;
+    histotemp_t=hc_t->ProjectionY("hc_tprojY",k,k);
+   
+   
+    yt[k]=histotemp_t->GetMean();
+    RMS[2][k]= histotemp_t->GetMeanError();
+
     y_l[k]=histotemp_l->GetMean();
     RMS[0][k]= histotemp_l->GetMeanError();
-   
-    x_r[k]=xmin+(xmax-xmin)/newbin*k; 
+    
     y_r[k]=histotemp_r->GetMean();
     RMS[1][k]= histotemp_r->GetMeanError();
 
 
     delete histotemp_l;
     delete histotemp_r;
-    
+    delete histotemp_t;
 
     
   }//chiudo for k
 
 
-  TGraphErrors* graph_rt=new TGraphErrors(newbin-1,x_r,y_r,0,rmsy_r);
-  TGraphErrors* graph_lt=new TGraphErrors(newbin-1,x_l,y_l,0,rmsy_l);  
-  
-  //TCanvas* imma = new TCanvas("mycanv","title",1000,600);
-  TLegend* l1=new TLegend(0.2,0.3,0.2,0.3);
-  l1->SetHeader("SiPM","C");
-  l1->AddEntry(graph_rt,"SiPM right");
-  l1->AddEntry(graph_lt,"SiPM left");
-  
-  graph_rt->GetXaxis()->SetTitle("t_{left}-t_{right} [ns]");
-  graph_rt->GetYaxis()->SetTitle("amp_{max} [mV]");
-  
-  graph_rt->SetMarkerStyle(8);
-  graph_lt->SetMarkerStyle(8);
-  
-  graph_rt->SetMarkerSize(.8);
-  graph_lt->SetMarkerSize(.8);
-  
-  graph_rt->SetMarkerColor(kRed);
-  graph_lt->SetMarkerColor(kBlue);
-  wf_c->cd(5);
-  graph_rt->Draw("SAMEP");
-  wf_c->cd(4);
-  graph_lt->Draw("SAMEP");
+   TGraphErrors* graph_lc = new TGraphErrors(nbinx-1,x_l,y_l,0,RMS[0]);
+   TGraphErrors* graph_rc = new TGraphErrors(nbinx-1,x_r,y_r,0,RMS[1]);
+   TGraphErrors* graph_tc = new TGraphErrors(nbinx-1,xt,yt,0,RMS[2]);
+   TF1* corr_tc= new TF1("corr_tc","[0]*x+[1]",-0.2,0.8);
 
-  wf_c->cd(6);
-  graph_rt->Draw("AP");
-  graph_rt->GetXaxis()->SetLimits(-0.7,0.3);
-  graph_rt->GetYaxis()->SetLimits(0.12,0.24);
-  graph_lt->Draw("SAMEP");
+    wf_c->cd(4);
+     hc_l->GetYaxis()->SetTitle("t_left-t_MCP [ns]");
+    hc_l->GetXaxis()->SetTitle("max.amplitude [mV]");
+    hc_l->Draw("COLZ");
+    graph_lc->SetMarkerStyle(8);
+    graph_lc->SetMarkerSize(.5);
+    graph_lc->Draw("P");
 
-  l1->Draw();
+  // graph_l->Fit("hyp_l","R");
+   //   graph_l->SetMarkerStyle(8);
+   // graph_l->SetMarkerSize(.5);
+  // graph_l->Draw("P");
+
+   wf_c->cd(5);
+
+    hc_r->GetYaxis()->SetTitle("t_right-t_MCP [ns]");
+   hc_r->GetXaxis()->SetTitle("max.amplitude [mV]");
+   hc_r->Draw("COLZ");
+   graph_rc->SetMarkerStyle(8);
+   graph_rc->SetMarkerSize(.5);
+   graph_rc->Draw("P");
+
+  // graph_l->Fit("hyp_l","R");
+   // graph_l->SetMarkerStyle(8);
+   // graph_l->SetMarkerSize(.5);
+  // graph_l->Draw("P");
+
+   wf_c->cd(6);
+
+   hc_t->GetYaxis()->SetTitle("t_ave-t_MCP [ns]");
+   hc_t->GetXaxis()->SetTitle("t_left-t_right [ns]");
+   
+
+
+   hc_t->Draw("COLZ");
+   graph_tc->SetMarkerStyle(8);
+   graph_tc->SetMarkerSize(.5);
+   graph_tc->Draw("P");
+   graph_tc->Fit("corr_tc","R");
+   corr_tc->Draw("SAME");
+
+
+  // graph_l->Fit("hyp_l","R");
+  // graph_l->SetMarkerStyle(8);
+  // graph_l->SetMarkerSize(.5);
+  // graph_l->Draw("P");
+
+   TH1D* histo_cl;
+   TH1D* histo_cr;
+   TH1D* histo_ct;
+   TF1* gaus_cl = new TF1("gaus_cl","gaus",-2.5,-0.7);
+   TF1* gaus_cr = new TF1("gaus_cr","gaus",-2.5,-0.7);
+   TF1* gaus_ct = new TF1("gaus_ct","gaus",-2.5,-0.7);
+   histo_cl = hc_l->ProjectionY("histo_cl",0,nbinx);
+   histo_cr = hc_r->ProjectionY("histo_cr",0,nbinx);
+   histo_ct = hc_t->ProjectionY("histo_ct",0,nbinx);
+
+
+   histo_ct->SetLineColor(kBlack);
+   histo_cl->SetLineColor(kBlue);
+   histo_cr->SetLineColor(kRed);
+
+   
    
   }
