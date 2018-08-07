@@ -3,7 +3,7 @@
 
 
 
-void AmpCorr(const char * filename){
+void AmpCorrUniv(const char * filename){
   
   
   TFile*  file= TFile::Open(filename);

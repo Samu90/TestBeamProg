@@ -242,15 +242,15 @@ void plotWF_ASU13(const char * filename){
    for(k=0;k<digiTree->GetEntries();k++){
 
     digiTree->GetEntry(k);
-
+    
     if (0.8*(fit_l->GetParameter(1)) < (amp_max[4]/max) && (amp_max[4]/max) < (3*fit_l->GetParameter(1)) && amp_max[0]/max > mcp_amp->GetMean()-1.5*mcp_amp->GetRMS() && amp_max[0]/max < mcp_amp->GetMean()+1.5*mcp_amp->GetRMS())
-      {
-	hc_l->Fill(time[2+LEDi]-hyp_r->Eval(amp_max[4]/max)+hyp_r->GetParameter(0)-(time[1+LEDi]-hyp_l->Eval(amp_max[3]/max)+hyp_l->GetParameter(0)), amp_max[4]/max);
-	hc_r->Fill(time[2+LEDi]-hyp_r->Eval(amp_max[4]/max)+hyp_r->GetParameter(0)-(time[1+LEDi]-hyp_l->Eval(amp_max[3]/max)+hyp_l->GetParameter(0)), amp_max[3]/max);
-      }
-
-  }//chiudo for k
-
+     {
+	hc_l->Fill(time[2+LEDi]-hyp_r->Eval(amp_max[4]/max)+hyp_r->GetParameter(0)-(time[1+LEDi]-hyp_l->Eval(amp_max[3]/max)+hyp_l->GetParameter(0)), amp_max[3]/max);
+	hc_r->Fill(time[2+LEDi]-hyp_r->Eval(amp_max[4]/max)+hyp_r->GetParameter(0)-(time[1+LEDi]-hyp_l->Eval(amp_max[3]/max)+hyp_l->GetParameter(0)), amp_max[4]/max);
+    }
+    
+   }//chiudo for k
+   cout<<"_______________________________________"<<hc_r->GetEntries()<<endl;
    wf_c->cd(4);
    hc_l->Draw("COLZ");
    wf_c->cd(5);
@@ -263,16 +263,18 @@ void plotWF_ASU13(const char * filename){
    TH1D* histotemp_l;
    TH1D* histotemp_r;
    
-for(k=0;k<nbinx;k++){
+   int newbin=nbinx;
+
+for(k=0;k<newbin;k++){
 
     histotemp_l=hc_l->ProjectionY("hc_lprojY",k,k);
     histotemp_r=hc_r->ProjectionY("hc_rprojY",k,k);
      
-    x_l[k]=xmin+(xmax-xmin)/nbinx*k;
+    x_l[k]=xmin+(xmax-xmin)/newbin*k;
     y_l[k]=histotemp_l->GetMean();
     RMS[0][k]= histotemp_l->GetMeanError();
    
-    x_r[k]=xmin+(xmax-xmin)/nbinx*k; 
+    x_r[k]=xmin+(xmax-xmin)/newbin*k; 
     y_r[k]=histotemp_r->GetMean();
     RMS[1][k]= histotemp_r->GetMeanError();
 
@@ -285,8 +287,8 @@ for(k=0;k<nbinx;k++){
   }//chiudo for k
 
 
-  TGraphErrors* graph_rt=new TGraphErrors(nbinx-1,x_r,y_r,0,rmsy_r);
-  TGraphErrors* graph_lt=new TGraphErrors(nbinx-1,x_l,y_l,0,rmsy_l);  
+  TGraphErrors* graph_rt=new TGraphErrors(newbin-1,x_r,y_r,0,rmsy_r);
+  TGraphErrors* graph_lt=new TGraphErrors(newbin-1,x_l,y_l,0,rmsy_l);  
   
   //TCanvas* imma = new TCanvas("mycanv","title",1000,600);
   TLegend* l1=new TLegend(0.2,0.3,0.2,0.3);
