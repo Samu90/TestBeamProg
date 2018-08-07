@@ -1,5 +1,7 @@
 # TestBeamProg
 
+-Wiki base delle ntuple utilizzate per l'analisi dei dati del Test Beam di MAGGIO 2018 A T10
+
 -plotWF.C(Conf,nevento) plotta le 6 forme d'onda acquisite di un evento (con 0 le plotta in sequenza, non si ferma)
 
 -ploWF_graph.C(Conf) plotta gli istogrammi delle ampiezze massime e crea un file histoConf.root con gli istogrammi
