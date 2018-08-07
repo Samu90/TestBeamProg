@@ -67,13 +67,14 @@ void AmpCorrUniv(const char * filename){
   
   Double_t mean1=TMath::Mean(nentries,Times1)-1.2;
   Double_t rms1=TMath::RMS(nentries,Times1);
-  
+  cout<<mean1<<"_________"<<rms1<<endl;
   Double_t mean2=TMath::Mean(nentries,Times2)-1.2;
   Double_t rms2=TMath::RMS(nentries,Times2);
-  
+  cout<<mean2<<"_________"<<rms2<<endl;
   Double_t mean3=TMath::Mean(nentries,Times3)-1.2;
   Double_t rms3=TMath::RMS(nentries,Times3);
-  
+  cout<<mean3<<"_________"<<rms3<<endl;
+
   rymin_l=mean1-0.5*rms1;
   rymax_l=mean1+0.5*rms1;
   rymin_r=mean2-0.5*rms2;
@@ -172,15 +173,7 @@ void AmpCorrUniv(const char * filename){
 
     if(k%20==0) cout << k << " / " << nbinx << endl;
   }//chiudo for k
-  /*
-  for(k=0;k<nbinx;k++){
-    for(j=0;j<nbiny;j++){
-      //      if (k>20 && k<70) cout <<"  "<< rymin_l+(rymax_l-rymin_l)/nbiny*j << "<" << y_l[k]-3*RMS[0][k] <<"     "<< rymin_l+(rymax_l-rymin_l)/nbiny*j << ">" << y_l[k]+3*RMS[0][k] <<endl; 
-      if (rymin_l+(rymax_l-rymin_l)/nbiny*j < y_l[k]-3*RMS[0][k] || rymin_l+(rymax_l-rymin_l)/nbiny*j > y_l[k]+3*RMS[0][k] )h2_l->SetBinContent(k,j,0);
-      if (rymin_r+(rymax_r- rymin_r)/nbiny*j < y_r[k]-3*RMS[1][k] || rymin_r+(rymax_r-rymin_r)/nbiny*j > y_r[k]+3*RMS[1][k] ) h2_r->SetBinContent(k,j,0);
-      // if (tymin+(tymax-tymin)/nbiny*j < yt[k]-3*RMS[2][k] || tymin+(tymax-tymin)/nbiny*j > yt[k]+3*RMS[2][k] ) h2_t->SetBinContent(k,j,0);
-    }
-    }*/
+  
   
   TCanvas* wf_c =new TCanvas("wf","Plot wf",1800,1100);
   TGraphErrors* graph_r=new TGraphErrors(nbinx-1,x_r,y_r,0,rmsy_r);
