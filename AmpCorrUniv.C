@@ -128,15 +128,12 @@ void AmpCorrUniv(const char * filename){
 
 
     if (0.8*(fit_l->GetParameter(1)) < (amp_max[4]/max) && (amp_max[4]/max) < (3*fit_l->GetParameter(1)) && amp_max[0]/max > mcp_amp->GetMean()-1*mcp_amp->GetRMS() && amp_max[0]/max < mcp_amp->GetMean()+1*mcp_amp->GetRMS())
-    //if (0.8*() < (amp_max[4]/max) && (amp_max[4]/max) < (3) && amp_max[0]/max > mcp_amp->GetMean()-1*mcp_amp->GetRMS() && amp_max[0]/max < mcp_amp->GetMean()+1*mcp_amp->GetRMS())
       {
 	h2_l->Fill(amp_max[3]/max,time[1+LEDi]-time[0]);
 	if (amp_max[4]/max < 0.35)h2_r->Fill(amp_max[4]/max,time[2+LEDi]-time[0]);
 	h2_t->Fill((time[1+LEDi]-time[2+LEDi]),(time[1+LEDi]+time[2+LEDi])/2-time[0]);
 
-      }//chiudo if
-	
-      
+      }//chiudo if      
 
   }//chiudo for k
 
@@ -155,13 +152,13 @@ void AmpCorrUniv(const char * filename){
     rmsyt[k]=histotemp_t->GetMeanError();
     RMS[2][k]= histotemp_t->GetRMS();
 
-    x_l[k]=(rxmax-rxmin)/nbinx*k;
+    x_l[k]=rxmin+(rxmax-rxmin)/nbinx*k;
     y_l[k]=histotemp_l->GetMean();
     rmsy_l[k]=histotemp_l->GetMeanError();
     RMS[0][k]= histotemp_l->GetRMS();
     
     
-    x_r[k]=(rxmax-rxmin)/nbinx*k;
+    x_r[k]=rxmin+(rxmax-rxmin)/nbinx*k;
     y_r[k]=histotemp_r->GetMean();
     rmsy_r[k]=histotemp_r->GetMeanError();
     RMS[1][k]= histotemp_r->GetRMS();
@@ -198,9 +195,9 @@ void AmpCorrUniv(const char * filename){
   hyp_r->SetParameter(1, -9e-2);
   hyp_r->SetParameter(2, -1e-1);
   
-
- 
- wf_c->Divide(3,2);
+  
+  
+  wf_c->Divide(3,2);
 
   wf_c->cd(1);
 
@@ -253,46 +250,45 @@ void AmpCorrUniv(const char * filename){
   
    for(k=0;k<digiTree->GetEntries();k++){
 
-    digiTree->GetEntry(k);
-
-    if (0.8*(fit_l->GetParameter(1)) < (amp_max[4]/max) && (amp_max[4]/max) < (3*fit_l->GetParameter(1)) && amp_max[0]/max > mcp_amp->GetMean()-1.5*mcp_amp->GetRMS() && amp_max[0]/max < mcp_amp->GetMean()+1.5*mcp_amp->GetRMS())
-      {
+     digiTree->GetEntry(k);
+     
+     if (0.8*(fit_l->GetParameter(1)) < (amp_max[4]/max) && (amp_max[4]/max) < (3*fit_l->GetParameter(1)) && amp_max[0]/max > mcp_amp->GetMean()-1.5*mcp_amp->GetRMS() && amp_max[0]/max < mcp_amp->GetMean()+1.5*mcp_amp->GetRMS())
+       {
 	hc_l->Fill(amp_max[3]/max,time[1+LEDi]-time[0]-hyp_l->Eval(amp_max[3]/max)+hyp_l->GetParameter(0));
         hc_r->Fill(amp_max[4]/max,time[2+LEDi]-time[0]-hyp_r->Eval(amp_max[4]/max)+hyp_r->GetParameter(0));
 	hc_t->Fill((time[1+LEDi]-time[2+LEDi]),(time[1+LEDi]+time[2+LEDi])/2-time[0]-(hyp_r->Eval(amp_max[3]/max)-hyp_r->GetParameter(0)+hyp_l->Eval(amp_max[4]/max)-hyp_l->GetParameter(0))/2);
-
-	if(debug) cout << 0.8*fit_l->GetParameter(1) << " < " << amp_max[3]/max << " < " << 3*fit_l->GetParameter(1) << " ////  " << time[4+LEDi]-time[0] <<endl;
-      }
+	
+       }//chiudo if
 
   }//chiudo for k
 
-     for(k=0;k<nbinx;k++){
-    TH1D* histotemp_l;
-    TH1D* histotemp_r;
-    TH1D* histotemp_t;
-
-    histotemp_l=hc_l->ProjectionY("hc_lprojY",k,k);
-    histotemp_r=hc_r->ProjectionY("hc_rprojY",k,k);
-    histotemp_t=hc_t->ProjectionY("hc_tprojY",k,k);
+   for(k=0;k<nbinx;k++){
+     TH1D* histotemp_l;
+     TH1D* histotemp_r;
+     TH1D* histotemp_t;
+     
+     histotemp_l=hc_l->ProjectionY("hc_lprojY",k,k);
+     histotemp_r=hc_r->ProjectionY("hc_rprojY",k,k);
+     histotemp_t=hc_t->ProjectionY("hc_tprojY",k,k);
+     
+     
+     yt[k]=histotemp_t->GetMean();
+     RMS[2][k]= histotemp_t->GetMeanError();
+     
+     y_l[k]=histotemp_l->GetMean();
+     RMS[0][k]= histotemp_l->GetMeanError();
+     
+     y_r[k]=histotemp_r->GetMean();
+     RMS[1][k]= histotemp_r->GetMeanError();
+     
+     
+     delete histotemp_l;
+     delete histotemp_r;
+     delete histotemp_t;
+     
+     
+   }//chiudo for k
    
-   
-    yt[k]=histotemp_t->GetMean();
-    RMS[2][k]= histotemp_t->GetMeanError();
-
-    y_l[k]=histotemp_l->GetMean();
-    RMS[0][k]= histotemp_l->GetMeanError();
-    
-    y_r[k]=histotemp_r->GetMean();
-    RMS[1][k]= histotemp_r->GetMeanError();
-
-
-    delete histotemp_l;
-    delete histotemp_r;
-    delete histotemp_t;
-
-    
-  }//chiudo for k
-
 
    TGraphErrors* graph_lc = new TGraphErrors(nbinx-1,x_l,y_l,0,RMS[0]);
    TGraphErrors* graph_rc = new TGraphErrors(nbinx-1,x_r,y_r,0,RMS[1]);
@@ -307,10 +303,7 @@ void AmpCorrUniv(const char * filename){
     graph_lc->SetMarkerSize(.5);
     graph_lc->Draw("P");
 
-  // graph_l->Fit("hyp_l","R");
-   //   graph_l->SetMarkerStyle(8);
-   // graph_l->SetMarkerSize(.5);
-  // graph_l->Draw("P");
+
 
    wf_c->cd(5);
 
@@ -321,10 +314,6 @@ void AmpCorrUniv(const char * filename){
    graph_rc->SetMarkerSize(.5);
    graph_rc->Draw("P");
 
-  // graph_l->Fit("hyp_l","R");
-   // graph_l->SetMarkerStyle(8);
-   // graph_l->SetMarkerSize(.5);
-  // graph_l->Draw("P");
 
    wf_c->cd(6);
 
@@ -341,10 +330,6 @@ void AmpCorrUniv(const char * filename){
    corr_tc->Draw("SAME");
 
 
-  // graph_l->Fit("hyp_l","R");
-  // graph_l->SetMarkerStyle(8);
-  // graph_l->SetMarkerSize(.5);
-  // graph_l->Draw("P");
 
    TH1D* histo_cl;
    TH1D* histo_cr;
