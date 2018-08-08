@@ -23,12 +23,7 @@ void plotWF_cut(const char * filename){
   
   digiTree->SetBranchAddress("amp_max",&amp_max);
   
-  /*  for(k=0;k<digiTree->GetEntries();k++){
-    digiTree->GetEntry(k);
-    if(amp_max[3]>max) {max=amp_max[3];}
-    if(amp_max[4]>max) {max=amp_max[4];}
-  }//chiudo for k
-  */
+
   max=4096;
   for(k=0;k<digiTree->GetEntries();k++){
     if (k%3000==0) cout<<"On entry " <<k<<endl;
