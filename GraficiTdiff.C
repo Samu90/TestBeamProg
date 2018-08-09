@@ -96,15 +96,7 @@ for(k=0;k<digiTree->GetEntries();k++){
 
 
   max=4096;
-  /*for(k=0; k<digiTree->GetEntries(); k++){
-    digiTree->GetEntry(k);
-    if (k%10000==0) cout<<"On entry " <<k<<endl;
-    if(amp_max[3]>max) {max=amp_max[3];}
-    if(amp_max[4]>max) {max=amp_max[4];}
-  //if(time[3]-time[4]>tmax && time[3]-time[4]<10) {tmax = time[3]-time[4];}
-
-  } chiudo for */
-
+  
   for(k=0;k<digiTree->GetEntries();k++){
     if (k%10000==0) cout<<"On entry " <<k<<endl;
     digiTree->GetEntry(k);
