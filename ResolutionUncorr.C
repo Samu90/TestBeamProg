@@ -23,11 +23,11 @@ void ResolutionUncorr(const char * filename){
   const Int_t  nbinx=200,nbiny=300;
 
   rymin_l=0;
-  rymax_l=60;
+  rymax_l=200;
   rymin_r=0;
-  rymax_r=60;
-  tymin=6;
-  tymax=17;
+  rymax_r=200;
+  tymin=0;
+  tymax=100;
 
 
 
@@ -70,18 +70,21 @@ void ResolutionUncorr(const char * filename){
   TH2F* h2_m= new TH2F("h2_m", "histo h2_m",nbinx,rxmin,rxmax,nbiny,rymin_r,rymax_r);
 
   for(k=0;k<digiTree->GetEntries();k++){
+    
     digiTree->GetEntry(k);
-    if (0.8*(fit_l->GetParameter(1)) < (amp_max[3]/max) && (amp_max[3]/max) < (3*fit_l->GetParameter(1)))
+    
+    if (0.8*(fit_l->GetParameter(1)) < (amp_max[3]/max) && (amp_max[3]/max) < (3*fit_l->GetParameter(1)) && amp_max[0]/max > 0.4 && amp_max[0]/max < 0.75)
       {
 	h2_l->Fill(amp_max[3]/max,time[1+32]-time[0]);
 	h2_r->Fill(amp_max[4]/max,time[2+32]-time[0]);
 	h2_m->Fill(time[1+32]-time[2+32],(time[1+32]+time[2+32])/2-time[0]);
+	if(k%500==0) cout<<time[1+32]-time[0]<<endl;
       }
     
   }//chiudo for k
   
   
-
+  
   TH1D* histotemp_l;
   TH1D* histotemp_r;
   TH1D* histotemp_m;
@@ -89,9 +92,6 @@ void ResolutionUncorr(const char * filename){
   histotemp_l=h2_l->ProjectionY("h2_lprojY",0,nbinx);
   histotemp_r=h2_r->ProjectionY("h2_rprojY",0,nbinx);
   histotemp_m=h2_m->ProjectionY("h2_tprojY",0,nbinx);
-  
-  
-
   
   
   TCanvas* wf_c =new TCanvas("wf","Plot wf",600,550);
@@ -107,11 +107,10 @@ void ResolutionUncorr(const char * filename){
   // hyp_r->SetParLimits(0,1,8);
   gStyle->SetOptStat("");
   gStyle->SetOptFit();
+  
   histotemp_r->SetLineColor(kRed);
   histotemp_l->SetLineColor(kBlue);
   
-
- 
 
   histotemp_m->GetXaxis()->SetTitle("t_ave-t_MCP");
   histotemp_m->GetYaxis()->SetTitle("counts");
@@ -119,11 +118,12 @@ void ResolutionUncorr(const char * filename){
   histotemp_m->Draw();
   histotemp_r->Draw("same");
   histotemp_l->Draw("same");
+  
   g_l->Draw("same");
   g_r->Draw("same");
   g_m->Draw("same");
 
- 
+  cout<<histotemp_l->GetEntries()<<"    "<<histotemp_r->GetEntries()<<"    "<< histotemp_m->GetEntries()<<endl; 
 
 }
 
