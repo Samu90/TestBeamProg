@@ -3,7 +3,7 @@
 
 
 
-void plotWF_tdiff(const char * filename){
+void RisRelVsTdiff(const char * filename){
 
 
   TFile*  file= TFile::Open(filename);
@@ -259,7 +259,7 @@ void plotWF_tdiff(const char * filename){
       {
 	hc_l->Fill(amp_max[3]/max,time[1+LEDi]-time[0]-hyp_l->Eval(amp_max[3]/max)+hyp_l->GetParameter(0));
         hc_r->Fill(amp_max[4]/max,time[2+LEDi]-time[0]-hyp_r->Eval(amp_max[4]/max)+hyp_r->GetParameter(0));
-	hc_t->Fill(time[1+LEDi]-time[2+LEDi]-(hyp_r->Eval(amp_max[4]/max)-hyp_r->GetParameter(0)-hyp_l->Eval(amp_max[3]/max)+hyp_l->GetParameter(0)),(time[1+LEDi]+time[2+LEDi])/2-time[0]-(hyp_r->Eval(amp_max[4]/max)-hyp_r->GetParameter(0)+hyp_l->Eval(amp_max[3]/max)-hyp_l->GetParameter(0))/2);
+	hc_t->Fill((time[1+LEDi]-time[2+LEDi]),(time[1+LEDi]+time[2+LEDi])/2-time[0]-(hyp_r->Eval(amp_max[4]/max)-hyp_r->GetParameter(0)+hyp_r->Eval(amp_max[4]/max)-hyp_r->GetParameter(0))/2);
 
 	if(debug) cout << 0.8*fit_l->GetParameter(1) << " < " << amp_max[3]/max << " < " << 3*fit_l->GetParameter(1) << " ////  " << time[4+LEDi]-time[0] <<endl;
       }
@@ -310,7 +310,7 @@ void plotWF_tdiff(const char * filename){
 	
         
 	
-	hc_tdiff->Fill(time[1+LEDi]-time[2+LEDi]-(hyp_r->Eval(amp_max[4]/max)-hyp_r->GetParameter(0)-hyp_l->Eval(amp_max[3]/max)+hyp_l->GetParameter(0)),(time[1+LEDi]+time[2+LEDi])/2-fit_tdiff->Eval(time[1+LEDi]-time[2+LEDi])+fit_tdiff->GetParameter(0)-time[0]-(hyp_r->Eval(amp_max[4]/max)-hyp_r->GetParameter(0)+hyp_l->Eval(amp_max[3]/max)-hyp_l->GetParameter(0))/2);
+	hc_tdiff->Fill((time[1+LEDi]-time[2+LEDi]),(time[1+LEDi]+time[2+LEDi])/2-fit_tdiff->Eval(time[1+LEDi]-time[2+LEDi])+fit_tdiff->GetParameter(0)-time[0]-(hyp_r->Eval(amp_max[4]/max)-hyp_r->GetParameter(0)+hyp_r->Eval(amp_max[4]/max)-hyp_r->GetParameter(0))/2);
 
 	if(debug) cout << 0.8*fit_l->GetParameter(1) << " < " << amp_max[3]/max << " < " << 3*fit_l->GetParameter(1) << " ////  " << time[4+LEDi]-time[0] <<endl;
       }
@@ -422,8 +422,6 @@ void plotWF_tdiff(const char * filename){
 
    TCanvas* tdiff = new TCanvas("tdiff","plot_tdiff",600,550);
    TLegend* l2=new TLegend(0.1,0.7,0.48,0.9);
-   TH1D* histotemp_t[(int)nbinx/13];
-   TF1* fit[(int)nbinx/13];
    l2->SetHeader("time stamps");
    l2->AddEntry(histo_ct,"t_ave-t_MCP");
    l2->AddEntry(histo_ctdiff,"t_ave-t_MCP(tdiff corr)");
@@ -433,39 +431,32 @@ void plotWF_tdiff(const char * filename){
    histo_ct->Draw();
    histo_ctdiff->Draw("same");
    l2->Draw();
-   cout << "########################### "<< gaus_ct->GetParameter(2)/gaus_ct->GetParameter(1) << "_________" << gaus_ctdiff->GetParameter(2)/gaus_ctdiff->GetParameter(1) << endl;
-   TCanvas* rest_gaussine = new TCanvas("rest_gaussine","rest_plotgaus",1800,1100);
-   rest_gaussine->Divide(nbinx/(13*4),4);
-   for (i=0;i<nbinx/13;i++){
-     cut[i] =txmin+(Float_t)(txmax-txmin)*(i*13)/nbinx;
+   for (i=0;i<nbinx/10;i++){
+     cut[i] =txmin+(Float_t)(txmax-txmin)*(i*10)/nbinx;
    }
-   for (i=0;i<nbinx/13;i++){
-     rest_gaussine->cd(i+1);
-     fit[i] = new TF1(((string)("fit"+to_string(i))).c_str(),"gaus",7,9);
-    
-     histotemp_t[i]=hc_tdiff->ProjectionY(((string)("histoY"+to_string(i))).c_str(),hc_tdiff->GetXaxis()->FindBin(cut[i]-(cut[i+1]-cut[i])/2),hc_tdiff->GetXaxis()->FindBin(cut[i]+(cut[i+1]-cut[i])/2));
+   for (i=0;i<nbinx/10;i++){
+     TF1* fit = new TF1("fit","gaus",6,8);
+     TH1D* histotemp_t;
+     histotemp_t=hc_tdiff->ProjectionY("hc_tprojY",hc_tdiff->GetXaxis()->FindBin(cut[i]-(cut[i+1]-cut[i])/2),hc_tdiff->GetXaxis()->FindBin(cut[i]+(cut[i+1]-cut[i])/2));
      cout << "____________" << hc_tdiff->GetXaxis()->FindBin(cut[i]-(cut[i+1]-cut[i])/2) << endl;
-     gStyle->SetOptFit(00010);
-     histotemp_t[i]->Fit(("fit"+to_string(i)).c_str(),"R");
-     histotemp_t[i]->Draw();
-     
-     sigma[i]=fit[i]->GetParameter(2);
-     erry[i]=fit[i]->GetParError(2);
-     errx[i]= (txmax-txmin)*13/(2*nbinx);
 
-   
-   
+     histotemp_t->Fit("fit","R");
+     sigma[i]=sqrt(pow(fit->GetParameter(2),2)-pow(0.015,2))/fit->GetParameter(1);
+     erry[i]=sqrt(pow(fit->GetParError(2)/fit->GetParameter(1),2)+pow((fit->GetParameter(2)*fit->GetParError(1))/pow(fit->GetParameter(1),2),2));
+     errx[i]= (txmax-txmin)*10/(2*nbinx);
+
+     delete histotemp_t;
+     delete fit;
      // delete fit;
 
 
    }
 
-   histotemp_t[4]->Draw();
+   
+   TGraphErrors* rest = new TGraphErrors(nbinx/10,cut,sigma,errx,erry);
    TCanvas* rest_plot = new TCanvas("rest","rest_plot",600,550);
-   TGraphErrors* rest = new TGraphErrors(nbinx/13,cut,sigma,errx,erry);
-  
    rest->GetXaxis()->SetTitle("t_{left}-t_{right}(ns)");
-   rest->GetYaxis()->SetTitle("#sigma_{t_{ave}}(ns)");
+   rest->GetYaxis()->SetTitle("#sigma_{t^{ave}}/mean_{t^{ave}}");
    rest->SetMarkerStyle(8);
    rest->SetMarkerSize(.8);
    rest->Draw("AP");
