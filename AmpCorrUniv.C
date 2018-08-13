@@ -36,11 +36,7 @@ void AmpCorrUniv(const char * filename){
   Int_t counter1=0, counter2=0, counter3 =0;
   Float_t Times1[nentries],Times2[nentries],Times3[nentries];
 
-  for(k=0;k<digiTree->GetEntries();k++){
-    Times1[k]=0;
-    Times2[k]=0;
-    Times3[k]=0;
-  }
+
   
   TH1F *hr_amp =new TH1F("hr_amp","histos_ampr",nbinx,0.0,1);
   TH1F *hl_amp =new TH1F("hl_amp","histos_ampl",nbinx,0.0,1);
