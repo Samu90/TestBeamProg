@@ -27,15 +27,15 @@ void GraficiTdiff(const char * filename){
   Float_t Times1[nentries],Times2[nentries],Times3[nentries];
 
   const Int_t  nbinx=250,nbiny=200;
-
- int i;
- Double_t sigma[50],erry[50],cut[50],errx[50];
   
-    txmin=-0.3;
-    txmax=0.8;
+  int i;
+  Double_t sigma[50],erry[50],cut[50],errx[50];
+  
+  txmin=-0.2;
+  txmax=0.6;
   
   
-
+  
   Double_t x_r[nbinx],y_r[nbinx], x_l[nbinx],y_l[nbinx],rmsy_l[nbinx],rmsy_r[nbinx];
   Double_t xt[nbinx],yt[nbinx],rmsyt[nbinx];
   Double_t RMS[3][nbinx];
@@ -96,15 +96,7 @@ for(k=0;k<digiTree->GetEntries();k++){
 
 
   max=4096;
-  /*for(k=0; k<digiTree->GetEntries(); k++){
-    digiTree->GetEntry(k);
-    if (k%10000==0) cout<<"On entry " <<k<<endl;
-    if(amp_max[3]>max) {max=amp_max[3];}
-    if(amp_max[4]>max) {max=amp_max[4];}
-  //if(time[3]-time[4]>tmax && time[3]-time[4]<10) {tmax = time[3]-time[4];}
-
-  } chiudo for */
-
+  
   for(k=0;k<digiTree->GetEntries();k++){
     if (k%10000==0) cout<<"On entry " <<k<<endl;
     digiTree->GetEntry(k);
@@ -318,7 +310,7 @@ for(k=0;k<digiTree->GetEntries();k++){
 
     if (0.8*(fit_l->GetParameter(1)) < (amp_max[4]/max) && (amp_max[4]/max) < (3*fit_l->GetParameter(1)) && amp_max[0]/max > 0.4 && amp_max[0]/max < 0.75)
       {
-	hc_tdiff->Fill((time[1+LEDi]-time[2+LEDi]),(time[1+LEDi]+time[2+LEDi])/2-fit_tdiff->Eval(time[1+LEDi]-time[2+LEDi])+fit_tdiff->GetParameter(0)-time[0]-(hyp_r->Eval(amp_max[4]/max)-hyp_r->GetParameter(0)+hyp_r->Eval(amp_max[4]/max)-hyp_r->GetParameter(0))/2);
+	hc_tdiff->Fill(time[1+LEDi]-hyp_l->Eval(amp_max[3]/max)+hyp_l->GetParameter(0)-(time[2+LEDi]-hyp_r->Eval(amp_max[4]/max)+hyp_r->GetParameter(0)),(time[1+LEDi]+time[2+LEDi])/2-fit_tdiff->Eval(time[1+LEDi]-time[2+LEDi])+fit_tdiff->GetParameter(0)-time[0]-(hyp_r->Eval(amp_max[4]/max)-hyp_r->GetParameter(0)+hyp_l->Eval(amp_max[3]/max)-hyp_l->GetParameter(0))/2);
 	
       }
 
@@ -384,6 +376,7 @@ for(k=0;k<digiTree->GetEntries();k++){
 
      if (0.8*(fit_l->GetParameter(1)) < (amp_max[4]/max) && (amp_max[4]/max) < (3*fit_l->GetParameter(1)) && amp_max[0]/max > 0.4 && amp_max[0]/max < 0.75)
        {
+
 	 hc_l->Fill((time[1+LEDi]-hyp_l->Eval(amp_max[3]/max)+hyp_l->GetParameter(0)-(time[2+LEDi]-hyp_r->Eval(amp_max[4]/max)+hyp_r->GetParameter(0))),time[1+LEDi]-time[0]-hyp_l->Eval(amp_max[3]/max)+hyp_l->GetParameter(0)-fit_lc->Eval((time[1+LEDi]-hyp_l->Eval(amp_max[3]/max)+hyp_l->GetParameter(0)-(time[2+LEDi]-hyp_r->Eval(amp_max[4]/max)+hyp_r->GetParameter(0))))+fit_lc->GetParameter(0));
 	 
 	 hc_r->Fill((time[1+LEDi]-hyp_l->Eval(amp_max[3]/max)+hyp_l->GetParameter(0)-(time[2+LEDi]-hyp_r->Eval(amp_max[4]/max)+hyp_r->GetParameter(0))),time[2+LEDi]-time[0]-hyp_r->Eval(amp_max[4]/max)+hyp_r->GetParameter(0)-fit_rc->Eval((time[1+LEDi]-hyp_l->Eval(amp_max[3]/max)+hyp_l->GetParameter(0)-(time[2+LEDi]-hyp_r->Eval(amp_max[4]/max)+hyp_r->GetParameter(0))))+fit_rc->GetParameter(0));
@@ -473,9 +466,9 @@ for(k=0;k<digiTree->GetEntries();k++){
      fittino[1][i] = new TF1("xzcbxcn"+i ,"gaus",6,8);
      fittino[2][i] = new TF1("jklnjbm"+i ,"gaus",6,8);
      
-     istogrammi[0][i]=hc_tdiff->ProjectionY("ghijklxz"+i,hc_tdiff->GetXaxis()->FindBin(0.0), hc_tdiff->GetXaxis()->FindBin(cut[i]));
-     istogrammi[1][i]=hc_l->ProjectionY("abcdefuv"+i, hc_tdiff->GetXaxis()->FindBin(0.0), hc_tdiff->GetXaxis()->FindBin(cut[i]));
-     istogrammi[2][i]=hc_r->ProjectionY("mnopqrst"+i, hc_tdiff->GetXaxis()->FindBin(0.0), hc_tdiff->GetXaxis()->FindBin(cut[i]));
+     istogrammi[0][i]=hc_tdiff->ProjectionY("ghijklxz"+i,hc_tdiff->GetXaxis()->FindBin(TMath::Max(-cut[i],(Double_t)txmin)), hc_tdiff->GetXaxis()->FindBin(cut[i]));
+     istogrammi[1][i]=hc_l->ProjectionY("abcdefuv"+i, hc_l->GetXaxis()->FindBin(TMath::Max(-cut[i],(Double_t)txmin)), hc_l->GetXaxis()->FindBin(cut[i]));
+     istogrammi[2][i]=hc_r->ProjectionY("mnopqrst"+i, hc_r->GetXaxis()->FindBin(TMath::Max(-cut[i],(Double_t)txmin)), hc_r->GetXaxis()->FindBin(cut[i]));
 
      istogrammi[0][i]->SetLineColor(kBlack);
      istogrammi[1][i]->SetLineColor(kBlue);
@@ -487,7 +480,7 @@ for(k=0;k<digiTree->GetEntries();k++){
      istogrammi[2][i]->GetXaxis()->SetTitle("t_{ave}-t_{MCP}");
      istogrammi[2][i]->GetYaxis()->SetTitle("counts");
      
-     cout<<"__________________"<< hc_tdiff->GetXaxis()->FindBin(0.0)<<"     "<<hc_tdiff->GetXaxis()->FindBin(cut[i])<<endl;
+     cout<<"__________________"<< hc_tdiff->GetXaxis()->FindBin(TMath::Max(-cut[i],(Double_t)txmin))<<"     "<<hc_tdiff->GetXaxis()->FindBin(cut[i])<<"______________"<<TMath::Max(-cut[i],(Double_t)txmin)<<"        "<<cut[i]<<endl;
 
      //canvino->cd(i+1);
      istogrammi[0][i]->Fit("argaerg"+i,"0");
@@ -496,58 +489,27 @@ for(k=0;k<digiTree->GetEntries();k++){
      istogrammi[2][i]->Fit("jklnjbm"+i,"0");
      
        
-     cout<< fittino[0][0]->GetParameter(2)<<"   "<< istogrammi[0][i]->GetName()<<  " "<<istogrammi[0][i]->GetEntries()<<endl;
-
      
    }
 
-   canvino->cd(1);
-   istogrammi[0][0]->Draw();
-   //   istogrammi[1][0]->Draw("SAME");
-   // istogrammi[2][0]->Draw("SAME");
-   fittino[0][0]->Draw("SAME");
-   //fittino[1][0]->Draw("SAME");
-   //fittino[2][0]->Draw("SAME");
-   
-   canvino->cd(2);
-   
-   //istogrammi[1][1]->Draw("SAME");
-   //istogrammi[2][1]->Draw("SAME");
-   istogrammi[0][1]->Draw();
-   fittino[0][1]->Draw("SAME");
-   //fittino[1][1]->Draw("SAME");
-   //fittino[2][1]->Draw("SAME");
-   
-   canvino->cd(3);
-   
-   //istogrammi[1][2]->Draw("SAME");
-   // istogrammi[2][2]->Draw("SAME");
-   istogrammi[0][2]->Draw();
-   fittino[0][2]->Draw("SAME");
-   //fittino[1][2]->Draw("SAME");
-   //fittino[2][2]->Draw("SAME");
-   
-   canvino->cd(4);
-   //istogrammi[1][3]->Draw();
-   // istogrammi[2][3]->Draw("SAME");
-   istogrammi[0][3]->Draw("SAME");
-   fittino[0][3]->Draw("SAME");
-   //fittino[1][3]->Draw("SAME");
-   //fittino[2][3]->Draw("SAME");
-   
-   canvino->cd(5);
-   //istogrammi[1][4]->Draw();
-   //istogrammi[2][4]->Draw("SAME");
-   istogrammi[0][4]->Draw("SAME");
-   fittino[0][4]->Draw("SAME");
-   //fittino[1][4]->Draw("SAME");
-   //fittino[2][4]->Draw("SAME");
-   
-   canvino->cd(6);
-   //istogrammi[1][5]->Draw();
-   //istogrammi[2][5]->Draw("SAME");
-   istogrammi[0][5]->Draw("SAME");
-   fittino[0][5]->Draw("SAME");
-   //fittino[1][5]->Draw("SAME");
-   //fittino[2][5]->Draw("SAME");
+   TLegend* legenda[6];
+   TString LegSigma;
+   for(i=0;i<6;i++){ 
+     LegSigma="";
+     LegSigma.Append("sigma=");
+     canvino->cd(i+1);
+     
+     istogrammi[1][i]->Draw();
+     istogrammi[2][i]->Draw("SAME");
+     istogrammi[0][i]->Draw("SAME");
+
+     fittino[0][i]->Draw("SAME");
+     fittino[1][i]->Draw("SAME");
+     fittino[2][i]->Draw("SAME");
+     LegSigma.Append(to_string(fittino[0][i]->GetParameter(2)));
+     legenda[i] = new TLegend();
+     legenda[i]->AddEntry(istogrammi[0][i],LegSigma);
+     legenda[i]->Draw();
+   }
+
 }

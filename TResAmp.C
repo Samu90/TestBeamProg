@@ -25,7 +25,7 @@ void TResAmp(const char * filename){
 
 
 
-  const Int_t  nbinx=200,nbiny=150;
+  const Int_t  nbinx=200,nbiny=250;
 
  int i;
  Double_t sigma[50],erry[50],cut[50],errx[50];
@@ -351,31 +351,75 @@ void TResAmp(const char * filename){
 
 
    
-   for (i=0;i<nbinx/10;i++){
+   for (i=0;i<nbinx/10+1;i++){
      cut[i] =rxmin+(Double_t)(rxmax-rxmin)*(i*10)/nbinx;  
    }
    
-   for (i=0;i<nbinx/10;i++){
-     TF1* fit = new TF1("fit","gaus");
-     TH1D* histotemp_t;
+   TCanvas *proiettati;
+   TString histoname;
+   TString title;
+   TF1* fit;
+   bool SaveProjection=false;
+   Double_t XMinPlot=-0.3, XMaxPlot=0.3;
+
+   if(SaveProjection){
+     gSystem->Exec("rm -r -f HistoTResAmp");
+     gSystem->Exec("mkdir HistoTResAmp");
+   }
+   
+   for (i=0;i<nbinx/10-1;i++){
+     fit = new TF1("fit","gaus",XMinPlot,XMaxPlot);
+     fit->SetParameter(0,200);
+     fit->SetParameter(1,0);
+     fit->SetParameter(2,30e-2);
+     proiettati = new TCanvas("canvasProjection","",1200,800);
+     gStyle->SetOptFit(1111);
+     
      histotemp_t=hc_tl->ProjectionY("hc_totprojY",hc_tot->GetXaxis()->FindBin(cut[i]),hc_tot->GetXaxis()->FindBin(cut[i+1]));
      cout << "____________" << hc_tot->GetXaxis()->FindBin(cut[i])<<"_____" << hc_tot->GetXaxis()->FindBin(cut[i+1]) << endl;
+     histotemp_t->Fit("fit","R0");
      
-     histotemp_t->Fit("fit","0");
-   
+     if(SaveProjection){
+       histoname="";
+       histoname.Append("HistoTResAmp/histo");
+       histoname.Append(to_string(i));
+       histoname.Append(".png");
+       
+       title="";
+       title.Append("Amp/MIP -> ");
+       title.Append(to_string(cut[i]));
+       title.Resize(title.Sizeof()-4);
+       title.Append("-");
+       title.Append(to_string(cut[i+1]));
+       title.Resize(title.Sizeof()-4);
+       
+       //histotemp_t->GetXaxis()->SetLimits(XMinPlot,XMaxPlot);
+       //fit->GetXaxis()->SetLimits(XMinPlot,XMaxPlot);
+       fit->GetXaxis()->SetTitle("t_{ave}-t_{MCP} [ns]");
+       fit->GetYaxis()->SetTitle("counts");
+       fit->SetTitle(title);
+       fit->Draw();
+       histotemp_t->Draw("SAME");
+       //fit->DrawF1(XMinPlot,XMaxPlot,"SAME");
+       
+       //gPad->WaitPrimitive();
+       proiettati->SaveAs(histoname);
+     }
+     
      sigma[i]=sqrt((fit->GetParameter(2))*(fit->GetParameter(2))-0.015*0.015);
      erry[i]=fit->GetParError(2);
      errx[i]= (rxmax-rxmin)*10/(2*nbinx);
      
+
      delete histotemp_t;
      delete fit;
-     // delete fit;
+     delete proiettati;
    }
 
    
 				     
    TCanvas* c_TresAmp = new TCanvas("c_TresAmp","c_rest_plot",600,550);
-   TGraphErrors* TResAmp = new TGraphErrors(nbinx/10,cut,sigma,errx,erry);
+   TGraphErrors* TResAmp = new TGraphErrors(nbinx/10-1,cut,sigma,errx,erry);
    TF1* fitramp = new TF1("fitramp","[0]+[1]/sqrt(x)",rxmin,rxmax-0.06);
    gStyle->SetOptFit(1111);
    fitramp->SetParameter(0,0.029);

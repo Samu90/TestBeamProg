@@ -74,7 +74,7 @@ void plotWF_tdiff(const char * filename){
     else{Times3[k]=Times3[k-1];}
   }
   
-  cout<<"HERE"<<endl;
+  
   Double_t mean1=TMath::Mean(nentries,Times1)-1.2;
   Double_t rms1=TMath::RMS(nentries,Times1);
   cout<<mean1<<"_________"<<rms1<<endl;
@@ -307,15 +307,17 @@ void plotWF_tdiff(const char * filename){
 
     if (0.8*(fit_l->GetParameter(1)) < (amp_max[4]/max) && (amp_max[4]/max) < (3*fit_l->GetParameter(1)) && amp_max[0]/max > 0.4 && amp_max[0]/max < 0.75)
       {
+
 	
         
 	
 	hc_tdiff->Fill(time[1+LEDi]-time[2+LEDi]-(hyp_r->Eval(amp_max[4]/max)-hyp_r->GetParameter(0)-hyp_l->Eval(amp_max[3]/max)+hyp_l->GetParameter(0)),(time[1+LEDi]+time[2+LEDi])/2-fit_tdiff->Eval(time[1+LEDi]-time[2+LEDi]-(-hyp_r->Eval(amp_max[4]/max)+hyp_r->GetParameter(0)+hyp_l->Eval(amp_max[3]/max)-hyp_l->GetParameter(0)))+fit_tdiff->GetParameter(0)-(hyp_r->Eval(amp_max[4]/max)-hyp_r->GetParameter(0)+hyp_l->Eval(amp_max[3]/max)-hyp_l->GetParameter(0))/2);
 
-	if(debug) cout << 0.8*fit_l->GetParameter(1) << " < " << amp_max[3]/max << " < " << 3*fit_l->GetParameter(1) << " ////  " << time[4+LEDi]-time[0] <<endl;
+	
       }
 
   }//chiudo for k
+
     for(k=0;k<nbinx;k++){
    
    
@@ -333,7 +335,7 @@ void plotWF_tdiff(const char * filename){
 
     
   }//chiudo for k
-
+    
     TGraphErrors* graph_tcdiff = new TGraphErrors(nbinx-1,xt,yt,0,RMS[2]);
     wf_c->cd(4);
     hc_l->GetYaxis()->SetTitle("t_left-t_MCP [ns]");
@@ -343,11 +345,7 @@ void plotWF_tdiff(const char * filename){
     graph_lc->SetMarkerSize(.5);
     graph_lc->Draw("P");
 
-  // graph_l->Fit("hyp_l","R");
-   //   graph_l->SetMarkerStyle(8);
-   // graph_l->SetMarkerSize(.5);
-  // graph_l->Draw("P");
-
+  
    wf_c->cd(5);
 
    hc_r->GetYaxis()->SetTitle("t_right-t_MCP [ns]");
@@ -357,11 +355,7 @@ void plotWF_tdiff(const char * filename){
    graph_rc->SetMarkerSize(.5);
    graph_rc->Draw("P");
 
-  // graph_l->Fit("hyp_l","R");
-   // graph_l->SetMarkerStyle(8);
-   // graph_l->SetMarkerSize(.5);
-  // graph_l->Draw("P");
-
+  
    wf_c->cd(6);
 
    hc_tdiff->GetYaxis()->SetTitle("t_ave-t_MCP [ns]");
@@ -371,11 +365,7 @@ void plotWF_tdiff(const char * filename){
    graph_tcdiff->SetMarkerSize(.5);
    graph_tcdiff->Draw("P");
 
-  // graph_l->Fit("hyp_l","R");
-  // graph_l->SetMarkerStyle(8);
-  // graph_l->SetMarkerSize(.5);
-  // graph_l->Draw("P");
-
+  
    TH1D* histo_cl;
    TH1D* histo_cr;
    TH1D* histo_ct;
@@ -433,6 +423,8 @@ void plotWF_tdiff(const char * filename){
    histo_ct->Draw();
    histo_ctdiff->Draw("same");
    l2->Draw();
+<<
+  
    cout << "########################### "<< gaus_ct->GetParameter(2)/gaus_ct->GetParameter(1) << "_________" << gaus_ctdiff->GetParameter(2)/gaus_ctdiff->GetParameter(1) << endl;
    TCanvas* rest_gaussine = new TCanvas("rest_gaussine","rest_plotgaus",1800,1100);
    rest_gaussine->Divide(nbinx/(13*4),4);
@@ -471,4 +463,27 @@ void plotWF_tdiff(const char * filename){
    rest->Draw("AP");
    
 
+
+   bool ConfrontoTdiff=true;
+   
+   if(ConfrontoTdiff){
+     TCanvas* ConfCanv = new TCanvas("confronto","",1200,800);
+     
+     ConfCanv->Divide(3,1);
+     
+     ConfCanv->cd(1);
+     h2_t->Draw("COLZ");
+     graph_t->Draw("P");
+
+     ConfCanv->cd(2);
+     hc_t->Draw("COLZ");
+     graph_tc->Draw("P");
+
+     ConfCanv->cd(3);
+     hc_tdiff->Draw("COLZ");
+     graph_tcdiff->Draw("P");
+
+   }
+
+   
 }
