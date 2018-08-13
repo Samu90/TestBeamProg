@@ -434,7 +434,6 @@ void plotWF_tdiff(const char * filename){
      ConfCanv->cd(3);
      hc_tdiff->Draw("COLZ");
      graph_tcdiff->Draw("P");
-
    }
 
    
