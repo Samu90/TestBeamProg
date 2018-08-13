@@ -185,6 +185,7 @@ void plotWF_time(const char * filename){
 
 
   wf_c->Divide(3,2);
+
   wf_c->cd(1);
   h2_l->GetYaxis()->SetTitle("t_left-t_MCP [ns]");
   h2_l->GetXaxis()->SetTitle("max.amplitude [mV]");
@@ -241,13 +242,6 @@ void plotWF_time(const char * filename){
     histotemp_r=h3_r->ProjectionY("ht_rprojY",k,k);
     histotemp_t=h3_t->ProjectionY("ht_projY",k,k);
 
-
-    //    maxbin_l=histotemp_l->GetMean();
-    //  maxbin_r=histotemp_r->GetMaximumBin();
-    // maxbin_t=histotemp_t->GetMaximumBin();
-
-
-
     xt[k]=txmin+(Float_t)(txmax-(txmin))/nbinx*k;
     yt[k]=histotemp_t->GetMean();
     rmsyt[k]=histotemp_t->GetMeanError();
@@ -295,7 +289,8 @@ void plotWF_time(const char * filename){
   l1->AddEntry(fitgr2_l,"t_{left}-t_{MCP}","L");
   l1->AddEntry(fitgr2_r,"t_{right}-t_{MCP}","L");
   l1->AddEntry(fitgr2_t,"t_{ave}-t_{MCP}","L"); 
-  gr2_l->GetYaxis()->SetRangeUser(7.5,8.6);
+
+  gr2_l->GetYaxis()->SetRangeUser(rymin_l,rymax_l);
   gr2_l->GetXaxis()->SetRangeUser(-0.08,0.6);
   gr2_l->GetYaxis()->SetTitle("t-t_{MCP}(ns)");
   gr2_l->GetXaxis()->SetTitle("t_{left}-t_{right}(ns)");
@@ -329,7 +324,7 @@ void plotWF_time(const char * filename){
   
    for(k=0;k<digiTree->GetEntries();k++){
 
-     digitree->GetEntry(k);
+     digiTree->GetEntry(k);
     
     if (0.8*(fit_l->GetParameter(1)) < (amp_max[3]/max) && (amp_max[3]/max) < (3*fit_l->GetParameter(1)) && amp_max[0]/max > 0.4 && amp_max[0]/max < 0.75)
       {
@@ -402,7 +397,7 @@ void plotWF_time(const char * filename){
   l2->AddEntry(fitg_l,"t_{left}-t_{MCP}","L");
   l2->AddEntry(fitg_r,"t_{right}-t_{MCP}","L");
   l2->AddEntry(fitg_t,"t_{ave}-t_{MCP}","L"); 
-  g_l->GetYaxis()->SetRangeUser(7.3,8.6);
+  g_l->GetYaxis()->SetRangeUser(rymin_l,rymax_l);
   g_l->GetXaxis()->SetRangeUser(-0.08,0.6);
   g_l->GetYaxis()->SetTitle("t-t_{MCP}(amp.walk corr)(ns)");
   g_l->GetXaxis()->SetTitle("t_{left}-t_{right}(amp.walk corr)(ns)");
@@ -424,7 +419,6 @@ void plotWF_time(const char * filename){
   g_t->SetMarkerStyle(8);
   g_t->SetMarkerSize(.5);
   cout << "*********************************" <<endl;
-  g_t->Fit("fitg_t");
   cout << "*********************************" <<endl;
   g_t->Draw("SAMEP");
   l2->Draw();
@@ -432,62 +426,58 @@ void plotWF_time(const char * filename){
 
   
   
-  TH2D* htdiff= new TH2D("hc_t", "histo hc_t",nbinx,txmin,txmax,nbiny,tymin,tymax);
+  TH2D* htdiff= new TH2D("hc_tdiff", "histo hc_tdiff",nbinx,txmin,txmax,nbiny,tymin,tymax);
   g_t->Fit("fitg_t");
 
   for(k=0;k<digiTree->GetEntries();k++){
 
     digiTree->GetEntry(k);
-
+    
     if (0.8*(fit_l->GetParameter(1)) < (amp_max[3]/max) && (amp_max[3]/max) < (3*fit_l->GetParameter(1)) && amp_max[0]/max > 0.4 && amp_max[0]/max < 0.75)
       {
 
-	
-	htdiff->Fill(time[1+LEDi]-hyp_l->Eval(amp_max[3]/max)+hyp_l->GetParameter(0)-time[2+LEDi]+hyp_r->Eval(amp_max[4]/max)-hyp_r->GetParameter(0),(time[1+LEDi]+time[2+LEDi])/2-fitg_t->Eval(time[1+LEDi]-hyp_l->Eval(amp_max[3]/max)+hyp_l->GetParameter(0)-time[2+LEDi]+hyp_r->Eval(amp_max[4]/max)-hyp_r->GetParameter(0))+fitg_t->GetParameter(0)-time[0]-(hyp_r->Eval(amp_max[3]/max)-hyp_r->GetParameter(0)+hyp_l->Eval(amp_max[4]/max)-hyp_l->GetParameter(0))/2);
-
+	htdiff->Fill(time[1+LEDi]-time[2+LEDi]-(hyp_r->Eval(amp_max[4]/max)-hyp_r->GetParameter(0)-hyp_l->Eval(amp_max[3]/max)+hyp_l->GetParameter(0)),(time[1+LEDi]+time[2+LEDi])/2-time[0]-(hyp_r->Eval(amp_max[4]/max)-hyp_r->GetParameter(0)+hyp_l->Eval(amp_max[3]/max)-hyp_l->GetParameter(0))/2-fitg_t->Eval(time[1+LEDi]-time[2+LEDi]-(hyp_r->Eval(amp_max[4]/max)-hyp_r->GetParameter(0)-hyp_l->Eval(amp_max[3]/max)+hyp_l->GetParameter(0)))+fitg_t->GetParameter(0)); //GIUSTAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
       }
 
   }//chiudo for k 
 
-   for(k=0;k<nbinx;k++){
-   
-   
+  for(k=0;k<nbinx;k++){
+    
     TH1D* histotemp_t;
-
-   
-   
     histotemp_t=htdiff->ProjectionY("ht_projY",k,k);
-
-
+    
+    
     xt[k]=txmin+(Float_t)(txmax-(txmin))/nbinx*k;
     yt[k]=histotemp_t->GetMean();
     rmsyt[k]=histotemp_t->GetMeanError();
-
+    
     delete histotemp_t;
-
+    
     if(k%20==0) cout << k << " / " << nbinx << endl;
   }//chiudo for k
-    TGraphErrors* g_tdiff=new TGraphErrors(nbinx-1,xt,yt,0,rmsyt);
-    TF1* fitc_tdiff = new TF1("fitc_tdiff","[0]+x*[1]",tymin,tymax);
-
-    fitc_tdiff->SetLineColor(kGreen);
-    
   
-    g_tdiff->SetMarkerColor(kGreen);
-    g_tdiff->SetMarkerStyle(8);
-    g_tdiff->SetMarkerSize(.5);
-    cout << "__________________________" << endl;
-    g_tdiff->Fit("fitc_tdiff");
-    cout << "__________________________" << endl;
-    g_tdiff->Draw("SAMEP");
-    l2->Draw();
+  TGraphErrors* g_tdiff=new TGraphErrors(nbinx-1,xt,yt,0,rmsyt);
+  TF1* fitc_tdiff = new TF1("fitc_tdiff","[0]+x*[1]",tymin,tymax);
+  
+  fitc_tdiff->SetLineColor(kGreen);
+  
+  
+  g_tdiff->SetMarkerColor(kGreen);
+  g_tdiff->SetMarkerStyle(8);
+  g_tdiff->SetMarkerSize(.5);
+  cout << "__________________________" << endl;
+  g_tdiff->Fit("fitc_tdiff");
+  cout << "__________________________" << endl;
+  g_tdiff->Draw("SAMEP");
+  l2->Draw();
+  
+  wf_c->cd(4);
+  ht->Draw("COLZ");
+  g_t->Fit("fitg_t","0RL");
+  g_t->SetMarkerStyle(8);
+  g_t->SetMarkerSize(.5);
+  g_t->Draw("P");
+  fitg_t->Draw("same");
 
-    wf_c->cd(4);
-    ht->Draw("COLZ");
-    g_t->Fit("fitg_t","0RL");
-    g_t->SetMarkerStyle(8);
-    g_t->SetMarkerSize(.5);
-    g_t->Draw("P");
-    fitg_t->Draw("same");
 }
 
