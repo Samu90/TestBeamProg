@@ -444,14 +444,14 @@ void RisRelVsTdiff(const char * filename){
      sigma[i]=sqrt(pow(fit->GetParameter(2),2)-pow(0.015,2))/fit->GetParameter(1);
      erry[i]=sqrt(pow(fit->GetParError(2)/fit->GetParameter(1),2)+pow((fit->GetParameter(2)*fit->GetParError(1))/pow(fit->GetParameter(1),2),2));
      errx[i]= (txmax-txmin)*10/(2*nbinx);
-
+     
      delete histotemp_t;
      delete fit;
      // delete fit;
-
-
+     
+     
    }
-
+   
    
    TGraphErrors* rest = new TGraphErrors(nbinx/10,cut,sigma,errx,erry);
    TCanvas* rest_plot = new TCanvas("rest","rest_plot",600,550);
@@ -461,5 +461,5 @@ void RisRelVsTdiff(const char * filename){
    rest->SetMarkerSize(.8);
    rest->Draw("AP");
    
-
+   
 }
