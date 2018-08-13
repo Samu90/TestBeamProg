@@ -2,29 +2,38 @@
 
 -Wiki base delle ntuple utilizzate per l'analisi dei dati del Test Beam di MAGGIO 2018 A T10
 
--plotWF.C(Conf,nevento) plotta le 6 forme d'onda acquisite di un evento (con 0 le plotta in sequenza, non si ferma)
+      
+													USEFUL PROGRAMS
+													
+-plotWF.C(Conf,nevent ) the program plots the 6/8 waveforms of a sigle events (nevent) if nevent==0 it plots the waveforms of the events in sequence (push enter to go on)  
 
--ploWF_graph.C(Conf) plotta gli istogrammi delle ampiezze massime e crea un file histoConf.root con gli istogrammi
+-ploWF_graph.C(Conf) the program plot the max amplitute distribution and create a file (histoConf.root) with the histogram 
 
--plotHisto.C(histoConf1,histoconf2) plotta gli istogrammi delle ampiezze massime delle forme d'onda
+-plotWF_fit.C(Conf) the program plots the distribution of max amplitude and fits the distribution with a Landau function
 
--plotWF_fit.C(Conf) plotta gli istogrammi delle ampiezze massime delle forme d'onda e fa un fit con la funzione di Landau
+-plotWF_cut.C(Conf) the program plots the distribution of max amplitude and fits the distribution with a Landau function and makes a cut on the events in (0.8*MIP,3*MIP)
 
--plotWF_cut.C(Conf) plotta gli istogrammi delle ampiezze massime delle forme d'onda e fa un fit con la funzione di Landau e taglia gli eventi in un intervallo (0.8*MIP,3*MIP)
+-plotWF_tamp.C(Conf) the program plots the 2D histogram of t_r-t_MCP t_l-t_MCP vs max amplitude and t_ave-t_MCP vs t_l-t_MCP-t_r-t_MCP, it also makes a logaritmic fit on the mean values of time variable for each bin of max amplitude.
 
--plotWF_tamp.C(Conf) plota gli istogrammi 2D di t_r-t_MCP t_l-t_MCP t_ave-t_MCP in funzione dell'ampiezza massima, fa un fit sui valori medi delle variabili temporali per ogni valore di dei bin dell'ampiezza massima.
+-ResolutionUncorr.C(Conf) the program calculates the time resolution of the cristal bar without any correction on amplitude or time.
 
--plot_lsign.C(Conf) plotta una gaussiana con la sigma dei tempi calcolata senza correggere con il time walk.
+-AmpCorrUniv.C(Conf) the program plots the same graph of _tamp.C whith the graph corrected with the amplitude walks, the time stamps of NINO with LED300 are used. In addiction the program plot the gaussian of t_ave-t_MCP distribution
 
--plotWF_su.C(Conf) plotta i valori di amp_max in funzione di t_left-t_right
+-AmpSpatUnif.C(Conf) the program plots the values of max amplitude vs t_left-t_right corrected with amplitude walk.
 
--plotWF_corr.C(Conf) plotta i grafici di _tamp.C insime a quelli corretti con l'amplitude walk, sono stati usati i tempi calcolati con soglia LED30 (30 u.d.). Plotta infine la gaussiana con la distribuzione
+-GraficiTdiff.C(Conf) the program plot the gaussian of t_ave-t_MCP distribution with correction on amp max and, with and withouth t_diff correction, calculating the different time resolution, it also calculate the time resolution for different value of t_left-t_right: |dt|<400ps, |dt|<200ps, |dt|<100ps, |dt|<50ps, |dt|<20ps, |dt|<10ps
 
+-ResNinoT.C the program plots the time resolution values vs the NINO treshold, it plots also the gaussian distribution of t_ave-t_MCP for each treshold with related fit. 
 
+-RisRelVsMip.C the program plots the relative time resolution (sigma/mean) vs the MIP peak value with only amplitude walk correction.
 
+-RisRelVsTdiff.C(Conf) the program plots the relative time resolution vs t_left-t_right in bins
 
+-RisVsMip.C the program plots the absolute time resolution vs the MIP peak value with only amplitude walk correction.
 
+-TResAmp.C(Conf) the program plots the time resolution vs bin of (max amp)/(MIP Peak)  
 
+-PlotWF_tdiff.C(Conf) the program plots data with tdiff corrections, it plots a comparison between raw data, data corrected with amp-walk correction and data corrected with amp walk+tdiff correction. The gaussians with and without tdiff correction are plotted and the resolutions are calculated. In addition it plots the values of time resolution for binning of tdiff and for each bin on tdiff the single histogram is plotted
 
 
 
