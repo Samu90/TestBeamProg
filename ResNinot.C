@@ -1,13 +1,11 @@
 //to run with ranges [0.125;2]right, [0.13;2]left on 4.1
 //to run with ranges [0.125;2]right, [0.13;2]left on 1.3
 
-#include <sstream>
 
 void plotWF_tdiff(const char * filename,Double_t* sigma,Double_t* ssigma,int index,TCanvas* tdiff,Double_t* bias){
 
 
   TFile*  file= TFile::Open(filename);
-  //TTree * WFTree = (TTree*)file->Get("wf");
   TTree* digiTree = (TTree*)file->Get("digi");
 
 
@@ -396,21 +394,7 @@ void plotWF_tdiff(const char * filename,Double_t* sigma,Double_t* ssigma,int ind
    histo_cr->SetLineColor(kRed);
    gaus_ct->SetLineColor(kBlack);
 
-   /* TCanvas * timeres = new TCanvas("timeres","plot_timeres",600,550);
-
-   TLegend* l1=new TLegend(0.1,0.7,0.48,0.9);
-   l1->SetHeader("time stamps");
-   l1->AddEntry(histo_cl,"t_left-t_MCP");
-   l1->AddEntry(histo_cr,"t_right-t_MCP");
-   l1->AddEntry(histo_cr,"t_ave-t_MCP");
-   
-   gStyle->SetOptStat("");
-   histo_ct->Draw();
-   gaus_ct->SetParameter(0,500);
-   histo_ct->GetYaxis()->SetTitle("counts");
-   histo_ct->GetXaxis()->SetTitle("t_{ave}-t_{MCP}(ns)");
-   histo_cl->SetLineColor(kBlue);
-   */
+  
    histo_cl->Fit("gaus_cl");
    histo_cr->Fit("gaus_cr");
    if (blind==true) histo_ct->Fit("gaus_ct");
@@ -439,38 +423,7 @@ void plotWF_tdiff(const char * filename,Double_t* sigma,Double_t* ssigma,int ind
    histo_ctdiff[index]->SetAxisRange(histo_ctdiff[index]->GetMean()-3*histo_ctdiff[index]->GetRMS(),histo_ctdiff[index]->GetMean()+3*histo_ctdiff[index]->GetRMS());
    histo_ctdiff[index]->Draw();
    tdiff->SaveAs("file:///home/raffaella/Documents/CERN/TestBeam/TestBeamProg/ResNINOthr.png");
-   // l2->Draw();
-
-   /* for (i=0;i<nbinx/10;i++){
-     cut[i] =txmin+(Float_t)(txmax-txmin)*(i*10)/nbinx;
-   }
-   for (i=0;i<nbinx/10;i++){
-     TF1* fit = new TF1("fit","gaus",6,8);
-     TH1D* histotemp_t;
-     histotemp_t=hc_tdiff->ProjectionY("hc_tprojY",hc_tdiff->GetXaxis()->FindBin(cut[i]-(cut[i+1]-cut[i])/2),hc_tdiff->GetXaxis()->FindBin(cut[i]+(cut[i+1]-cut[i])/2));
-     cout << "____________" << hc_tdiff->GetXaxis()->FindBin(cut[i]-(cut[i+1]-cut[i])/2) << endl;
-
-     histotemp_t->Fit("fit","R");
-     sigma[i]=fit->GetParameter(2);
-     erry[i]=fit->GetParError(2);
-     errx[i]= (txmax-txmin)*10/(2*nbinx);
-
-     delete histotemp_t;
-     delete fit;
-     // delete fit;
-
-
-   }
-
-   
-   TGraphErrors* rest = new TGraphErrors(nbinx/10,cut,sigma,errx,erry);
-   TCanvas* rest_plot = new TCanvas("rest","rest_plot",600,550);
-   rest->GetXaxis()->SetTitle("t_{left}-t_{right}(ns)");
-   rest->GetYaxis()->SetTitle("#sigma_{t_{ave}}(ns)");
-   rest->SetMarkerStyle(8);
-   rest->SetMarkerSize(.8);
-   rest->Draw("AP");
-   */
+  
 
 }
 
@@ -492,6 +445,7 @@ void ResNinot(){
   bias[4] =200;
   bias[5] =500;
   bias[6] =1000;
+
   TCanvas* tdiff = new TCanvas("tdiff","plot_tdiff",1800,1100);
   tdiff->Clear();
   tdiff->Divide(4,2);

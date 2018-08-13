@@ -365,7 +365,11 @@ void AmpCorrUniv(const char * filename){
    histo_ct->SetLineColor(kBlack);
    histo_cl->SetLineColor(kBlue);
    histo_cr->SetLineColor(kRed);
-
    
+   TCanvas* canv= new TCanvas();
+   histo_ct->Draw();
+   histo_cr->Draw("SAME");
+   histo_cl->Draw("SAME");
+
    
   }

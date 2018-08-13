@@ -171,7 +171,7 @@ void Ris(const char * filename,Double_t* sigma,Double_t* ssigma,Double_t valMIP)
     }
     }*/
   
-  TCanvas* wf_c =new TCanvas("wf","Plot wf",1800,1100);
+  //TCanvas* wf_c =new TCanvas("wf","Plot wf",1800,1100);
   TGraphErrors* graph_r=new TGraphErrors(nbinx-1,x_r,y_r,0,rmsy_r);
   TGraphErrors* graph_l=new TGraphErrors(nbinx-1,x_l,y_l,0,rmsy_l);
   TGraphErrors* graph_t=new TGraphErrors(nbinx-1,xt,yt,0,rmsyt);
@@ -198,43 +198,31 @@ void Ris(const char * filename,Double_t* sigma,Double_t* ssigma,Double_t valMIP)
 
  
 
-  wf_c->Divide(2,1);
+  //wf_c->Divide(2,1);
 
-  wf_c->cd(1);
+  //wf_c->cd(1);
 
   h2_l->GetYaxis()->SetTitle("t_left-t_MCP [ns]");
   h2_l->GetXaxis()->SetTitle("max.amplitude [mV]");
-  h2_l->Draw("COLZ");
+  //h2_l->Draw("COLZ");
   graph_l->Fit("hyp_l","0RL");
   graph_l->SetMarkerStyle(8);
   graph_l->SetMarkerSize(.5);
   graph_l->Draw("P");
-  hyp_l->DrawF1(0,1,"same");
+  //hyp_l->DrawF1(0,1,"same");
 
 
-  wf_c->cd(2);
+  //wf_c->cd(2);
   h2_r->GetYaxis()->SetTitle("t_right-t_MCP [ns]");
   h2_r->GetXaxis()->SetTitle("max.amplitude [mV]");
-  h2_r->Draw("COLZ");
+  //h2_r->Draw("COLZ");
   graph_r->Fit("hyp_r","R0L");
   graph_r->SetMarkerStyle(8);
   graph_r->SetMarkerSize(.5);
   graph_r->Draw("P");
-  hyp_r->DrawF1(0,1,"same");
+  //hyp_r->DrawF1(0,1,"same");
   
-  wf_c->cd(3);
-  h2_t->GetYaxis()->SetTitle("t_ave-t_MCP [ns]");
-  h2_t->GetXaxis()->SetTitle("t_left-t_right [ns]");
-  //h2_t->Draw("COLZ");
-  graph_t->Fit("hyp_t","RL0");
-  graph_t->SetMarkerStyle(8);
-  graph_t->SetMarkerSize(.5);
-  //graph_t->Draw("P");
-  //hyp_t->DrawF1(txmin,txmax,"same");
-
-
-
-  
+   
   TH2F* hc_l= new TH2F("hc_l", "histo hc_l",nbinx,rxmin,rxmax,nbiny,rymin_lc,rymax_lc);
   TH2F* hc_r= new TH2F("hc_r", "histo hc_r",nbinx,rxmin,rxmax,nbiny,rymin_rc,rymax_rc);
   TH2F* hc_t= new TH2F("hc_t", "histo hc_t",nbinx,txmin,txmax,nbiny,tymin_c,tymax_c);
@@ -288,53 +276,55 @@ void Ris(const char * filename,Double_t* sigma,Double_t* ssigma,Double_t valMIP)
    TGraphErrors* graph_rc = new TGraphErrors(nbinx-1,x_r,y_r,0,RMS[1]);
    TGraphErrors* graph_tc = new TGraphErrors(nbinx-1,xt,yt,0,RMS[2]);
 
-    wf_c->cd(4);
-     hc_l->GetYaxis()->SetTitle("t_left-t_MCP [ns]");
-    hc_l->GetXaxis()->SetTitle("max.amplitude [mV]");
-    //hc_l->Draw("COLZ");
+   //wf_c->cd(4);
+   hc_l->GetYaxis()->SetTitle("t_left-t_MCP [ns]");
+   hc_l->GetXaxis()->SetTitle("max.amplitude [mV]");
+   //hc_l->Draw("COLZ");
     graph_lc->SetMarkerStyle(8);
     graph_lc->SetMarkerSize(.5);
     //graph_lc->Draw("P");
 
-  // graph_l->Fit("hyp_l","R");
-   //   graph_l->SetMarkerStyle(8);
-   // graph_l->SetMarkerSize(.5);
-  // graph_l->Draw("P");
-
-   wf_c->cd(5);
-
+    // graph_l->Fit("hyp_l","R");
+    //   graph_l->SetMarkerStyle(8);
+    // graph_l->SetMarkerSize(.5);
+    // graph_l->Draw("P");
+    
+    //wf_c->cd(5);
+    
     hc_r->GetYaxis()->SetTitle("t_right-t_MCP [ns]");
-   hc_r->GetXaxis()->SetTitle("max.amplitude [mV]");
-   //hc_r->Draw("COLZ");
-   graph_rc->SetMarkerStyle(8);
-   graph_rc->SetMarkerSize(.5);
-   //graph_rc->Draw("P");
-
-  // graph_l->Fit("hyp_l","R");
-   // graph_l->SetMarkerStyle(8);
-   // graph_l->SetMarkerSize(.5);
-  // graph_l->Draw("P");
-
-   wf_c->cd(6);
-
-   hc_t->GetYaxis()->SetTitle("t_ave-t_MCP [ns]");
-   hc_t->GetXaxis()->SetTitle("t_left-t_right [ns]");
-   //hc_t->Draw("COLZ");
-   graph_tc->SetMarkerStyle(8);
-   graph_tc->SetMarkerSize(.5);
-   //graph_tc->Draw("P");
-
-  // graph_l->Fit("hyp_l","R");
-  // graph_l->SetMarkerStyle(8);
-  // graph_l->SetMarkerSize(.5);
-  // graph_l->Draw("P");
-
+    hc_r->GetXaxis()->SetTitle("max.amplitude [mV]");
+    //hc_r->Draw("COLZ");
+    graph_rc->SetMarkerStyle(8);
+    graph_rc->SetMarkerSize(.5);
+    //graph_rc->Draw("P");
+    
+    // graph_l->Fit("hyp_l","R");
+    // graph_l->SetMarkerStyle(8);
+    // graph_l->SetMarkerSize(.5);
+    // graph_l->Draw("P");
+    
+    //wf_c->cd(6);
+    
+    hc_t->GetYaxis()->SetTitle("t_ave-t_MCP [ns]");
+    hc_t->GetXaxis()->SetTitle("t_left-t_right [ns]");
+    //hc_t->Draw("COLZ");
+    graph_tc->SetMarkerStyle(8);
+    graph_tc->SetMarkerSize(.5);
+    //graph_tc->Draw("P");
+    
+    // graph_l->Fit("hyp_l","R");
+    // graph_l->SetMarkerStyle(8);
+    // graph_l->SetMarkerSize(.5);
+    // graph_l->Draw("P");
+    
    TH1D* histo_cl;
    TH1D* histo_cr;
    TH1D* histo_ct;
+   
    TF1* gaus_cl = new TF1("gaus_cl","gaus",-2.5,-0.7);
    TF1* gaus_cr = new TF1("gaus_cr","gaus",-2.5,-0.7);
    TF1* gaus_ct = new TF1("gaus_ct","gaus",-2.5,-0.7);
+   
    histo_cl = hc_l->ProjectionY("histo_cl",0,nbinx);
    histo_cr = hc_r->ProjectionY("histo_cr",0,nbinx);
    histo_ct = hc_t->ProjectionY("histo_ct",0,nbinx);
@@ -366,7 +356,7 @@ void Ris(const char * filename,Double_t* sigma,Double_t* ssigma,Double_t valMIP)
   
    //histo_cl->Draw("same");
    
-  *sigma=gaus_ct->GetParameter(2)/gaus_ct->GetParameter(1);
+   *sigma=gaus_ct->GetParameter(2)/gaus_ct->GetParameter(1);
    cout << gaus_ct->GetParameter(2)/gaus_ct->GetParameter(1) << endl;
    *ssigma=sqrt(pow(gaus_ct->GetParError(2)/gaus_ct->GetParameter(1),2)+pow((gaus_ct->GetParameter(2)*gaus_ct->GetParError(1))/pow(gaus_ct->GetParameter(1),2),2));
    
@@ -395,7 +385,7 @@ void RisRelVsMip(){
     cout<< sigma[i] << "   "<< ssigma[i] << "   "<< MIP[i]<<endl;
     
     }
-
+  TCanvas* newcanvas = new TCanvas();
   TGraphErrors* graph= new TGraphErrors(ndat,MIP,sigma,0,ssigma);
   graph->SetMarkerStyle(8);
   graph->SetMarkerSize(.8);

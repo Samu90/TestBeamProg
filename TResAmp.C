@@ -359,7 +359,7 @@ void TResAmp(const char * filename){
    TString histoname;
    TString title;
    TF1* fit;
-   bool SaveProjection=false;
+   bool SaveProjection=true;
    Double_t XMinPlot=-0.3, XMaxPlot=0.3;
 
    if(SaveProjection){
@@ -373,7 +373,7 @@ void TResAmp(const char * filename){
      fit->SetParameter(1,0);
      fit->SetParameter(2,30e-2);
      proiettati = new TCanvas("canvasProjection","",1200,800);
-     gStyle->SetOptFit(1111);
+
      
      histotemp_t=hc_tl->ProjectionY("hc_totprojY",hc_tot->GetXaxis()->FindBin(cut[i]),hc_tot->GetXaxis()->FindBin(cut[i+1]));
      cout << "____________" << hc_tot->GetXaxis()->FindBin(cut[i])<<"_____" << hc_tot->GetXaxis()->FindBin(cut[i+1]) << endl;
@@ -395,6 +395,7 @@ void TResAmp(const char * filename){
        
        //histotemp_t->GetXaxis()->SetLimits(XMinPlot,XMaxPlot);
        //fit->GetXaxis()->SetLimits(XMinPlot,XMaxPlot);
+       gStyle->SetOptFit(1111);
        fit->GetXaxis()->SetTitle("t_{ave}-t_{MCP} [ns]");
        fit->GetYaxis()->SetTitle("counts");
        fit->SetTitle(title);
