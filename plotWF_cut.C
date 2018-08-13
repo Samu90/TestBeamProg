@@ -16,8 +16,8 @@ void plotWF_cut(const char * filename){
   
   TH1F *hr_amp =new TH1F("hr_amp","histos_ampr",500,0.0,1);
   TH1F *hl_amp =new TH1F("hl_amp","histos_ampl",500,0.0,1);
-  TF1 *fit_r = new TF1("f_r","landau",0.14,1);
-  TF1 *fit_l = new TF1("f_l","landau",0.14,1);
+  TF1 *fit_r = new TF1("f_r","landau",0.06,1);
+  TF1 *fit_l = new TF1("f_l","landau",0.1,1);
   TH1F *hr_cut =new TH1F("hr_cut","histos_cut",500,0.0,1);
   TH1F *hl_cut =new TH1F("hl_cut","histos_cut ",500,0.0,1);
   
