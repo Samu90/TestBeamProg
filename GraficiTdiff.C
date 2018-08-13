@@ -134,8 +134,6 @@ for(k=0;k<digiTree->GetEntries();k++){
 	h2_t->Fill((time[1+LEDi]-time[2+LEDi]),(time[1+LEDi]+time[2+LEDi])/2-time[0]);
 
       }//chiudo if
-	if(debug) cout << 0.8*fit_l->GetParameter(1) << " < " << amp_max[3]/max << " < " << 3*fit_l->GetParameter(1) << " ////  " << time[4+LEDi]-time[0] <<endl;
-      
 
   }//chiudo for k
 
@@ -363,8 +361,8 @@ for(k=0;k<digiTree->GetEntries();k++){
 
   
 
-   TCanvas* plottini = new TCanvas("altroCanvas","",800,600);
-   plottini->Divide(2,1);
+   // TCanvas* plottini = new TCanvas("altroCanvas","",800,600);
+   // plottini->Divide(2,1);
    hc_r->Reset();
    hc_l->Reset();
    
@@ -380,10 +378,12 @@ for(k=0;k<digiTree->GetEntries();k++){
      
    }//chiudo for k
    
+   /*
    plottini->cd(1);
    hc_l->Draw("COLZ");
    plottini->cd(2);
    hc_r->Draw("COLZ");
+   */
    
    TH1D* histo_cl;
    TH1D* histo_cr;
@@ -406,7 +406,7 @@ for(k=0;k<digiTree->GetEntries();k++){
    histo_cr->SetLineColor(kRed);
    gaus_ct->SetLineColor(kBlack);
 
-   TCanvas * timeres = new TCanvas("timeres","plot_timeres",600,550);
+   /*   TCanvas * timeres = new TCanvas("timeres","plot_timeres",600,550);
 
    TLegend* l1=new TLegend(0.1,0.7,0.48,0.9);
    l1->SetHeader("time stamps");
@@ -430,6 +430,9 @@ for(k=0;k<digiTree->GetEntries();k++){
    histo_ct->Draw("same");
 
    l1->Draw();
+   */
+
+   
 
    TCanvas* tdiff = new TCanvas("tdiff","plot_tdiff",600,550);
    TLegend* l2=new TLegend(0.1,0.7,0.48,0.9);
@@ -437,6 +440,7 @@ for(k=0;k<digiTree->GetEntries();k++){
    l2->AddEntry(histo_ct,"t_ave-t_MCP");
    l2->AddEntry(histo_ctdiff,"t_ave-t_MCP(tdiff corr)");
    gaus_ctdiff->SetLineColor(kGreen);
+   histo_ct->Fit("gaus_ct");
    histo_ctdiff->Fit("gaus_ctdiff");
    histo_ctdiff->SetLineColor(kGreen);
    histo_ct->Draw();
