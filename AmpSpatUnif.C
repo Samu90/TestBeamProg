@@ -97,14 +97,7 @@ void AmpSpatUnif(const char * filename){
 
   
   max=4096;
-  /*for(k=0; k<digiTree->GetEntries(); k++){
-    digiTree->GetEntry(k);
-    if (k%10000==0) cout<<"On entry " <<k<<endl;
-    if(amp_max[3]>max) {max=amp_max[3];}
-    if(amp_max[4]>max) {max=amp_max[4];}
-  //if(time[3]-time[4]>tmax && time[3]-time[4]<10) {tmax = time[3]-time[4];}
 
-  } chiudo for */
 
   for(k=0;k<digiTree->GetEntries();k++){
     if (k%10000==0) cout<<"On entry " <<k<<endl;
@@ -143,8 +136,6 @@ void AmpSpatUnif(const char * filename){
 	h2_t->Fill((time[1+LEDi]-time[2+LEDi]),(time[1+LEDi]+time[2+LEDi])/2-time[0]);
 
       }//chiudo if
-	if(debug) cout << 0.8*fit_l->GetParameter(1) << " < " << amp_max[3]/max << " < " << 3*fit_l->GetParameter(1) << " ////  " << time[4+LEDi]-time[0] <<endl;
-      
 
   }//chiudo for k
 
@@ -326,7 +317,7 @@ void AmpSpatUnif(const char * filename){
   wf_c->cd(4);
   graph_lt->Draw("SAMEP");
 
-  wf_c->cd(6);
+  TCanvas* newcanv = new TCanvas();
   graph_rt->Draw("AP");
   graph_rt->GetXaxis()->SetLimits(-0.7,0.3);
   graph_rt->GetYaxis()->SetLimits(0.12,0.24);

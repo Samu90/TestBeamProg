@@ -232,7 +232,7 @@ for(k=0;k<digiTree->GetEntries();k++){
   graph_t->Draw("SAMEP");
   hyp_t->Draw("same");
 
- rymin_lc=rymin_l-hyp_l->Eval(0.25)+hyp_l->GetParameter(0);
+  rymin_lc=rymin_l-hyp_l->Eval(0.25)+hyp_l->GetParameter(0);
   rymax_lc=rymax_l-hyp_l->Eval(0.25)+hyp_l->GetParameter(0);
   rymin_rc=rymin_r-hyp_r->Eval(0.25)+hyp_r->GetParameter(0);
   rymax_rc=rymax_r-hyp_r->Eval(0.25)+hyp_r->GetParameter(0);
@@ -255,7 +255,7 @@ for(k=0;k<digiTree->GetEntries();k++){
       {
 	hc_l->Fill((time[1+LEDi]-hyp_l->Eval(amp_max[3]/max)+hyp_l->GetParameter(0)-(time[2+LEDi]-hyp_r->Eval(amp_max[4]/max)+hyp_r->GetParameter(0))),time[1+LEDi]-time[0]-hyp_l->Eval(amp_max[3]/max)+hyp_l->GetParameter(0));
         hc_r->Fill((time[1+LEDi]-hyp_l->Eval(amp_max[3]/max)+hyp_l->GetParameter(0)-(time[2+LEDi]-hyp_r->Eval(amp_max[4]/max)+hyp_r->GetParameter(0))),time[2+LEDi]-time[0]-hyp_r->Eval(amp_max[4]/max)+hyp_r->GetParameter(0));
-	hc_t->Fill((time[1+LEDi]-time[2+LEDi]),(time[1+LEDi]+time[2+LEDi])/2-time[0]-(hyp_r->Eval(amp_max[4]/max)-hyp_r->GetParameter(0)+hyp_r->Eval(amp_max[4]/max)-hyp_r->GetParameter(0))/2);
+	hc_t->Fill((time[1+LEDi]-(time[2+LEDi])),(time[1+LEDi]+time[2+LEDi])/2-time[0]-(hyp_r->Eval(amp_max[4]/max)-hyp_r->GetParameter(0)+hyp_r->Eval(amp_max[4]/max)-hyp_r->GetParameter(0))/2);
 
 	if(debug) cout << 0.8*fit_l->GetParameter(1) << " < " << amp_max[3]/max << " < " << 3*fit_l->GetParameter(1) << " ////  " << time[4+LEDi]-time[0] <<endl;
       }
@@ -310,30 +310,27 @@ for(k=0;k<digiTree->GetEntries();k++){
 
     if (0.8*(fit_l->GetParameter(1)) < (amp_max[4]/max) && (amp_max[4]/max) < (3*fit_l->GetParameter(1)) && amp_max[0]/max > 0.4 && amp_max[0]/max < 0.75)
       {
-	hc_tdiff->Fill(time[1+LEDi]-hyp_l->Eval(amp_max[3]/max)+hyp_l->GetParameter(0)-(time[2+LEDi]-hyp_r->Eval(amp_max[4]/max)+hyp_r->GetParameter(0)),(time[1+LEDi]+time[2+LEDi])/2-fit_tdiff->Eval(time[1+LEDi]-time[2+LEDi])+fit_tdiff->GetParameter(0)-time[0]-(hyp_r->Eval(amp_max[4]/max)-hyp_r->GetParameter(0)+hyp_l->Eval(amp_max[3]/max)-hyp_l->GetParameter(0))/2);
+	hc_tdiff->Fill(time[1+LEDi]-time[2+LEDi],(time[1+LEDi]+time[2+LEDi])/2-fit_tdiff->Eval(time[1+LEDi]-time[2+LEDi])+fit_tdiff->GetParameter(0)-time[0]-(hyp_r->Eval(amp_max[4]/max)-hyp_r->GetParameter(0)+hyp_l->Eval(amp_max[3]/max)-hyp_l->GetParameter(0))/2);
 	
       }
 
   }//chiudo for k
-    for(k=0;k<nbinx;k++){
    
-   
-    TH1D* histotemp_t;
 
+   for(k=0;k<nbinx;k++){ 
+     TH1D* histotemp_t;
+     
+     histotemp_t=hc_tdiff->ProjectionY("hc_tprojY",k,k);
+     
+     yt[k]=histotemp_t->GetMean();
+     RMS[2][k]= histotemp_t->GetMeanError();
+     
+     delete histotemp_t;
+   }//chiudo for k
    
-   
-    histotemp_t=hc_tdiff->ProjectionY("hc_tprojY",k,k);
-   
-   
-    yt[k]=histotemp_t->GetMean();
-    RMS[2][k]= histotemp_t->GetMeanError();
-
-    delete histotemp_t;
+    TGraphErrors* graph_tcdiff = new TGraphErrors(nbinx-1,xt,yt,0,RMS[2]);
 
     
-  }//chiudo for k
-
-    TGraphErrors* graph_tcdiff = new TGraphErrors(nbinx-1,xt,yt,0,RMS[2]);
     wf_c->cd(4);
     hc_l->GetYaxis()->SetTitle("t_left-t_MCP [ns]");
     hc_l->GetXaxis()->SetTitle("t_left-t_right [mV]");
@@ -344,15 +341,15 @@ for(k=0;k<digiTree->GetEntries();k++){
 
   
 
-   wf_c->cd(5);
-
-   hc_r->GetYaxis()->SetTitle("t_right-t_MCP [ns]");
-   hc_r->GetXaxis()->SetTitle("t_left-t_right [mV]");
-   hc_r->Draw("COLZ");
-   graph_rc->SetMarkerStyle(8);
-   graph_rc->SetMarkerSize(.5);
-   graph_rc->Draw("P");
-
+    wf_c->cd(5);
+    
+    hc_r->GetYaxis()->SetTitle("t_right-t_MCP [ns]");
+    hc_r->GetXaxis()->SetTitle("t_left-t_right [mV]");
+    hc_r->Draw("COLZ");
+    graph_rc->SetMarkerStyle(8);
+    graph_rc->SetMarkerSize(.5);
+    graph_rc->Draw("P");
+    
   
 
    wf_c->cd(6);
@@ -376,12 +373,10 @@ for(k=0;k<digiTree->GetEntries();k++){
 
      if (0.8*(fit_l->GetParameter(1)) < (amp_max[4]/max) && (amp_max[4]/max) < (3*fit_l->GetParameter(1)) && amp_max[0]/max > 0.4 && amp_max[0]/max < 0.75)
        {
-
 	 hc_l->Fill((time[1+LEDi]-hyp_l->Eval(amp_max[3]/max)+hyp_l->GetParameter(0)-(time[2+LEDi]-hyp_r->Eval(amp_max[4]/max)+hyp_r->GetParameter(0))),time[1+LEDi]-time[0]-hyp_l->Eval(amp_max[3]/max)+hyp_l->GetParameter(0)-fit_lc->Eval((time[1+LEDi]-hyp_l->Eval(amp_max[3]/max)+hyp_l->GetParameter(0)-(time[2+LEDi]-hyp_r->Eval(amp_max[4]/max)+hyp_r->GetParameter(0))))+fit_lc->GetParameter(0));
 	 
-	 hc_r->Fill((time[1+LEDi]-hyp_l->Eval(amp_max[3]/max)+hyp_l->GetParameter(0)-(time[2+LEDi]-hyp_r->Eval(amp_max[4]/max)+hyp_r->GetParameter(0))),time[2+LEDi]-time[0]-hyp_r->Eval(amp_max[4]/max)+hyp_r->GetParameter(0)-fit_rc->Eval((time[1+LEDi]-hyp_l->Eval(amp_max[3]/max)+hyp_l->GetParameter(0)-(time[2+LEDi]-hyp_r->Eval(amp_max[4]/max)+hyp_r->GetParameter(0))))+fit_rc->GetParameter(0));
-	 	 
-       }
+	 hc_r->Fill((time[1+LEDi]-hyp_l->Eval(amp_max[3]/max)+hyp_l->GetParameter(0)-(time[2+LEDi]-hyp_r->Eval(amp_max[4]/max)+hyp_r->GetParameter(0))),time[2+LEDi]-time[0]-hyp_r->Eval(amp_max[4]/max)+hyp_r->GetParameter(0)-fit_rc->Eval((time[1+LEDi]-hyp_l->Eval(amp_max[3]/max)+hyp_l->GetParameter(0)-(time[2+LEDi]-hyp_r->Eval(amp_max[4]/max)+hyp_r->GetParameter(0))))+fit_rc->GetParameter(0)); 	 
+       }// chiudo if
      
    }//chiudo for k
    
@@ -394,10 +389,12 @@ for(k=0;k<digiTree->GetEntries();k++){
    TH1D* histo_cr;
    TH1D* histo_ct;
    TH1D* histo_ctdiff;
+   
    TF1* gaus_cl = new TF1("gaus_cl","gaus",-2.5,-0.7);
    TF1* gaus_cr = new TF1("gaus_cr","gaus",-2.5,-0.7);
    TF1* gaus_ct = new TF1("gaus_ct","gaus",-2.5,-0.7);
    TF1* gaus_ctdiff = new TF1("gaus_ctdiff","gaus",6,8);
+
    histo_cl = hc_l->ProjectionY("histo_cl",0,nbinx);
    histo_cr = hc_r->ProjectionY("histo_cr",0,nbinx);
    histo_ct = hc_t->ProjectionY("histo_ct",0,nbinx);
@@ -494,6 +491,7 @@ for(k=0;k<digiTree->GetEntries();k++){
 
    TLegend* legenda[6];
    TString LegSigma;
+   
    for(i=0;i<6;i++){ 
      LegSigma="";
      LegSigma.Append("sigma=");
@@ -502,7 +500,7 @@ for(k=0;k<digiTree->GetEntries();k++){
      istogrammi[1][i]->Draw();
      istogrammi[2][i]->Draw("SAME");
      istogrammi[0][i]->Draw("SAME");
-
+     
      fittino[0][i]->Draw("SAME");
      fittino[1][i]->Draw("SAME");
      fittino[2][i]->Draw("SAME");
@@ -511,5 +509,5 @@ for(k=0;k<digiTree->GetEntries();k++){
      legenda[i]->AddEntry(istogrammi[0][i],LegSigma);
      legenda[i]->Draw();
    }
-
+   
 }
