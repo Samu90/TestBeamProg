@@ -359,7 +359,7 @@ void TResAmp(const char * filename){
    TString histoname;
    TString title;
    TF1* fit;
-   bool SaveProjection=true;
+   bool SaveProjection=false;
    Double_t XMinPlot=-0.3, XMaxPlot=0.3;
 
    if(SaveProjection){

@@ -120,8 +120,6 @@ void plotWF_time(const char * filename){
 	if(amp_max[4]/max < 0.35)h2_r->Fill(amp_max[4]/max,time[2+LEDi]-time[0]);
 	h2_t->Fill((time[1+LEDi]-time[2+LEDi]),(time[1+LEDi]+time[2+LEDi])/2-time[0]);
       }//chiudo if
-	if(debug) cout << 0.8*fit_l->GetParameter(1) << " < " << amp_max[3]/max << " < " << 3*fit_l->GetParameter(1) << " ////  " << time[4+LEDi]-time[0] <<endl;
-      
 
   }//chiudo for k
 
@@ -134,9 +132,6 @@ void plotWF_time(const char * filename){
     histotemp_l=h2_l->ProjectionY("ht_lprojY",k,k);
     histotemp_r=h2_r->ProjectionY("ht_rprojY",k,k);
     histotemp_t=h2_t->ProjectionY("ht_projY",k,k);
-
-
-
 
     xt[k]=txmin+(Float_t)(txmax-(txmin))/nbinx*k;
     yt[k]=histotemp_t->GetMean();
@@ -157,6 +152,7 @@ void plotWF_time(const char * filename){
     delete histotemp_t;
 
     if(k%20==0) cout << k << " / " << nbinx << endl;
+
   }//chiudo for k
 
 
@@ -205,9 +201,10 @@ void plotWF_time(const char * filename){
   graph_r->SetMarkerSize(.5);
   graph_r->Draw("P");
   hyp_r->Draw("same");
+
   wf_c->cd(3);
   h2_t->Draw("COLZ");
-  //  graph_t->Fit("hyp_t","RL");
+  graph_t->Fit("hyp_t","R");
   
   graph_t->SetMarkerStyle(8);
   graph_t->SetMarkerSize(.5);
@@ -261,6 +258,7 @@ void plotWF_time(const char * filename){
     delete histotemp_t;
 
     if(k%20==0) cout << k << " / " << nbinx << endl;
+
   }//chiudo for k
   
 
@@ -473,7 +471,7 @@ void plotWF_time(const char * filename){
   
   wf_c->cd(4);
   ht->Draw("COLZ");
-  g_t->Fit("fitg_t","0RL");
+  g_t->Fit("fitg_t","0L");
   g_t->SetMarkerStyle(8);
   g_t->SetMarkerSize(.5);
   g_t->Draw("P");
