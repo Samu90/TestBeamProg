@@ -495,22 +495,29 @@ for(k=0;k<digiTree->GetEntries();k++){
 
    TLegend* legenda[6];
    TString LegSigma;
-   
+   TString TTempo;
+
    for(i=0;i<6;i++){ 
      LegSigma="";
      LegSigma.Append("sigma=");
+     TTempo="";
+     TTempo.Append("|dt|<");
+     TTempo.Append(to_string(cut[i]));
+     TTempo.Resize(TTempo.Sizeof()-4);
+     TTempo.Append("ns");
      canvino->cd(i+1);
      
-     istogrammi[1][i]->Draw();
-     istogrammi[2][i]->Draw("SAME");
+     //istogrammi[1][i]->Draw();
+     //     istogrammi[2][i]->Draw("SAME");
      istogrammi[0][i]->Draw("SAME");
      
      fittino[0][i]->Draw("SAME");
-     fittino[1][i]->Draw("SAME");
-     fittino[2][i]->Draw("SAME");
+     //fittino[1][i]->Draw("SAME");
+     //fittino[2][i]->Draw("SAME");
      LegSigma.Append(to_string(fittino[0][i]->GetParameter(2)));
      legenda[i] = new TLegend();
-     legenda[i]->AddEntry(istogrammi[0][i],LegSigma);
+     legenda[i]->AddEntry(fittino[0][i],LegSigma);
+     legenda[i]->AddEntry(istogrammi[0][i],TTempo);
      legenda[i]->Draw();
    }
    
