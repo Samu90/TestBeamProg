@@ -308,8 +308,7 @@ for(k=0;k<digiTree->GetEntries();k++){
 
     if (0.8*(fit_l->GetParameter(1)) < (amp_max[4]/max) && (amp_max[4]/max) < (3*fit_l->GetParameter(1)) && amp_max[0]/max > 0.4 && amp_max[0]/max < 0.75)
       {
-	hc_tdiff->Fill(time[1+LEDi]-time[2+LEDi],(time[1+LEDi]+time[2+LEDi])/2-fit_tdiff->Eval(time[1+LEDi]-time[2+LEDi])+fit_tdiff->GetParameter(0)-time[0]-(hyp_r->Eval(amp_max[4]/max)-hyp_r->GetParameter(0)+hyp_l->Eval(amp_max[3]/max)-hyp_l->GetParameter(0))/2);
-	
+		 hc_tdiff->Fill(time[1+LEDi]-time[2+LEDi]+hyp_r->Eval(amp_max[4]/max)-hyp_r->GetParameter(0)-hyp_l->Eval(amp_max[3]/max)+hyp_l->GetParameter(0),(time[1+LEDi]+time[2+LEDi])/2-time[0]-(hyp_r->Eval(amp_max[4]/max)-hyp_r->GetParameter(0)+hyp_l->Eval(amp_max[3]/max)-hyp_l->GetParameter(0))/2-fit_tdiff->Eval(time[1+LEDi]-time[2+LEDi]+hyp_r->Eval(amp_max[4]/max)-hyp_r->GetParameter(0)-hyp_l->Eval(amp_max[3]/max)+hyp_l->GetParameter(0))+fit_tdiff->GetParameter(0));
       }
 
   }//chiudo for k
@@ -406,31 +405,6 @@ for(k=0;k<digiTree->GetEntries();k++){
    histo_cr->SetLineColor(kRed);
    gaus_ct->SetLineColor(kBlack);
 
-   /*   TCanvas * timeres = new TCanvas("timeres","plot_timeres",600,550);
-
-   TLegend* l1=new TLegend(0.1,0.7,0.48,0.9);
-   l1->SetHeader("time stamps");
-   l1->AddEntry(histo_cl,"t_left-t_MCP");
-   l1->AddEntry(histo_cr,"t_right-t_MCP");
-   l1->AddEntry(histo_cr,"t_ave-t_MCP");
-   
-   gStyle->SetOptStat("");
-   histo_ct->Draw();
-   gaus_ct->SetParameter(0,500);
-   histo_ct->GetYaxis()->SetTitle("counts");
-   histo_ct->GetXaxis()->SetTitle("t_{ave}-t_{MCP}(ns)");
-   histo_cl->SetLineColor(kBlue);
-
-   histo_cl->Fit("gaus_cl");
-   histo_cr->Fit("gaus_cr");
-   if (blind==true) histo_ct->Fit("gaus_ct");
-
-   histo_cr->Draw("same");
-   histo_cl->Draw("same");
-   histo_ct->Draw("same");
-
-   l1->Draw();
-   */
 
    
 
