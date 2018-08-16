@@ -23,7 +23,7 @@ void AmpSpatUnif(const char * filename){
   rxmin=0;
   rxmax=0.5;
 
-  Int_t nentries=digiTree->GetEntries();
+  Int_t nentries=digiTree->GetEntries(), counter1=0, counter2=0, counter3=0;
   Float_t Times1[nentries],Times2[nentries],Times3[nentries];
 
   const Int_t  nbinx=100,nbiny=120;
@@ -44,8 +44,8 @@ void AmpSpatUnif(const char * filename){
   TH1F *mcp_amp =new TH1F("mcp_amp","histomcp_ampl",nbinx,0.0,1);
 
 
-  TF1 *fit_r = new TF1("f_r","landau",0.14,1);
-  TF1 *fit_l = new TF1("f_l","landau",0.14,1);
+  TF1 *fit_r = new TF1("f_r","landau",0.08,1);
+  TF1 *fit_l = new TF1("f_l","landau",0.08,1);
 
 
   digiTree->SetBranchAddress("amp_max",&amp_max);
@@ -61,33 +61,40 @@ void AmpSpatUnif(const char * filename){
   for(k=0;k<digiTree->GetEntries();k++){
     digiTree->GetEntry(k);
     //cout<<"HERE"<<endl;
-    if(time[1+LEDi]-time[0]<50 && time[1+LEDi]-time[0]>0) {Times1[k]=time[1+LEDi]-time[0];}
-    else{Times1[k]=Times2[k-1];}
-    if(time[2+LEDi]-time[0]<50 && time[2+LEDi]-time[0]>0) {Times2[k]=time[2+LEDi]-time[0];}
-    else{Times2[k]=Times2[k-1];}  
-    if((time[1+LEDi]+time[2+LEDi])/2-time[0]<50 && (time[1+LEDi]+time[2+LEDi])/2-time[0]>-10) {Times3[k]=(time[1+LEDi]+time[2+LEDi])/2-time[0];}
-    else{Times3[k]=Times3[k-1];}
+    if(time[1+LEDi]-time[0]<15 && time[1+LEDi]-time[0]>0) {
+      counter1++;
+      Times1[counter1]=time[1+LEDi]-time[0];
+    }
+    //  else{Times1[k]=Times2[k-1];}
+    if(time[2+LEDi]-time[0]<15 && time[2+LEDi]-time[0]>0) {
+      counter2++;
+      Times2[counter2]=time[2+LEDi]-time[0];}
+    // else{Times2[k]=Times2[k-1];}  
+    if((time[1+LEDi]+time[2+LEDi])/2-time[0]<15 && (time[1+LEDi]+time[2+LEDi])/2-time[0]>-10) {
+      counter3++;
+      Times3[counter3]=(time[1+LEDi]+time[2+LEDi])/2-time[0];}
+    // else{Times3[k]=Times3[k-1];}
   }
   
-  Double_t mean1=TMath::Mean(nentries,Times1)-1.2;
-  Double_t rms1=TMath::RMS(nentries,Times1);
+  Double_t mean1=TMath::Mean(counter1,Times1);
+  Double_t rms1=TMath::RMS(counter1,Times1);
   cout<<mean1<<"________"<<rms1<<endl;
-  Double_t mean2=TMath::Mean(nentries,Times2)-1.2;
-  Double_t rms2=TMath::RMS(nentries,Times2);
+  Double_t mean2=TMath::Mean(counter2,Times2);
+  Double_t rms2=TMath::RMS(counter2,Times2);
   cout<<mean2<<"________"<<rms2<<endl;
-  Double_t mean3=TMath::Mean(nentries,Times3)-1.2;
-  Double_t rms3=TMath::RMS(nentries,Times3);
+  Double_t mean3=TMath::Mean(counter3,Times3);
+  Double_t rms3=TMath::RMS(counter3,Times3);
   cout<<mean3<<"________"<<rms3<<endl;
   
-  rymin_l=mean1-0.5*rms1;
-  rymax_l=mean1+0.5*rms1;
-  rymin_r=mean2-0.5*rms2;
-  rymax_r=mean2+0.5*rms2;
+  rymin_l=mean1-1.1*rms1;
+  rymax_l=mean1+0.8*rms1;
+  rymin_r=mean2-1.1*rms2;
+  rymax_r=mean2+0.8*rms2;
     
   
 
-  tymin=mean3-0.5*rms3;
-  tymax=mean3+0.5*rms3;
+  tymin=mean3-1.1*rms3;
+  tymax=mean3+0.8*rms3;
   
   
 
@@ -248,10 +255,10 @@ void AmpSpatUnif(const char * filename){
    for(k=0;k<digiTree->GetEntries();k++){
     digiTree->GetEntry(k);
     
-    if (0.8*(fit_l->GetParameter(1)) < (amp_max[4]/max) && (amp_max[4]/max) < (3*fit_l->GetParameter(1)) && amp_max[0]/max > mcp_amp->GetMean()-1.5*mcp_amp->GetRMS() && amp_max[0]/max < mcp_amp->GetMean()+1.5*mcp_amp->GetRMS())
+    if (0.8*(fit_l->GetParameter(1)) < (amp_max[4]/max) && (amp_max[4]/max) < (3*fit_l->GetParameter(1)) && amp_max[0]/max > 0.4 && amp_max[0]/max < 0.75)
      {
-	hc_l->Fill(time[2+LEDi]-hyp_r->Eval(amp_max[4]/max)+hyp_r->GetParameter(0)-(time[1+LEDi]-hyp_l->Eval(amp_max[3]/max)+hyp_l->GetParameter(0)), amp_max[3]/max);
-	hc_r->Fill(time[2+LEDi]-hyp_r->Eval(amp_max[4]/max)+hyp_r->GetParameter(0)-(time[1+LEDi]-hyp_l->Eval(amp_max[3]/max)+hyp_l->GetParameter(0)), amp_max[4]/max);
+       hc_l->Fill(time[1+LEDi]/*-hyp_l->Eval(amp_max[3]/max)+hyp_l->GetParameter(0)*/-time[2+LEDi]/*-hyp_r->Eval(amp_max[4]/max)+hyp_r->GetParameter(0))*/, amp_max[3]/max);
+       hc_r->Fill(time[1+LEDi]/*-hyp_l->Eval(amp_max[3]/max)+hyp_l->GetParameter(0)*/-time[2+LEDi]/*-hyp_r->Eval(amp_max[4]/max)+hyp_r->GetParameter(0))*/, amp_max[4]/max);
     }
     
    }//chiudo for k
@@ -292,8 +299,8 @@ void AmpSpatUnif(const char * filename){
    }//chiudo for k
    
    
-  TGraphErrors* graph_rt=new TGraphErrors(newbin-1,x_r,y_r,0,rmsy_r);
-  TGraphErrors* graph_lt=new TGraphErrors(newbin-1,x_l,y_l,0,rmsy_l);  
+  TGraphErrors* graph_rt=new TGraphErrors(newbin-1,x_r,y_r,0,RMS[0]);
+  TGraphErrors* graph_lt=new TGraphErrors(newbin-1,x_l,y_l,0,RMS[1]);  
   
   //TCanvas* imma = new TCanvas("mycanv","title",1000,600);
   TLegend* l1=new TLegend(0.2,0.3,0.2,0.3);
@@ -319,7 +326,7 @@ void AmpSpatUnif(const char * filename){
 
   TCanvas* newcanv = new TCanvas();
   graph_rt->Draw("AP");
-  graph_rt->GetXaxis()->SetLimits(-0.7,0.3);
+  graph_rt->GetXaxis()->SetLimits(-0.3,0.7);
   graph_rt->GetYaxis()->SetLimits(0.12,0.24);
   graph_lt->Draw("SAMEP");
 
