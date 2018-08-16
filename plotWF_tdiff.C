@@ -1,7 +1,3 @@
-#include <iostream>
-#include <string>
-#include <type_traits>
-
 void plotWF_tdiff(const char * filename){
 
 
