@@ -28,7 +28,7 @@ void plotWF_lsig(TFile* file,Float_t* Resol,Float_t* errResol,Float_t index){
   rxmax=0.5;
 
   
-  const Int_t  nbinx=200,nbiny=300;
+  const Int_t  nbinx=150,nbiny=250;
   
   rymin_l=5;
   rymax_l=21;
@@ -526,7 +526,7 @@ void Ris(TFile* file,Float_t* Resol,Float_t* errResol,Float_t* ResolHisto,Float_
    }//chiudo for k
     
    TGraphErrors* graph_tcdiff = new TGraphErrors(nbinx-1,xt,yt,0,RMS[2]);
-   graph_tcdiff->Fit("retta","0R");
+   graph_tcdiff->Fit("retta","0");
    
    wf_c->cd(4);
    hc_l->GetYaxis()->SetTitle("t_left-t_MCP [ns]");
@@ -622,7 +622,7 @@ void Ris(TFile* file,Float_t* Resol,Float_t* errResol,Float_t* ResolHisto,Float_
    bool ConfrontoTdiff=true;
    
    if(ConfrontoTdiff){
-     TCanvas* ConfCanv = new TCanvas("confronto","",1200,1200);
+     TCanvas* ConfCanv = new TCanvas("confronto","",1200,600);
      gStyle->SetOptFit();
      ConfCanv->Divide(3,1);
      
@@ -640,7 +640,8 @@ void Ris(TFile* file,Float_t* Resol,Float_t* errResol,Float_t* ResolHisto,Float_
      ConfCanv->cd(3);
      hc_tdiff->Draw("COLZ");
      graph_tcdiff->Draw("P");
-     graph_tcdiff->Fit("retta");
+     graph_tcdiff->Fit("retta","0");
+     retta->DrawF1(-1,1,"SAME");
      
      ConfCanv->SaveAs(("HDCRPlot/Confronto"+to_string((int)index)+".pdf").c_str());
      ConfCanv->Close();
