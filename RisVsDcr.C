@@ -1,4 +1,29 @@
-void Ris(TFile* file,Float_t* Resol,Float_t* errResol,Int_t index){
+#include <TFile.h>
+#include <TTree.h>
+#include <TH1F.h>
+#include <TF1.h>
+#include <TMath.h>
+#include <TLegend.h>
+#include <TLatex.h>
+#include <TH2F.h>
+#include <TCanvas.h>
+#include <TFile.h>
+#include <TGraphErrors.h>
+#include <TStyle.h>
+#include <TSystem.h>
+
+
+void Proiezione(TH2F* hl,TH2F* hr,Int_t nxbin,){
+  TH1D* proj[2];
+  proj[0]=ProjectionY("h2_lprojY",0,nxbin);
+  proj[1]=ProjectionY("h2_lprojY",0,nxbin);
+  
+  
+
+}
+
+
+void Ris(TFile* file,Float_t* Resol,Float_t* errResol,Float_t index){
 
 
   //TFile*  file= TFile::Open(filename);
@@ -27,7 +52,7 @@ void Ris(TFile* file,Float_t* Resol,Float_t* errResol,Int_t index){
   Double_t sigma[50],erry[50],cut[50],errx[50];
   
   txmin=-0.9;
-  txmax=1.2;
+  txmax=1.4;
   
   
   Double_t x_r[nbinx],y_r[nbinx], x_l[nbinx],y_l[nbinx],rmsy_l[nbinx],rmsy_r[nbinx];
@@ -100,7 +125,7 @@ void Ris(TFile* file,Float_t* Resol,Float_t* errResol,Int_t index){
   
 
   tymin=mean3-1.2*rms3;
-  tymax=mean3+0.8*rms3;
+  tymax=mean3+1.2*rms3;
  
 
 
@@ -142,7 +167,7 @@ void Ris(TFile* file,Float_t* Resol,Float_t* errResol,Int_t index){
     hr_amp->Draw();
     fit_r->Draw("SAME");
     
-    LandCanv->SaveAs(("HDCRPlot/Landau"+to_string(index)+".pdf").c_str());
+    LandCanv->SaveAs(("HDCRPlot/Landau"+to_string((int)index)+".pdf").c_str());
     LandCanv->Close();
   }
 
@@ -385,7 +410,7 @@ void Ris(TFile* file,Float_t* Resol,Float_t* errResol,Int_t index){
    graph_tcdiff->SetMarkerSize(.5);
    graph_tcdiff->Draw("P");
 
-   wf_c->SaveAs(("HDCRPlot/Controllo"+to_string(index)+".pdf").c_str());
+   wf_c->SaveAs(("HDCRPlot/Controllo"+to_string((int)index)+".pdf").c_str());
    wf_c->Close();
    /*#################################################################################################################################*/ 
    
@@ -432,7 +457,7 @@ void Ris(TFile* file,Float_t* Resol,Float_t* errResol,Int_t index){
    l2->AddEntry(histo_ctdiff,"t_ave-t_MCP(tdiff corr)");
    l2->AddEntry(gaus_ctdiff,("#sigma="+to_string(gaus_ctdiff->GetParameter(2))).c_str());
    l2->Draw();
-   tdiff->SaveAs(("HDCRPlot/Gaussiane"+to_string(index)+".pdf").c_str());
+   tdiff->SaveAs(("HDCRPlot/Gaussiane"+to_string((int)index)+".pdf").c_str());
    tdiff->Close();
      
    bool ConfrontoTdiff=true;
@@ -458,7 +483,7 @@ void Ris(TFile* file,Float_t* Resol,Float_t* errResol,Int_t index){
      graph_tcdiff->Draw("P");
      graph_tcdiff->Fit("retta");
      
-     ConfCanv->SaveAs(("HDCRPlot/Confronto"+to_string(index)+".pdf").c_str());
+     ConfCanv->SaveAs(("HDCRPlot/Confronto"+to_string((int)index)+".pdf").c_str());
      ConfCanv->Close();
    }
 
@@ -467,7 +492,8 @@ void Ris(TFile* file,Float_t* Resol,Float_t* errResol,Int_t index){
 
 
 void RisVsDcr(){
-  Int_t nfiles=19;
+  //Int_t nfiles=19;
+  Int_t nfiles=5;
   
   TFile* myfile[nfiles];
   Float_t sigma[nfiles],errsigma[nfiles];
@@ -475,11 +501,11 @@ void RisVsDcr(){
   Float_t bias[nfiles],NINOthr[nfiles],DCR[nfiles];
   Float_t biasPl[nfiles],NINOthrPl[nfiles],DCRPl[nfiles];
   
-  gSystem->Exec("rm -r -f DCRPlot");
+  gSystem->Exec("rm -r -f HDCRPlot");
   gSystem->Exec("mkdir HDCRPlot");
 
   for(i=0;i<nfiles;i++){
-    myfile[i]=TFile::Open(("Pd/DCRNum/"+to_string(i)+".root").c_str());    
+    myfile[i]=TFile::Open(("Pd/DCR10072/"+to_string(i)+".root").c_str());    
   }
   
   TTree* info[nfiles];
@@ -490,23 +516,47 @@ void RisVsDcr(){
     info[i]->SetBranchAddress("NINOthr_bar",&NINOthr[i]);
     info[i]->SetBranchAddress("Vbias_bar",&bias[i]);
   }
-
+gROOT->SetBatch(kTRUE);
   for(i=0;i<nfiles;i++){
     info[i]->GetEntry(1);
-    Ris(myfile[i],&sigma[i],&errsigma[i],i);
     biasPl[i]=bias[i];
     NINOthrPl[i]= NINOthr[i];
     DCRPl[i]=DCR[i];
-  }
+    Ris(myfile[i],&sigma[i],&errsigma[i],DCRPl[i]);
+}
+gROOT->SetBatch(kFALSE);
+
+
   TCanvas* defcanv = new TCanvas("RisvsDCR","",600,400);
+  defcanv->SetLogy();
   TGraphErrors* graph = new TGraphErrors(nfiles,DCRPl,sigma,0,errsigma);
   graph->GetXaxis()->SetTitle("DRC [#muA]");
   graph->GetYaxis()->SetTitle("t_{res} [ns]");
   graph->SetMarkerStyle(8);
   graph->SetMarkerSize(.8);
+
+   graph->Draw("AP");
+  
+   defcanv->SaveAs("HDCRPlot/plot.pdf");
+
+  TLatex* tex[nfiles];
+  cout<<"HERE"<<endl;
+  for(i=0;i<nfiles;i++){
+    cout<<"HERE"<<endl;
+    
+    tex[i]= new TLatex(DCRPl[i],sigma[i],( (to_string((int)NINOthrPl[i]))+"   "+to_string((int)biasPl[i])).c_str());
+    tex[i]->SetTextSize(0.035);
+    tex[i]->SetLineWidth(2);
+    tex[i]->SetLineColor(i);
+    
+      
+    tex[i]->Draw();
+    
+    
+  }
   
   
-  graph->Draw("AP");
+ 
   
  
 
