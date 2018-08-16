@@ -4,3 +4,6 @@ trees_TB
 *.root
 HistoTResAmp
 *#
+*_C.d
+*.so
+*.pcm
