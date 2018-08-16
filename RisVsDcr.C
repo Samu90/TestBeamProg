@@ -86,9 +86,6 @@ void plotWF_lsig(TFile* file,Float_t* Resol,Float_t* errResol,Float_t index){
 	h2_l->Fill(amp_max[3]/max,time[3+6]-time[0]);
 	h2_r->Fill(amp_max[4]/max,time[4+6]-time[0]);
 	h2_m->Fill((amp_max[3]+amp_max[4])/(2*max),(time[3+6]+time[4+6])/2-time[0]);
-
-
-	if(debug) cout << 0.8*fit_l->GetParameter(1) << " < " << amp_max[3]/max << " < " << 3*fit_l->GetParameter(1) << " ////  " << time[4]-time[0] <<endl;
       }
 
   }//chiudo for k
@@ -113,9 +110,9 @@ void plotWF_lsig(TFile* file,Float_t* Resol,Float_t* errResol,Float_t index){
   TF1* g_l = new TF1(((string)"g_l"+to_string((int)index)).c_str(),"gaus",0,21);
   TF1* g_m = new TF1(((string)"g_m"+to_string((int)index)).c_str(),"gaus",0,21);
   
-  histotemp_m->Fit(((string)"g_m"+to_string((int)index)).c_str(),"0");
-  histotemp_l->Fit(((string)"g_l"+to_string((int)index)).c_str(),"0");
-  histotemp_r->Fit(((string)"g_r"+to_string((int)index)).c_str(),"0");
+  histotemp_m->Fit(((string)"g_m"+to_string((int)index)).c_str(),"R0");
+  //histotemp_l->Fit(((string)"g_l"+to_string((int)index)).c_str(),"0");
+  //histotemp_r->Fit(((string)"g_r"+to_string((int)index)).c_str(),"0");
 
   
   gStyle->SetOptStat("");
@@ -129,16 +126,19 @@ void plotWF_lsig(TFile* file,Float_t* Resol,Float_t* errResol,Float_t index){
 
   histotemp_m->GetXaxis()->SetTitle("t_ave-t_MCP");
   histotemp_m->GetYaxis()->SetTitle("counts");
+  histotemp_m->GetXaxis()->SetLimits(histotemp_m->GetMean()-4*histotemp_m->GetRMS(),histotemp_m->GetMean()+4*histotemp_m->GetRMS());
+  
   
   histotemp_m->Draw();
-  histotemp_r->Draw("same");
-  histotemp_l->Draw("same");
-  g_l->Draw("same");
-  g_r->Draw("same");
+  //histotemp_r->Draw("same");
+  //histotemp_l->Draw("same");
+  //g_l->Draw("same");
+  //g_r->Draw("same");
   g_m->Draw("same");
 
   wf_c->SaveAs(("HDCRPlot/LargeGaus"+to_string((int)index)+".pdf").c_str());
   wf_c->Close();
+  
   delete h2_m;
   delete hr_amp;
   delete hl_amp;
@@ -183,7 +183,7 @@ void plotWF_lsig(TFile* file,Float_t* Resol,Float_t* errResol,Float_t index){
 
   
 
-void Ris(TFile* file,Float_t* Resol,Float_t* errResol,Float_t index){
+void Ris(TFile* file,Float_t* Resol,Float_t* errResol,Float_t* ResolHisto,Float_t index){
 
 
   //TFile*  file= TFile::Open(filename);
@@ -206,12 +206,12 @@ void Ris(TFile* file,Float_t* Resol,Float_t* errResol,Float_t index){
 
 
 
-  const Int_t  nbinx=250,nbiny=200;
+  const Int_t  nbinx=290,nbiny=200;
 
   int i;
   Double_t sigma[50],erry[50],cut[50],errx[50];
   
-  txmin=-0.9;
+  txmin=-1.1;
   txmax=1.4;
   
   
@@ -316,7 +316,7 @@ void Ris(TFile* file,Float_t* Resol,Float_t* errResol,Float_t index){
   bool DebugLand=true;
   
   if(DebugLand){
-    TCanvas* LandCanv = new TCanvas("mycanvas","",700,500);
+    TCanvas* LandCanv = new TCanvas("mycanvas","",1200,700);
     LandCanv->Divide(2,1);
     
     LandCanv->cd(1)->SetLogy();
@@ -498,9 +498,8 @@ void Ris(TFile* file,Float_t* Resol,Float_t* errResol,Float_t index){
    graph_tc->Fit("fit_tdiff","R0L");
    
    for(k=0;k<digiTree->GetEntries();k++){
-     
-     
      digiTree->GetEntry(k);
+     
      if (0.8*(fit_l->GetParameter(1)) < (amp_max[4]/max) && (amp_max[4]/max) < (3*fit_l->GetParameter(1)) && amp_max[0]/max > 0.4 && amp_max[0]/max < 0.75)
        {
 	 hc_tdiff->Fill(time[1+LEDi]-time[2+LEDi]+hyp_r->Eval(amp_max[4]/max)-hyp_l->Eval(amp_max[3]/max),(time[1+LEDi]+time[2+LEDi])/2-time[0]-(hyp_r->Eval(amp_max[4]/max)+hyp_l->Eval(amp_max[3]/max))/2-fit_tdiff->Eval(time[1+LEDi]-time[2+LEDi]+hyp_r->Eval(amp_max[4]/max)-hyp_l->Eval(amp_max[3]/max)));
@@ -513,11 +512,7 @@ void Ris(TFile* file,Float_t* Resol,Float_t* errResol,Float_t index){
  
    
    TF1* retta = new TF1("retta","[0]+[1]*x",-0.2,0.4);
-   
-
    for(k=0;k<nbinx;k++){
-     
-     
      TH1D* histotemp_t;
      histotemp_t=hc_tdiff->ProjectionY("hc_tprojY",k,k);
      
@@ -588,38 +583,46 @@ void Ris(TFile* file,Float_t* Resol,Float_t* errResol,Float_t index){
       
    TCanvas* tdiff = new TCanvas("tdiff","plot_tdiff",600,550);
    TLegend* l2=new TLegend(0.1,0.7,0.48,0.9);
+  
+   gStyle->SetOptStat(0);
+   gStyle->SetOptFit(0);
    
+
    gaus_ct->SetParameter(0,80);
    gaus_ct->SetParameter(1, 0.0);
    gaus_ct->SetParameter(2,0.03);
    histo_ct->Fit("gaus_ct","R");
-   gaus_ctdiff->SetLineColor(kGreen);
    
+   gaus_ctdiff->SetLineColor(kGreen);
    gaus_ctdiff->SetParameter(0,80);
    gaus_ctdiff->SetParameter(1,0.0);
    gaus_ctdiff->SetParameter(2,0.04);
    
    histo_ctdiff->Fit("gaus_ctdiff","R");
    histo_ctdiff->SetLineColor(kGreen);
-   histo_ctdiff->Draw("SAME");
+   histo_ctdiff->Draw();   
    histo_ct->Draw("SAME");
    
    *Resol=gaus_ctdiff->GetParameter(2);
    *errResol=gaus_ctdiff->GetParError(2);
-
+   *ResolHisto=histo_ctdiff->GetRMS();
+   
    l2->SetHeader("t_{ave}-t_{MCP} distrib");
    l2->AddEntry(histo_ct,"t_ave-t_MCP");
    l2->AddEntry(gaus_ct,("#sigma="+to_string(gaus_ct->GetParameter(2))).c_str());
    l2->AddEntry(histo_ctdiff,"t_ave-t_MCP(tdiff corr)");
    l2->AddEntry(gaus_ctdiff,("#sigma="+to_string(gaus_ctdiff->GetParameter(2))).c_str());
+   l2->AddEntry(histo_ctdiff,("#sigma_{histo}="+to_string(histo_ctdiff->GetRMS())).c_str());
    l2->Draw();
    tdiff->SaveAs(("HDCRPlot/Gaussiane"+to_string((int)index)+".pdf").c_str());
    tdiff->Close();
-     
+
+   
+
    bool ConfrontoTdiff=true;
    
    if(ConfrontoTdiff){
-     TCanvas* ConfCanv = new TCanvas("confronto","",1200,800);
+     TCanvas* ConfCanv = new TCanvas("confronto","",1200,1200);
      gStyle->SetOptFit();
      ConfCanv->Divide(3,1);
      
@@ -632,7 +635,7 @@ void Ris(TFile* file,Float_t* Resol,Float_t* errResol,Float_t index){
      hc_t->GetXaxis()->SetTitle("t_left-t_right [ns]");
      hc_t->Draw("COLZ");
      graph_tc->Draw("P");
-     fit_tdiff->Draw("SAME");
+      fit_tdiff->Draw("SAME");
 
      ConfCanv->cd(3);
      hc_tdiff->Draw("COLZ");
@@ -662,7 +665,7 @@ void RisVsDcr(){
   Int_t nfiles=5;
   
   TFile* myfile[nfiles];
-  Float_t sigma[nfiles],errsigma[nfiles], lsigma[nfiles],errlsigma[nfiles];
+  Float_t sigma[nfiles],errsigma[nfiles],sigmaHisto[nfiles], lsigma[nfiles],errlsigma[nfiles];
   Int_t i;
   Float_t bias[nfiles],NINOthr[nfiles],DCR[nfiles];
   Float_t biasPl[nfiles],NINOthrPl[nfiles],DCRPl[nfiles];
@@ -693,7 +696,8 @@ void RisVsDcr(){
     NINOthrPl[i]= NINOthr[i];
     DCRPl[i]=DCR[i];
     
-    Ris(myfile[i],&sigma[i],&errsigma[i],DCRPl[i]);
+    Ris(myfile[i],&sigma[i],&errsigma[i],&sigmaHisto[i],DCRPl[i]);
+  
     plotWF_lsig(myfile[i],&lsigma[i],&errlsigma[i],DCRPl[i]);
 
   }
@@ -703,19 +707,28 @@ void RisVsDcr(){
 
   TCanvas* defcanv = new TCanvas("RisvsDCR","",600,400);
   //defcanv->SetLogy();
+  defcanv->SetLogy();
   TGraphErrors* graph = new TGraphErrors(nfiles,DCRPl,sigma,0,errsigma);
-  graph->GetXaxis()->SetTitle("DCR [#muA]");
-  graph->GetYaxis()->SetTitle("t_{res} [ns]");
   graph->SetMarkerStyle(8);
-  graph->SetMarkerSize(.8);
-
-  graph->Draw("AP");
+  graph->SetMarkerSize(.5);
+  graph->SetTitle("NINOthr=100 d.u. bias SiPM=72 ");
+  
+  
+  TGraphErrors* graphHisto = new TGraphErrors(nfiles,DCR,sigmaHisto,0,0);
+  graphHisto->GetXaxis()->SetTitle("DCR [#muA]");
+  graphHisto->GetYaxis()->SetTitle("t_{res} [ns]");
+  graphHisto->SetMarkerStyle(8);
+  graphHisto->SetMarkerSize(.5);
+  graphHisto->SetMarkerColor(kBlue);
+  
+  graphHisto->Draw("AP");
+  graph->Draw("SAMEP");
   
   defcanv->SaveAs("HDCRPlot/plot.pdf");
   
   TLatex* tex[nfiles];
   
-  for(i=0;i<nfiles;i++){
+  /* for(i=0;i<nfiles;i++){
     
     tex[i]= new TLatex(DCRPl[i],sigma[i],( (to_string((int)NINOthrPl[i]))+"   "+to_string((int)biasPl[i])).c_str());
     tex[i]->SetTextSize(0.035);
@@ -723,18 +736,20 @@ void RisVsDcr(){
     tex[i]->SetLineColor(i);
     tex[i]->Draw();
      
-  }
+    }*/
   
-   TCanvas* nocorr_sigma = new TCanvas("nocorr_sigma","nocorr_#sigma plot",600,550);
+   TCanvas* uncorrSigma = new TCanvas("uncorrSigma","nocorr_#sigma plot",600,550);
     TGraphErrors* ncsigma = new TGraphErrors(nfiles,DCR,lsigma,0,errlsigma);
     ncsigma->GetXaxis()->SetTitle("DCR [#muA]");
     ncsigma->GetYaxis()->SetTitle("#sigma_{t_{ave}}");
     ncsigma->SetMarkerStyle(8);
     ncsigma->SetMarkerSize(.4);
     ncsigma->Draw("AP"); 
+    uncorrSigma->SaveAs("HDCRPlot/RisVsDCR.pdf");
+   
 
     for(i=0;i<nfiles;i++){
-      cout << DCRPl[i] << "  " << sigma[i] << "   " << errsigma[i] << endl;
+      cout << DCRPl[i] << "   " <<sigmaHisto[i] << "  " << sigma[i] << "   " << errsigma[i] << endl;
     }
 
 }
