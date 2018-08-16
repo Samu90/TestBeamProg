@@ -94,14 +94,14 @@ void plotWF_tdiff(const char * filename){
   Double_t rms3=TMath::RMS(counter3,Times3);
   cout<<mean3<<"_________"<<rms3<<endl;
 
-  rymin_l=mean1-1*rms1;
+  rymin_l=mean1-1.2*rms1;
   rymax_l=mean1+0.8*rms1;
-  rymin_r=mean2-1*rms2;
+  rymin_r=mean2-1.2*rms2;
   rymax_r=mean2+0.8*rms2;
     
   
 
-  tymin=mean3-1*rms3;
+  tymin=mean3-1.2*rms3;
   tymax=mean3+0.8*rms3;
  
 
@@ -421,7 +421,7 @@ rymax_rc=rymax_r-hyp_r->Eval(fit_r->GetParameter(1)+0.5*fit_r->GetParameter(2))+
 
  
 
-     fit[i] = new TF1(((string)("fit"+to_string(i))).c_str(),"gaus",rymin_l,rymax_l);
+     fit[i] = new TF1(((string)("fit"+to_string(i))).c_str(),"gaus",0,10);
 
     
      histotemp_t[i]=hc_tdiff->ProjectionY(((string)("histoY"+to_string(i))).c_str(),hc_tdiff->GetXaxis()->FindBin(cut[i]-(cut[i+1]-cut[i])/2),hc_tdiff->GetXaxis()->FindBin(cut[i]+(cut[i+1]-cut[i])/2));
