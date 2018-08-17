@@ -42,7 +42,7 @@ void plotWF_lsig(TFile* file,Float_t* Resol,Float_t* errResol,Float_t index,Floa
   rymax_r=10;
   tymin=7;
   tymax=10;
-  txmin = 0.5;
+  txmin =-0.5;
   txmax=0.8;
  
   Double_t RMS[3][nbinx];
@@ -90,24 +90,28 @@ void plotWF_lsig(TFile* file,Float_t* Resol,Float_t* errResol,Float_t index,Floa
 
   TH2F* h2_l= new TH2F("h2_l", "histo h2_l",nbinx,rxmin,rxmax,nbiny,rymin_l,rymax_l);
   TH2F* h2_r= new TH2F("h2_r", "histo h2_r",nbinx,rxmin,rxmax,nbiny,rymin_r,rymax_r);
-  TH2F* h2_m= new TH2F("h2_m", "histo h2_m",nbinx,rxmin,rxmax,nbiny,rymin_r,rymax_r);
+  TH2F* h2_m= new TH2F("h2_m", "histo h2_m",nbinx,rxmin,rxmax,nbiny,rymin_l,rymax_l);
 
-  for(k=0;k<digiTree->GetEntries();k++){
+
+
+    for(k=0;k<digiTree->GetEntries();k++){
 
     digiTree->GetEntry(k);
- if (0.8*(fit_l->GetParameter(1)) < (amp_max[4]/max) && (amp_max[4]/max) < (3*fit_l->GetParameter(1)) && amp_max[0]/max > 0.4 && amp_max[0]/max < 0.75)
+	cout << "here" << endl;
+     if (0.8*(fit_l->GetParameter(1)) < (amp_max[4]/max) && (amp_max[4]/max) < (3*fit_l->GetParameter(1)) && amp_max[0]/max > 0.4 && amp_max[0]/max < 0.75)
    
       {
+	//	h2_l->Fill(amp_max[3]/max,time[LEDi]-time[0]);
+	//	h2_r->Fill(amp_max[4]/max,time[LEDi]-time[0]);
+	h2_m->Fill(time[1+LEDi]-time[2+LEDi],(time[1+LEDi]+time[2+LEDi])/2-time[0]);
 
-	h2_l->Fill(amp_max[3]/max,time[LEDi+1]-time[0]);
-	h2_r->Fill(amp_max[4]/max,time[LEDi+2]-time[0]);
-	h2_m->Fill(time[LEDi+1]-time[LEDi+2],(time[1+LEDi]+time[LEDi+2])/2-time[0]);
-
+	
+	
       }
-
-
-  }//chiudo for k
-
+     
+    }//chiudo for k
+    cout <<    h2_m->GetEntries() << endl;
+    h2_m->SaveAs("/HDCRplots/prova.png");
 
     // for(k=0;k<nbinx;k++){
     TH1D* histotemp_l;
@@ -147,7 +151,7 @@ void plotWF_lsig(TFile* file,Float_t* Resol,Float_t* errResol,Float_t index,Floa
 
   histotemp_m->GetXaxis()->SetTitle("t_ave-t_MCP");
   histotemp_m->GetYaxis()->SetTitle("counts");
-  histotemp_m->GetXaxis()->SetLimits(histotemp_m->GetMean()-4*histotemp_m->GetRMS(),histotemp_m->GetMean()+4*histotemp_m->GetRMS());
+  // histotemp_m->GetXaxis()->SetLimits(histotemp_m->GetMean()-4*histotemp_m->GetRMS(),histotemp_m->GetMean()+4*histotemp_m->GetRMS());
   
   
   histotemp_m->Draw();
@@ -798,7 +802,7 @@ void RisVsDcr(){
   
   TFile* myfile[nfiles];
 
-  Float_t sigma[nfiles],errsigma[nfiles], lsigma[nfiles],errlsigma[nfiles],lcsigma[nfiles],errlcsigma[nfiles];
+  Float_t sigma[nfiles],errsigma[nfiles],sigmaHisto[nfiles], lsigma[nfiles],errlsigma[nfiles],lcsigma[nfiles],errlcsigma[nfiles];
 
 
 
@@ -832,7 +836,7 @@ void RisVsDcr(){
     NINOthrPl[i]= NINOthr[i];
     DCRPl[i]=DCR[i];
 
-    Ris(myfile[i],&sigma[i],&errsigma[i],DCRPl[i]);
+    Ris(myfile[i],&sigma[i],&errsigma[i],&sigmaHisto[i],DCRPl[i]);
     plotWF_lsig(myfile[i],&lsigma[i],&errlsigma[i],DCRPl[i],&lcsigma[i],&errlcsigma[i]);
 
 
@@ -853,13 +857,13 @@ void RisVsDcr(){
   graph->SetTitle("NINOthr=100 d.u. bias SiPM=72 ");
   
   
-  TGraphErrors* graphHisto = new TGraphErrors(nfiles,DCR,sigmaHisto,0,0);
+   TGraphErrors* graphHisto = new TGraphErrors(nfiles,DCR,sigmaHisto,0,0);
   graphHisto->GetXaxis()->SetTitle("DCR [#muA]");
   graphHisto->GetYaxis()->SetTitle("t_{res} [ns]");
   graphHisto->SetMarkerStyle(8);
   graphHisto->SetMarkerSize(.5);
   graphHisto->SetMarkerColor(kBlue);
-  
+  graph->SetLineColor(kBlack);
   graphHisto->Draw("AP");
   graph->Draw("SAMEP");
   
@@ -867,7 +871,7 @@ void RisVsDcr(){
   
   TLatex* tex[nfiles];
   
-  /* for(i=0;i<nfiles;i++){
+   for(i=0;i<nfiles;i++){
     
     tex[i]= new TLatex(DCRPl[i],sigma[i],( (to_string((int)NINOthrPl[i]))+"   "+to_string((int)biasPl[i])).c_str());
     tex[i]->SetTextSize(0.035);
@@ -875,7 +879,7 @@ void RisVsDcr(){
     tex[i]->SetLineColor(i);
     tex[i]->Draw();
      
-    }*/
+    }
   
 
    TCanvas* nocorr_sigma = new TCanvas("nocorr_sigma","nocorr_#sigma plot",600,550);
@@ -883,20 +887,25 @@ void RisVsDcr(){
    TGraphErrors* csigma = new TGraphErrors(nfiles,DCR,lcsigma,0,errlcsigma);
    TLegend* l3 = new TLegend();
    
-
+   nocorr_sigma->cd();
     ncsigma->GetXaxis()->SetTitle("DCR [#muA]");
     ncsigma->GetXaxis()->Set(8,-70,2070);
+    ncsigma->GetYaxis()->SetRangeUser(0.03,0.25);
     ncsigma->GetYaxis()->SetTitle("#sigma_{t_{ave}}(ns)");
     ncsigma->SetMarkerStyle(8);
-
+    graph->SetMarkerColor(kRed);
+    
     ncsigma->SetMarkerSize(.8);
     csigma->SetMarkerStyle(8);
     csigma->SetMarkerSize(.8);
+    graph->SetMarkerSize(.8);
     csigma->SetMarkerColor(kBlue);
     ncsigma->Draw("AP");
     csigma->Draw("P");
+    graph->Draw("P");
     l3->AddEntry(ncsigma,"uncorr. #sigma ","P");
-    l3->AddEntry(csigma,"tdiff_corr. #sigma ","P"); 
+    l3->AddEntry(csigma,"tdiff_corr. #sigma ","P");
+    l3->AddEntry(graph,"amp walk+ tdiff corr #sigma","P");
     l3->Draw();
  
 
