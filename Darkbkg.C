@@ -109,6 +109,13 @@ void Darkbkg(){
   TH1D *amp_rdcr[ncurrents];
   TH1D *bgk_l[ncurrents];
   TH1D *bgk_r[ncurrents];
+  TF1 *fitr;
+  TF1 *fitl;
+  TF1 *fitr_dcr[ncurrents];
+  TF1 *fitl_dcr[ncurrents];
+ 
+ 
+  
   string filename = "Pd/ConfT100-B72-1.2.root";
   cout << "hereee" << endl;
    for(i=0;i<ncurrents;i++){
@@ -118,7 +125,17 @@ void Darkbkg(){
      amp_r[i] =new TH1D(((string)"amp_R_"+to_string((int)DCR[i])+(string)"#muA").c_str(),((string)"amp_R_"+to_string((int)DCR[i])+(string)"#muA").c_str(),500,0.0,1);
      bgk_l[i] =new TH1D(((string)"bgk_L_"+to_string((int)DCR[i])+(string)"#muA").c_str(),((string)"bgk_L_"+to_string((int)DCR[i])+(string)"#muA").c_str(),500,0.0,1);
      bgk_r[i] =new TH1D(((string)"bgk_R_"+to_string((int)DCR[i])+(string)"#muA").c_str(),((string)"bgk_R_"+to_string((int)DCR[i])+(string)"#muA").c_str(),500,0.0,1);
-   
+
+     fitl= new TF1(((string)"fitl"+to_string((int)DCR[i])+(string)"#muA").c_str(),"landau",0.05,1);
+     fitr= new TF1(((string)"fitr"+to_string((int)DCR[i])+(string)"#muA").c_str(),"landau",0.05,1);
+     fitl_dcr[i]= new TF1(((string)"fitl_dcr"+to_string((int)DCR[i])+(string)"#muA").c_str(),"landau",0.05,1);
+     fitr_dcr[i]= new TF1(((string)"fitr_dcr"+to_string((int)DCR[i])+(string)"#muA").c_str(),"landau",0.05,1);
+
+     amp_l[i]->Fit(((string)"fitl"+to_string((int)DCR[i])+(string)"#muA").c_str(),"0R");
+     amp_r[i]->Fit(((string)"fitr"+to_string((int)DCR[i])+(string)"#muA").c_str(),"0R");
+     amp_ldcr[i]->Fit(((string)"fitl_dcr"+to_string((int)DCR[i])+(string)"#muA").c_str(),"0R");
+     amp_rdcr[i]->Fit(((string)"fitr_dcr"+to_string((int)DCR[i])+(string)"#muA").c_str(),"0R");
+     
      super[i] =new TCanvas(((string)"super"+to_string((int)DCR[i])).c_str(),((string)"Plot super"+to_string((int)DCR[i])).c_str(),800,1200);
      wf[i] =new TPad(((string)"super"+to_string((int)DCR[i])).c_str(),((string)"Plot super"+to_string((int)DCR[i])).c_str(),0.0,0.2,1,1);
      bkg[i] =new TPad(((string)"super"+to_string((int)DCR[i])).c_str(),((string)"Plot super"+to_string((int)DCR[i])).c_str(),0.0,0.0,1,0.2);
@@ -146,8 +163,12 @@ void Darkbkg(){
      amp_ldcr[i]->SetTitle(((string)"amp_L_"+to_string((int)DCR[i])+(string)"#muA").c_str());
      amp_ldcr[i]->DrawCopy("HIST");
      amp_l[i]->SetLineColor(kRed);
+     fitl->SetLineColor(kRed);
+     fitl_dcr[i]->SetLineColor(kBlue);
      l1->AddEntry(amp_l[i],"ampL","l");
      amp_l[i]->DrawCopy("HISTsame");
+     fitl->Draw("same");
+     fitl_dcr[i]->Draw("same");
      l1->Draw();
      
      cout << Mipl[0][i] << endl;
