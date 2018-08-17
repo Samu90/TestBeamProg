@@ -853,20 +853,29 @@ void RisVsDcr(){
   defcanv->SetLogy();
   TGraphErrors* graph = new TGraphErrors(nfiles,DCRPl,sigma,0,errsigma);
   graph->SetMarkerStyle(8);
-  graph->SetMarkerSize(.5);
+  graph->SetMarkerSize(.8);
   graph->SetTitle("NINOthr=100 d.u. bias SiPM=72 ");
   
   
    TGraphErrors* graphHisto = new TGraphErrors(nfiles,DCR,sigmaHisto,0,0);
+
   graphHisto->GetXaxis()->SetTitle("DCR [#muA]");
-  graphHisto->GetYaxis()->SetTitle("t_{res} [ns]");
+  graphHisto->GetYaxis()->SetTitle("#sigma_{t_{ave}} [ns]");
   graphHisto->SetMarkerStyle(8);
-  graphHisto->SetMarkerSize(.5);
+  graphHisto->SetMarkerSize(.8);
   graphHisto->SetMarkerColor(kBlue);
+
   graph->SetLineColor(kBlack);
+  graphHisto->GetXaxis()->SetLimits(-40.0,2100.0);
+  
+  TLegend* legenda= new TLegend();
+  legenda->SetHeader("#sigma(DCR)");
+  legenda->AddEntry(graph,"GaussRMS");
+  legenda->AddEntry(graphHisto,"HistoRMS");
+  
   graphHisto->Draw("AP");
   graph->Draw("SAMEP");
-  
+  legenda->Draw();
   defcanv->SaveAs("HDCRPlot/plot.pdf");
   
   TLatex* tex[nfiles];
@@ -889,6 +898,7 @@ void RisVsDcr(){
    
    nocorr_sigma->cd();
     ncsigma->GetXaxis()->SetTitle("DCR [#muA]");
+
     ncsigma->GetXaxis()->Set(8,-70,2070);
     ncsigma->GetYaxis()->SetRangeUser(0.03,0.25);
     ncsigma->GetYaxis()->SetTitle("#sigma_{t_{ave}}(ns)");
@@ -908,6 +918,7 @@ void RisVsDcr(){
     l3->AddEntry(graph,"amp walk+ tdiff corr #sigma","P");
     l3->Draw();
  
+
 
     for(i=0;i<nfiles;i++){
       cout << DCRPl[i] << "   " <<sigmaHisto[i] << "  " << sigma[i] << "   " << errsigma[i] << endl;
