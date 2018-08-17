@@ -87,9 +87,9 @@ void plotWF_lsig(const char * filename){
 
     if (0.8*(fit_l->GetParameter(1)) < (amp_max[3]/max) && (amp_max[3]/max) < (3*fit_l->GetParameter(1)))
       {
-	h2_l->Fill(amp_max[3]/max,time[3+6]-time[0]);
-	h2_r->Fill(amp_max[4]/max,time[4+6]-time[0]);
-	h2_m->Fill((amp_max[3]+amp_max[4])/(2*max),(time[3+6]+time[4+6])/2-time[0]);
+	h2_l->Fill(amp_max[3]/max,time[1+32]-time[0]);
+	h2_r->Fill(amp_max[4]/max,time[2+32]-time[0]);
+	h2_m->Fill((amp_max[3]+amp_max[4])/(2*max),(time[1+32]+time[2+32])/2-time[0]);
 
 
 	if(debug) cout << 0.8*fit_l->GetParameter(1) << " < " << amp_max[3]/max << " < " << 3*fit_l->GetParameter(1) << " ////  " << time[4]-time[0] <<endl;
