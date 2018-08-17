@@ -711,20 +711,27 @@ void RisVsDcr(){
   defcanv->SetLogy();
   TGraphErrors* graph = new TGraphErrors(nfiles,DCRPl,sigma,0,errsigma);
   graph->SetMarkerStyle(8);
-  graph->SetMarkerSize(.5);
+  graph->SetMarkerSize(.8);
   graph->SetTitle("NINOthr=100 d.u. bias SiPM=72 ");
   
   
+
   TGraphErrors* graphHisto = new TGraphErrors(nfiles,DCR,sigmaHisto,0,0);
   graphHisto->GetXaxis()->SetTitle("DCR [#muA]");
-  graphHisto->GetYaxis()->SetTitle("t_{res} [ns]");
+  graphHisto->GetYaxis()->SetTitle("#sigma_{t_{ave}} [ns]");
   graphHisto->SetMarkerStyle(8);
-  graphHisto->SetMarkerSize(.5);
+  graphHisto->SetMarkerSize(.8);
   graphHisto->SetMarkerColor(kBlue);
+  graphHisto->GetXaxis()->SetLimits(-40.0,2100.0);
+  
+  TLegend* legenda= new TLegend();
+  legenda->SetHeader("#sigma(DCR)");
+  legenda->AddEntry(graph,"GaussRMS");
+  legenda->AddEntry(graphHisto,"HistoRMS");
   
   graphHisto->Draw("AP");
   graph->Draw("SAMEP");
-  
+  legenda->Draw();
   defcanv->SaveAs("HDCRPlot/plot.pdf");
   
   TLatex* tex[nfiles];
@@ -742,9 +749,10 @@ void RisVsDcr(){
    TCanvas* uncorrSigma = new TCanvas("uncorrSigma","nocorr_#sigma plot",600,550);
     TGraphErrors* ncsigma = new TGraphErrors(nfiles,DCR,lsigma,0,errlsigma);
     ncsigma->GetXaxis()->SetTitle("DCR [#muA]");
-    ncsigma->GetYaxis()->SetTitle("#sigma_{t_{ave}}");
+    ncsigma->GetYaxis()->SetTitle("#sigma_{t_{ave}} [ns]");
     ncsigma->SetMarkerStyle(8);
     ncsigma->SetMarkerSize(.4);
+    ncsigma->GetXaxis()->SetLimits(-40.0,2100.0);
     ncsigma->Draw("AP"); 
     uncorrSigma->SaveAs("HDCRPlot/RisVsDCR.pdf");
    
