@@ -46,7 +46,8 @@ void ProjAWC(TH2D* histo,string name,Int_t nbinx,Float_t index,string time){
 
 //####################################################################################################################################################################################################################### 
 void GaussianAmpWalk(TFile* file,Float_t index, Double_t rymin_l,Double_t rymax_l,Double_t rymin_r,Double_t rymax_r,Double_t tymin,Double_t tymax,Float_t* NAWRes,Float_t* errNAWRes){
-TTree* digiTree = (TTree*)file->Get("digi");
+
+  TTree* newtree2 = (TTree*)file->Get("digi");
 
   Float_t amp_max[54], time[54];
   int k,j,maxbin_l,maxbin_r,maxbin_t;
@@ -73,10 +74,10 @@ TTree* digiTree = (TTree*)file->Get("digi");
   Double_t RMS[3][nbinx];
   
   
-  Int_t nentries=digiTree->GetEntries(), counter1=0,counter2=0, counter3=0;
+  Int_t nentries=newtree2->GetEntries(), counter1=0,counter2=0, counter3=0;
   Float_t Times1[nentries],Times2[nentries],Times3[nentries];
   
-  for(k=0;k<digiTree->GetEntries();k++){
+  for(k=0;k<newtree2->GetEntries();k++){
     Times1[k]=0;
     Times2[k]=0;
     Times3[k]=0;
@@ -91,27 +92,27 @@ TTree* digiTree = (TTree*)file->Get("digi");
   TF1 *fit_l = new TF1("f_l","landau",0.04,1);
 
 
-  digiTree->SetBranchAddress("amp_max",&amp_max);
-  digiTree->SetBranchAddress("time",&time);
-  digiTree->SetBranchAddress("LED300",&LED300);
-  digiTree->SetBranchAddress("LED100",&LED100);
-  digiTree->SetBranchAddress("LED50",&LED50);
-  digiTree->SetBranchAddress("LED30",&LED30);
+  newtree2->SetBranchAddress("amp_max",&amp_max);
+  newtree2->SetBranchAddress("time",&time);
+  newtree2->SetBranchAddress("LED300",&LED300);
+  newtree2->SetBranchAddress("LED100",&LED100);
+  newtree2->SetBranchAddress("LED50",&LED50);
+  newtree2->SetBranchAddress("LED30",&LED30);
 
      
   max=4096;
 
 
-  for(k=0;k<digiTree->GetEntries();k++){
+  for(k=0;k<newtree2->GetEntries();k++){
     if (k%10000==0) cout<<"On entry " <<k<<endl;
-    digiTree->GetEntry(k);
+    newtree2->GetEntry(k);
 
     hr_amp->Fill(amp_max[3]/max);
     hl_amp->Fill(amp_max[4]/max);
     mcp_amp->Fill(amp_max[0]/max);
 
   }/*chiudo for */
-
+  
   LEDi=LED300;
   hr_amp->Scale(1/(hr_amp->Integral()));
   hl_amp->Scale(1/(hl_amp->Integral()));
@@ -145,9 +146,9 @@ TTree* digiTree = (TTree*)file->Get("digi");
   TH2D* h2_r= new TH2D("h2_r", "histo h2_r",nbinx,rxmin,rxmax,nbiny,rymin_r,rymax_r);
   TH2D* h2_t= new TH2D("h2_t", "histo h2_t",nbinx,txmin,txmax,nbiny,tymin,tymax);
 
-  for(k=0;k<digiTree->GetEntries();k++){
+  for(k=0;k<newtree2->GetEntries();k++){
 
-    digiTree->GetEntry(k);
+    newtree2->GetEntry(k);
 
     if (0.8*(fit_l->GetParameter(1)) < (amp_max[4]/max) && (amp_max[4]/max) < (3*fit_l->GetParameter(1)) && amp_max[0]/max > 0.4 && amp_max[0]/max < 0.75)
       {
@@ -276,11 +277,11 @@ TTree* digiTree = (TTree*)file->Get("digi");
 
   TH2D* hc_l= new TH2D("hc_l", "histo hc_l",nbinx,rxmin,rxmax,nbiny,rymin_lc,rymax_lc);
   TH2D* hc_r= new TH2D("hc_r", "histo hc_r",nbinx,rxmin,rxmax,nbiny,rymin_rc,rymax_rc);
-  TH2D* hc_t= new TH2D("hc_r", "histo hc_r",nbinx,txmin,txmax,nbiny,tymin_c,tymax_c);
+  TH2D* hc_t= new TH2D("hc_t", "histo hc_t",nbinx,txmin,txmax,nbiny,tymin_c,tymax_c);
 
-  for(k=0;k<digiTree->GetEntries();k++){
+  for(k=0;k<newtree2->GetEntries();k++){
     
-    digiTree->GetEntry(k);
+    newtree2->GetEntry(k);
     
     if (0.8*(fit_l->GetParameter(1)) < (amp_max[4]/max) && (amp_max[4]/max) < (3*fit_l->GetParameter(1)) && amp_max[0]/max > 0.4 && amp_max[0]/max < 0.75)
       {
@@ -291,8 +292,7 @@ TTree* digiTree = (TTree*)file->Get("digi");
     
   }//chiudo for k
   gSystem->Exec("mkdir HDCRPlot/NAW");
-  ProjAWC(h2_r,"uncorrNAW",nbinx,index,"NAW");
-  ProjAWC(hc_r,"corrNAW",nbinx,index,"NAW");
+  
   
   
   CanvAmpGauss->cd(4);
@@ -325,12 +325,15 @@ TTree* digiTree = (TTree*)file->Get("digi");
   
   tProjection->Fit("fitgaussiano","R");
   tProjection->Draw("SAME");
-  cout<< "E IL FIT??_________________________________________________________________________________________________________"<<endl;
+  
   RisDef->SaveAs(("HDCRPlot/NewAWTimeRes"+to_string((int)index)+".pdf").c_str());
   RisDef->Close();
   
   *NAWRes=fitgaussiano->GetParameter(2);
   *errNAWRes=fitgaussiano->GetParError(2);
+
+  ProjAWC(h2_r,"uncorrNAW",nbinx,index,"NAW");
+  ProjAWC(hc_r,"corrNAW",nbinx,index,"NAW");
 
   delete hr_amp;
   delete hl_amp;
@@ -349,7 +352,7 @@ TTree* digiTree = (TTree*)file->Get("digi");
 
 void plotWF_lsig(TFile* file,Float_t* Resol,Float_t* errResol,Float_t index,Float_t* Resolc,Float_t* errResolc){
 
-  TTree* digiTree = (TTree*)file->Get("digi");
+  TTree* newtree = (TTree*)file->Get("digi");
   
 
   Float_t amp_max[54], time[54];
@@ -388,21 +391,23 @@ void plotWF_lsig(TFile* file,Float_t* Resol,Float_t* errResol,Float_t index,Floa
   TF1 *fit_l = new TF1("f_l","landau",0.10,1);
 
 
-  digiTree->SetBranchAddress("amp_max",&amp_max);
-  digiTree->SetBranchAddress("time",&time);
+  newtree->SetBranchAddress("amp_max",&amp_max);
+  newtree->SetBranchAddress("time",&time);
 
-  digiTree->SetBranchAddress("LED300",&LED300);
-  digiTree->SetBranchAddress("LED100",&LED100);
-  digiTree->SetBranchAddress("LED50",&LED50);
-  digiTree->SetBranchAddress("LED30",&LED30);
-
+  newtree->SetBranchAddress("LED300",&LED300);
+  newtree->SetBranchAddress("LED100",&LED100);
+  newtree->SetBranchAddress("LED50",&LED50);
+  newtree->SetBranchAddress("LED30",&LED30);
+  
+  newtree->GetEntry(1);
+  
   LEDi=LED300;
 
   max=4096;
 
-  for(k=0;k<digiTree->GetEntries();k++){
+  for(k=0;k<newtree->GetEntries();k++){
     if (k%10000==0) cout<<"On entry " <<k<<endl;
-    digiTree->GetEntry(k);
+    newtree->GetEntry(k);
 
     hr_amp->Fill(amp_max[3]/max);
     hl_amp->Fill(amp_max[4]/max);
@@ -411,31 +416,32 @@ void plotWF_lsig(TFile* file,Float_t* Resol,Float_t* errResol,Float_t index,Floa
   hr_amp->Scale(1/(hr_amp->Integral()));
   hl_amp->Scale(1/(hl_amp->Integral()));
 
-  cout << tmax <<endl;
-  cout<< max << endl;
-
+  
   hr_amp->Fit("f_r","RQ0");
   hl_amp->Fit("f_l","RQ0");
 
 
-  TH2F* h2_l= new TH2F("h2_l", "histo h2_l",nbinx,rxmin,rxmax,nbiny,rymin_l,rymax_l);
-  TH2F* h2_r= new TH2F("h2_r", "histo h2_r",nbinx,rxmin,rxmax,nbiny,rymin_r,rymax_r);
-  TH2F* h2_m= new TH2F("h2_m", "histo h2_m",nbinx,rxmin,rxmax,nbiny,rymin_l,rymax_l);
+  TH2D* h2_l= new TH2D("h2_l", "histo h2_l",nbinx,rxmin,rxmax,nbiny,rymin_l,rymax_l);
+  TH2D* h2_r= new TH2D("h2_r", "histo h2_r",nbinx,rxmin,rxmax,nbiny,rymin_r,rymax_r);
+  TH2D* histotempi= new TH2D("histotempi", "histo histotempi",nbinx,txmin,txmax,nbiny,tymin,tymax);
 
-
-
-  for(k=0;k<digiTree->GetEntries();k++){
+  histotempi->Reset();
+  
+  newtree->GetEntry(9);
+  cout<<time[1+LEDi]-time[2+LEDi]<<endl;
+  
+  for(k=0;k<newtree->GetEntries();k++){
     
-    digiTree->GetEntry(k);
-    
-    if (0.8*(fit_l->GetParameter(1)) < (amp_max[4]/max) && (amp_max[4]/max) < (3*fit_l->GetParameter(1)) && amp_max[0]/max > 0.4 && amp_max[0]/max < 0.75)
-      
-      {
-	h2_m->Fill(time[1+LEDi]-time[2+LEDi],(time[1+LEDi]+time[2+LEDi])/2-time[0]);
-      }
+    newtree->GetEntry(k);
+   
+    if (0.8*(fit_l->GetParameter(1)) < (amp_max[4]/max) && (amp_max[4]/max) < (3*fit_l->GetParameter(1)) && amp_max[0]/max > 0.4 && amp_max[0]/max < 0.75){
+     
+      histotempi->Fill(time[1+LEDi]-time[2+LEDi],(time[1+LEDi]+time[2+LEDi])/2-time[0]);
+    }
     
   }//chiudo for k
-  cout <<    h2_m->GetEntries() << endl;
+  
+  cout <<    histotempi->GetEntries() << endl;
   
   // for(k=0;k<nbinx;k++){
   TH1D* histotemp_l;
@@ -444,7 +450,7 @@ void plotWF_lsig(TFile* file,Float_t* Resol,Float_t* errResol,Float_t index,Floa
   
   histotemp_l=h2_l->ProjectionY(((string)"h2_lprojY"+to_string((int)index)).c_str(),0,nbinx);
   histotemp_r=h2_r->ProjectionY(((string)"h2_rprojY"+to_string((int)index)).c_str(),0,nbinx);
-  histotemp_m=h2_m->ProjectionY(((string)"h2_tprojY"+to_string((int)index)).c_str(),0,nbinx);
+  histotemp_m=histotempi->ProjectionY(((string)"h2_tprojY"+to_string((int)index)).c_str(),0,nbinx);
   
 
   TCanvas* wf_c =new TCanvas("wfbis","Plot wfbis",600,550);
@@ -479,21 +485,21 @@ void plotWF_lsig(TFile* file,Float_t* Resol,Float_t* errResol,Float_t index,Floa
 
   wf_c->SaveAs(("HDCRPlot/LargeGaus"+to_string((int)index)+".pdf").c_str());
   wf_c->Close();
-  for(k=0;k<nbinx;k++){
+
+  
+ for(k=0;k<nbinx;k++){
    
     TH1D* histotemp_t;
    
 
-    histotemp_t=h2_m->ProjectionY("hc_tprojY",k,k);
+    histotemp_t=histotempi->ProjectionY("hc_tprojY",k,k);
    
     xt[k]=rxmin+(Float_t)(rxmax-(rxmin))/nbinx*k;
     yt[k]=histotemp_t->GetMean();
     RMS[2][k]= histotemp_t->GetMeanError();
 
-        
+            
     delete histotemp_t;
-    
-    
   }//chiudo for k
   
   TH2D* hc_tdiff= new TH2D("hc_tdiff", "histo hc_tdiff",nbinx,txmin,txmax,nbiny,tymin,tymax);
@@ -501,6 +507,7 @@ void plotWF_lsig(TFile* file,Float_t* Resol,Float_t* errResol,Float_t index,Floa
   TGraphErrors* graph_tc = new TGraphErrors(nbinx-1,xt,yt,0,RMS[2]);
 
   graph_tc->Fit("fit_tdiff","R0");
+
   TCanvas * tdiffonly = new TCanvas("","",600,500);
   tdiffonly->Divide(2,1);
   tdiffonly->cd(1);
@@ -512,9 +519,9 @@ void plotWF_lsig(TFile* file,Float_t* Resol,Float_t* errResol,Float_t index,Floa
  
    
   for(k=0;k<digiTree->GetEntries();k++){
+
     
-    
-    digiTree->GetEntry(k);
+    newtree->GetEntry(k);
     if (0.8*(fit_l->GetParameter(1)) < (amp_max[4]/max) && (amp_max[4]/max) < (3*fit_l->GetParameter(1)) && amp_max[0]/max > 0.4 && amp_max[0]/max < 0.75)
       {
 	hc_tdiff->Fill(time[1+LEDi]-time[2+LEDi],(time[1+LEDi]+time[2+LEDi])/2-time[0]-fit_tdiff->Eval(time[1+LEDi]-time[2+LEDi])+fit_tdiff->GetParameter(0));
@@ -579,7 +586,7 @@ void plotWF_lsig(TFile* file,Float_t* Resol,Float_t* errResol,Float_t index,Floa
   
   delete histo_ctdiff;
   delete gaus_ctdiff;
-  delete h2_m;
+  delete histotempi;
   delete h2_r;
   delete h2_l;
   delete fit_tdiff;
@@ -629,7 +636,7 @@ void Proiezione(TH2D* hl,TH2D* hr,TH2D* ht,Int_t nxbin,Float_t DCR){
 
 void Ris(TFile* file,Float_t* Resol,Float_t* errResol,Float_t* ResolHisto,Float_t index,Float_t* NAWRes,Float_t* errNAWRes){
 
-  TTree* digiTree = (TTree*)file->Get("digi");
+  TTree* newtree3 = (TTree*)file->Get("digi");
 
   Float_t amp_max[54], time[54];
   int k,j,maxbin_l,maxbin_r,maxbin_t;
@@ -658,10 +665,10 @@ void Ris(TFile* file,Float_t* Resol,Float_t* errResol,Float_t* ResolHisto,Float_
   Double_t RMS[3][nbinx];
   
   
-  Int_t nentries=digiTree->GetEntries(), counter1=0,counter2=0, counter3=0;
+  Int_t nentries=newtree3->GetEntries(), counter1=0,counter2=0, counter3=0;
   Float_t Times1[nentries],Times2[nentries],Times3[nentries];
   
-  for(k=0;k<digiTree->GetEntries();k++){
+  for(k=0;k<newtree3->GetEntries();k++){
     Times1[k]=0;
     Times2[k]=0;
     Times3[k]=0;
@@ -676,17 +683,17 @@ void Ris(TFile* file,Float_t* Resol,Float_t* errResol,Float_t* ResolHisto,Float_
   TF1 *fit_l = new TF1("f_l","landau",0.04,1);
 
 
-  digiTree->SetBranchAddress("amp_max",&amp_max);
-  digiTree->SetBranchAddress("time",&time);
-  digiTree->SetBranchAddress("LED300",&LED300);
-  digiTree->SetBranchAddress("LED100",&LED100);
-  digiTree->SetBranchAddress("LED50",&LED50);
-  digiTree->SetBranchAddress("LED30",&LED30);
+  newtree3->SetBranchAddress("amp_max",&amp_max);
+  newtree3->SetBranchAddress("time",&time);
+  newtree3->SetBranchAddress("LED300",&LED300);
+  newtree3->SetBranchAddress("LED100",&LED100);
+  newtree3->SetBranchAddress("LED50",&LED50);
+  newtree3->SetBranchAddress("LED30",&LED30);
 
-  digiTree->GetEntry(3);
+  newtree3->GetEntry(3);
   LEDi=LED300;
-  for(k=0;k<digiTree->GetEntries();k++){
-    digiTree->GetEntry(k);
+  for(k=0;k<newtree3->GetEntries();k++){
+    newtree3->GetEntry(k);
     
     if(time[1+LEDi]-time[0]<15 && time[1+LEDi]-time[0]>0) {
       counter1++;
@@ -728,9 +735,9 @@ void Ris(TFile* file,Float_t* Resol,Float_t* errResol,Float_t* ResolHisto,Float_
 
   
   cout<<"Exit"<<endl;
-  for(k=0;k<digiTree->GetEntries();k++){
+  for(k=0;k<newtree3->GetEntries();k++){
     if (k%10000==0) cout<<"On entry " <<k<<endl;
-    digiTree->GetEntry(k);
+    newtree3->GetEntry(k);
 
     hr_amp->Fill(amp_max[3]/max);
     hl_amp->Fill(amp_max[4]/max);
@@ -770,9 +777,9 @@ void Ris(TFile* file,Float_t* Resol,Float_t* errResol,Float_t* ResolHisto,Float_
   TH2D* h2_r= new TH2D("h2_r", "histo h2_r",nbinx,rxmin,rxmax,nbiny,rymin_r,rymax_r);
   TH2D* h2_t= new TH2D("h2_t", "histo h2_t",nbinx,txmin,txmax,nbiny,tymin,tymax);
 
-  for(k=0;k<digiTree->GetEntries();k++){
+  for(k=0;k<newtree3->GetEntries();k++){
 
-    digiTree->GetEntry(k);
+    newtree3->GetEntry(k);
 
     if (0.8*(fit_l->GetParameter(1)) < (amp_max[4]/max) && (amp_max[4]/max) < (3*fit_l->GetParameter(1)) && amp_max[0]/max > 0.4 && amp_max[0]/max < 0.75)
       {
@@ -887,9 +894,9 @@ void Ris(TFile* file,Float_t* Resol,Float_t* errResol,Float_t* ResolHisto,Float_
   
 
   
-   for(k=0;k<digiTree->GetEntries();k++){
+   for(k=0;k<newtree3->GetEntries();k++){
 
-    digiTree->GetEntry(k);
+    newtree3->GetEntry(k);
 
     if (0.8*(fit_l->GetParameter(1)) < (amp_max[4]/max) && (amp_max[4]/max) < (3*fit_l->GetParameter(1)) && amp_max[0]/max > 0.4 && amp_max[0]/max < 0.75)
       {
@@ -941,8 +948,8 @@ void Ris(TFile* file,Float_t* Resol,Float_t* errResol,Float_t* ResolHisto,Float_
   
    graph_tc->Fit("fit_tdiff","R0L");
    
-   for(k=0;k<digiTree->GetEntries();k++){
-     digiTree->GetEntry(k);
+   for(k=0;k<newtree3->GetEntries();k++){
+     newtree3->GetEntry(k);
      
      if (0.8*(fit_l->GetParameter(1)) < (amp_max[4]/max) && (amp_max[4]/max) < (3*fit_l->GetParameter(1)) && amp_max[0]/max > 0.4 && amp_max[0]/max < 0.75)
        {
@@ -1149,7 +1156,7 @@ void RisVsDcr(){
     DCRPl[i]=DCR[i];
 
     Ris(myfile[i],&sigma[i],&errsigma[i],&sigmaHisto[i],DCRPl[i],&NAWRes[i],&errNAWRes[i]);
-
+    
     plotWF_lsig(myfile[i],&lsigma[i],&errlsigma[i],DCRPl[i],&lcsigma[i],&errlcsigma[i]);
   }
   
