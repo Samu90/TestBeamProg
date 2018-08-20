@@ -12,9 +12,40 @@
 #include <TStyle.h>
 #include <TSystem.h>
 
+void ProjAWC(TH2D* histo,string name,Int_t nbinx,Float_t index,string time){
+  bool EditCanvas=false;
+
+  cout<<"STO QUA_________________________________________________________________________________________________________________________"<<endl;
+
+  TH1D* projection;
+  projection=histo->ProjectionY("Proiezione",0,nbinx);
+  if(EditCanvas) gROOT->SetBatch(kFALSE);
+  TCanvas* projAW = new TCanvas("proiezioni AW","",1200,800);
+  TF1* gaussFit = new TF1("projectionFit","gaus");
+ 
+  gaussFit->SetRange(projection->GetBinCenter(projection->GetMaximumBin())-1, projection->GetBinCenter(projection->GetMaximumBin())+1);
+  
+  gStyle->SetOptFit(0111);
+  gStyle->SetStatX(0.5);
+
+  projection->Fit("projectionFit","R");
+  
+  projection->Draw("");
+  
+  if(EditCanvas) gPad->WaitPrimitive();
+  
+  projAW->SaveAs(("HDCRPlot/"+time+"/ProiezioniR"+to_string((int)index)+name+".pdf").c_str());
+  projAW->Close();
+  
+  if(EditCanvas) gROOT->SetBatch(kTRUE);
+  
+  delete projAW;
+  delete gaussFit;
+}
+
 
 //####################################################################################################################################################################################################################### 
-void GaussianAmpWalk(TFile* file/*,Float_t* Resol,Float_t* errResol,Float_t* ResolHisto*/,Float_t index, Double_t rymin_l,Double_t rymax_l,Double_t rymin_r,Double_t rymax_r,Double_t tymin,Double_t tymax){
+void GaussianAmpWalk(TFile* file,Float_t index, Double_t rymin_l,Double_t rymax_l,Double_t rymin_r,Double_t rymax_r,Double_t tymin,Double_t tymax,Float_t* NAWRes,Float_t* errNAWRes){
 TTree* digiTree = (TTree*)file->Get("digi");
 
   Float_t amp_max[54], time[54];
@@ -157,7 +188,7 @@ TTree* digiTree = (TTree*)file->Get("digi");
     
     gaush_r = new TF1("gaushr","gaus",7.7,9);
     gaush_l = new TF1("gaushl","gaus",7.7,9);
-    ProiezioniTemp=new TCanvas("mycanv","",1200,800);
+    ProiezioniTemp = new TCanvas("mycanv","",1200,800);
     ProiezioniTemp->Divide(2,1);
     
     ProiezioniTemp->cd(1);
@@ -259,6 +290,10 @@ TTree* digiTree = (TTree*)file->Get("digi");
       }
     
   }//chiudo for k
+  gSystem->Exec("mkdir HDCRPlot/NAW");
+  ProjAWC(h2_r,"uncorrNAW",nbinx,index,"NAW");
+  ProjAWC(hc_r,"corrNAW",nbinx,index,"NAW");
+  
   
   CanvAmpGauss->cd(4);
   hc_l->GetYaxis()->SetTitle("t_right-t_MCP [ns]");
@@ -280,6 +315,23 @@ TTree* digiTree = (TTree*)file->Get("digi");
   CanvAmpGauss->Close();
   if(controlFit) gROOT->SetBatch(kTRUE);
 
+  
+  TH1D* tProjection = hc_t->ProjectionY("ProjectionTave",0,nbinx);
+  TCanvas* RisDef = new TCanvas("RisDef","",1200,700);
+
+  TF1* fitgaussiano = new TF1("fitgaussiano","gaus");
+  gStyle->SetOptFit(0111);
+  fitgaussiano->SetRange(tProjection->GetBinCenter(tProjection->GetMaximumBin())-1, tProjection->GetBinCenter(tProjection->GetMaximumBin())+1);
+  
+  tProjection->Fit("fitgaussiano","R");
+  tProjection->Draw("SAME");
+  cout<< "E IL FIT??_________________________________________________________________________________________________________"<<endl;
+  RisDef->SaveAs(("HDCRPlot/NewAWTimeRes"+to_string((int)index)+".pdf").c_str());
+  RisDef->Close();
+  
+  *NAWRes=fitgaussiano->GetParameter(2);
+  *errNAWRes=fitgaussiano->GetParError(2);
+
   delete hr_amp;
   delete hl_amp;
   delete h2_l;
@@ -288,6 +340,9 @@ TTree* digiTree = (TTree*)file->Get("digi");
   delete hc_r;
   delete hc_l;
   delete hc_t;
+  delete RisDef;
+  delete fitgaussiano;
+
 }//CHIUDO FUNZIONE
 
 //#######################################################################################################################################################################################################################
@@ -571,27 +626,8 @@ void Proiezione(TH2D* hl,TH2D* hr,TH2D* ht,Int_t nxbin,Float_t DCR){
   }
 //####################################################################################################################################################################################################################### 
 
-void ProjAWC(TH2D* histo,string name,Int_t nbinx,Float_t index){
-  
-  TH1D* projection;
-  projection=histo->ProjectionY("Proiezione",0,nbinx);
-  
-  TCanvas* projAW = new TCanvas("proiezioni AW","",1200,800);
-  TF1* gaussFit = new TF1("projectionFit","gaus");
-  projection->Fit("projectionFit");
-  projection->Draw("");
-  
-  projAW->SaveAs(("HDCRPLot/ProiezioniR"+to_string((int)index)+name+".pdf").c_str());
-  projAW->Close();
-  
-  delete projAW;
-  delete gaussFit;
-}
 
-
-
-//####################################################################################################################################################################################################################### 
-void Ris(TFile* file,Float_t* Resol,Float_t* errResol,Float_t* ResolHisto,Float_t index){
+void Ris(TFile* file,Float_t* Resol,Float_t* errResol,Float_t* ResolHisto,Float_t index,Float_t* NAWRes,Float_t* errNAWRes){
 
   TTree* digiTree = (TTree*)file->Get("digi");
 
@@ -866,8 +902,9 @@ void Ris(TFile* file,Float_t* Resol,Float_t* errResol,Float_t* ResolHisto,Float_
     
   }//chiudo for k
 
-   ProjAWC(h2_r,"uncorr",nbinx,index);
-   ProjAWC(hc_r,"corr",nbinx,index);
+   gSystem->Exec("mkdir HDCRPlot/OAW");
+   ProjAWC(h2_r,"uncorrOAW",nbinx,index,"OAW");
+   ProjAWC(hc_r,"corrOAW",nbinx,index,"OAW");
    
    for(k=0;k<nbinx;k++){
     TH1D* histotemp_l;
@@ -1067,7 +1104,7 @@ void Ris(TFile* file,Float_t* Resol,Float_t* errResol,Float_t* ResolHisto,Float_
    delete hl_amp;
    delete mcp_amp;
   
-   GaussianAmpWalk(file/*,Float_t* Resol,Float_t* errResol,Float_t* ResolHisto*/,index, rymin_l,rymax_l,rymin_r,rymax_r,tymin,tymax);
+   GaussianAmpWalk(file,index, rymin_l,rymax_l,rymin_r,rymax_r,tymin,tymax,NAWRes,errNAWRes);
 }
 
 //####################################################################################################################################################################################################################### 
@@ -1078,7 +1115,7 @@ void RisVsDcr(){
   TFile* myfile[nfiles];
 
   Float_t sigma[nfiles],errsigma[nfiles],sigmaHisto[nfiles], lsigma[nfiles],errlsigma[nfiles],lcsigma[nfiles],errlcsigma[nfiles];
-
+  Float_t NAWRes[nfiles],errNAWRes[nfiles];
 
 
   Int_t i;
@@ -1111,7 +1148,7 @@ void RisVsDcr(){
     NINOthrPl[i]= NINOthr[i];
     DCRPl[i]=DCR[i];
 
-    Ris(myfile[i],&sigma[i],&errsigma[i],&sigmaHisto[i],DCRPl[i]);
+    Ris(myfile[i],&sigma[i],&errsigma[i],&sigmaHisto[i],DCRPl[i],&NAWRes[i],&errNAWRes[i]);
 
     plotWF_lsig(myfile[i],&lsigma[i],&errlsigma[i],DCRPl[i],&lcsigma[i],&errlcsigma[i]);
   }
@@ -1148,6 +1185,7 @@ void RisVsDcr(){
   graph->Draw("SAMEP");
   legenda->Draw();
   defcanv->SaveAs("HDCRPlot/plot.pdf");
+
   //defcanv->Close();
   /*  TLatex* tex[nfiles];
   
@@ -1165,6 +1203,8 @@ void RisVsDcr(){
    TCanvas* nocorr_sigma = new TCanvas("nocorr_sigma","nocorr_#sigma plot",600,550);
    TGraphErrors* ncsigma = new TGraphErrors(nfiles,DCR,lsigma,0,errlsigma);
    TGraphErrors* csigma = new TGraphErrors(nfiles,DCR,lcsigma,0,errlcsigma);
+   TGraphErrors* NAWGraph = new TGraphErrors(nfiles,DCR,NAWRes,0,errNAWRes);
+   
    TLegend* l3 = new TLegend();
    
    //nocorr_sigma->cd();
@@ -1181,20 +1221,25 @@ void RisVsDcr(){
     csigma->SetMarkerSize(.8);
     graph->SetMarkerSize(.8);
     csigma->SetMarkerColor(kBlue);
+    NAWGraph->SetMarkerStyle(24);
+    NAWGraph->SetMarkerSize(.8);
+    
+
+
     ncsigma->Draw("AP");
     csigma->Draw("SAMEP");
     graph->Draw("SAMEP");
+    NAWGraph->Draw("SAMEP");
     l3->AddEntry(ncsigma,"uncorr. #sigma ","P");
     l3->AddEntry(csigma,"tdiff_corr. #sigma ","P");
-    l3->AddEntry(graph,"amp walk+ tdiff corr #sigma","P");
+    l3->AddEntry(graph,"amp walk+ tdiff corr. #sigma","P");
+    l3->AddEntry(NAWGraph,"new amp walk #sigma","P");
     l3->Draw();
  
 
 
     for(i=0;i<nfiles;i++){
-      cout << DCRPl[i] << "   " <<sigmaHisto[i] << "  " << sigma[i] << "   " << errsigma[i] << endl;
+      cout << DCRPl[i] << "   " <<sigmaHisto[i] << "  " << sigma[i] << "   " << errsigma[i]<< "      ____      "<<NAWRes[i]<<"    " << errNAWRes[i] << endl;
     }
-
-
 }
 //####################################################################################################################################################################################################################### 
