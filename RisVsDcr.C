@@ -130,49 +130,56 @@ TTree* digiTree = (TTree*)file->Get("digi");
 
   TH1D* histohampl;
   TH1D* histohampr;
-  TF1* TempFitL;
-  TF1* TempFitR;
+  TF1* gaush_r;
+  TF1* gaush_l;
+
   TCanvas* ProiezioniTemp;
   Int_t npoint=50;
   
   gSystem->Exec(("mkdir HDCRPlot/Gauss"+to_string((int)index)).c_str());
   
+  for(i=0;i<npoint;i++){
+    x_r[i]=0;
+    x_l[i]=0;
+    y_l[i]=0;
+    y_r[i]=0;
+    rmsy_r[i]=0;
+    rmsy_l[i]=0;
+  }
     
   for(i=0;i<npoint;i++){
     
-    histohampl=h2_l->ProjectionY("FettaAmp",h2_l->FindBin(rxmin+(rxmax-rxmin)/npoint*i),h2_l->FindBin(rxmin+(rxmax-rxmin)/npoint*(i+1)));
-    histohampr=h2_r->ProjectionY("FettaAmp",h2_r->FindBin(rxmin+(rxmax-rxmin)/npoint*i),h2_r->FindBin(rxmin+(rxmax-rxmin)/npoint*(i+1)));
-    
-    TempFitL= new TF1("TempFitL","gaus",7.8,9);
-    TempFitR= new TF1("TempFitR","gaus",7.8,9);
-
+    histohampl=h2_l->ProjectionY("FettaAmpL",h2_l->FindBin(rxmin+(rxmax-rxmin)/npoint*i),h2_l->FindBin(rxmin+(rxmax-rxmin)/npoint*(i+1)));
+    histohampr=h2_r->ProjectionY("FettaAmpR",h2_r->FindBin(rxmin+(rxmax-rxmin)/npoint*i),h2_r->FindBin(rxmin+(rxmax-rxmin)/npoint*(i+1)));
+  
     x_r[i]=rxmin+(rxmax-rxmin)/npoint*i+((rxmax-rxmin)/npoint)/2;
     x_l[i]=rxmin+(rxmax-rxmin)/npoint*i+((rxmax-rxmin)/npoint)/2;
     
+    gaush_r = new TF1("gaushr","gaus",7.7,9);
+    gaush_l = new TF1("gaushl","gaus",7.7,9);
     ProiezioniTemp=new TCanvas("mycanv","",1200,800);
     ProiezioniTemp->Divide(2,1);
     
     ProiezioniTemp->cd(1);
-    histohampl->Fit("TempFitL","RQ");
+    
     histohampl->Draw();
-    // TempFitL->Draw("SAME");
-    y_l[i]=TempFitL->GetParameter(1);
-    rmsy_l[i]=TempFitL->GetParameter(2);
+    histohampl->Fit("gaushl","R");
+    y_l[i]=gaush_l->GetParameter(1);
+    rmsy_l[i]=gaush_l->GetParError(1);
 
     ProiezioniTemp->cd(2);
-    histohampr->Fit("TempFitL","RQ");
-    histohampr->Draw();
-    //TempFitR->Draw("SAME");
-    y_r[i]=TempFitR->GetParameter(1);
-    rmsy_r[i]=TempFitR->GetParameter(2);
-
     
+    histohampr->Draw();
+    histohampr->Fit("gaushr","R");
+    y_r[i]=gaush_r->GetParameter(1);
+    rmsy_r[i]=gaush_r->GetParError(1);
+   
     
     ProiezioniTemp->SaveAs(("HDCRPlot/Gauss"+to_string((int)index)+"/GaussianeAmp"+to_string(i)+".pdf").c_str());
-
-    delete TempFitL;
-    delete TempFitR;
+    ProiezioniTemp->Close();
     delete ProiezioniTemp;
+    delete gaush_l;
+    delete gaush_r;
     //delete mcp_amp;
   
   }//chiudo for
@@ -194,26 +201,93 @@ TTree* digiTree = (TTree*)file->Get("digi");
   FitLog_r->SetParameter(1, 5);
   FitLog_r->SetParameter(2, 1.2);
   
+
+  bool controlFit=false;
+  
+  if(controlFit)gROOT->SetBatch(kFALSE);
+ 
   TCanvas* CanvAmpGauss = new TCanvas("canv amplitude gauss","",1200,800);
-  CanvAmpGauss->Divide(2,1);
+  CanvAmpGauss->Divide(3,2);
+  
   CanvAmpGauss->cd(1);
+  h2_l->GetYaxis()->SetTitle("t_left-t_MCP [ns]");
+  h2_l->GetXaxis()->SetTitle("max.amplitude [mV]");
   h2_l->Draw("COLZ");
-  graphGAmp_l->Draw("P");
+  graphGAmp_l->SetMarkerStyle(8);
+  graphGAmp_l->SetMarkerSize(.8);
+  graphGAmp_l->Draw("SAMEP");
   graphGAmp_l->Fit("FitLog_l");
 
   CanvAmpGauss->cd(2);
+  h2_r->GetYaxis()->SetTitle("t_right-t_MCP [ns]");
+  h2_r->GetXaxis()->SetTitle("max.amplitude [mV]");
   h2_r->Draw("COLZ");
-  graphGAmp_r->Draw("P");
-  graphGAmp_r->Fit("FitLog_l");
+  graphGAmp_r->SetMarkerStyle(8);
+  graphGAmp_r->SetMarkerSize(.8);
+  graphGAmp_r->Draw("SAMEP");
+  graphGAmp_r->Fit("FitLog_r");
   
-  CanvAmpGauss->SaveAs(("HDCRPlot/GaussianeAmp"+to_string(index)+".pdf").c_str());
+  CanvAmpGauss->cd(3);
+  h2_t->GetYaxis()->SetTitle("t_right-t_MCP [ns]");
+  h2_t->GetXaxis()->SetTitle("max.amplitude [mV]");
+  h2_t->Draw("COLZ");
+  
+
+
+  rymin_lc=rymin_l-FitLog_l->Eval(fit_l->GetParameter(1)+0.5*fit_l->GetParameter(2))+FitLog_l->GetParameter(0);
+  rymax_lc=rymax_l-FitLog_l->Eval(fit_l->GetParameter(1)+0.5*fit_l->GetParameter(2))+FitLog_l->GetParameter(0);
+  rymin_rc=rymin_r-FitLog_r->Eval(fit_r->GetParameter(1)+0.5*fit_r->GetParameter(2))+FitLog_r->GetParameter(0);
+  rymax_rc=rymax_r-FitLog_r->Eval(fit_r->GetParameter(1)+0.5*fit_r->GetParameter(2))+FitLog_r->GetParameter(0);
+  tymin_c=tymin-(FitLog_l->Eval(0.25)-FitLog_l->GetParameter(0)+FitLog_r->Eval(0.25)-FitLog_r->GetParameter(0))/2;
+  tymax_c=tymax-(FitLog_l->Eval(0.25)-FitLog_l->GetParameter(0)+FitLog_r->Eval(0.25)-FitLog_r->GetParameter(0))/2;
+  
+
+
+  TH2D* hc_l= new TH2D("hc_l", "histo hc_l",nbinx,rxmin,rxmax,nbiny,rymin_lc,rymax_lc);
+  TH2D* hc_r= new TH2D("hc_r", "histo hc_r",nbinx,rxmin,rxmax,nbiny,rymin_rc,rymax_rc);
+  TH2D* hc_t= new TH2D("hc_r", "histo hc_r",nbinx,txmin,txmax,nbiny,tymin_c,tymax_c);
+
+  for(k=0;k<digiTree->GetEntries();k++){
+    
+    digiTree->GetEntry(k);
+    
+    if (0.8*(fit_l->GetParameter(1)) < (amp_max[4]/max) && (amp_max[4]/max) < (3*fit_l->GetParameter(1)) && amp_max[0]/max > 0.4 && amp_max[0]/max < 0.75)
+      {
+	hc_l->Fill(amp_max[3]/max,time[1+LEDi]-time[0]-FitLog_l->Eval(amp_max[3]/max)+FitLog_l->GetParameter(0));
+        hc_r->Fill(amp_max[4]/max,time[2+LEDi]-time[0]-FitLog_r->Eval(amp_max[4]/max)+FitLog_r->GetParameter(0));
+	hc_t->Fill(time[1+LEDi]-time[2+LEDi],(time[1+LEDi]+time[2+LEDi])/2-time[0]-(FitLog_r->Eval(amp_max[4]/max)-FitLog_r->GetParameter(0)+FitLog_l->Eval(amp_max[3]/max)-FitLog_l->GetParameter(0))/2);
+      }
+    
+  }//chiudo for k
+  
+  CanvAmpGauss->cd(4);
+  hc_l->GetYaxis()->SetTitle("t_right-t_MCP [ns]");
+  hc_l->GetXaxis()->SetTitle("max.amplitude [mV]");
+  hc_l->Draw("COLZ");
+
+  CanvAmpGauss->cd(5);
+  hc_r->GetYaxis()->SetTitle("t_right-t_MCP [ns]");
+  hc_r->GetXaxis()->SetTitle("max.amplitude [mV]");
+  hc_r->Draw("COLZ");
+
+  CanvAmpGauss->cd(6);
+  hc_t->GetYaxis()->SetTitle("t_{ave}-t_MCP [ns]");
+  hc_t->GetXaxis()->SetTitle("t_{left}-t_{right} [ns]");
+  hc_t->Draw("COLZ");
+  
+  if(controlFit) gPad->WaitPrimitive();
+  CanvAmpGauss->SaveAs(("HDCRPlot/GaussianeAmp"+to_string((int)index)+".pdf").c_str());
   CanvAmpGauss->Close();
+  if(controlFit) gROOT->SetBatch(kTRUE);
 
   delete hr_amp;
   delete hl_amp;
   delete h2_l;
   delete h2_r;
-
+  delete h2_t;
+  delete hc_r;
+  delete hc_l;
+  delete hc_t;
 }//CHIUDO FUNZIONE
 
 //#######################################################################################################################################################################################################################
@@ -484,6 +558,27 @@ void Proiezione(TH2D* hl,TH2D* hr,TH2D* ht,Int_t nxbin,Float_t DCR){
     
   }
 //####################################################################################################################################################################################################################### 
+
+void ProjAWC(TH2D* histo,string name,Int_t nbinx,Float_t index){
+  
+  TH1D* projection;
+  projection=histo->ProjectionY("Proiezione",0,nbinx);
+  
+  TCanvas* projAW = new TCanvas("proiezioni AW","",1200,800);
+  TF1* gaussFit = new TF1("projectionFit","gaus");
+  projection->Fit("projectionFit");
+  projection->Draw("");
+  
+  projAW->SaveAs(("HDCRPLot/ProiezioniR"+to_string((int)index)+name+".pdf").c_str());
+  projAW->Close();
+  
+  delete projAW;
+  delete gaussFit;
+}
+
+
+
+//####################################################################################################################################################################################################################### 
 void Ris(TFile* file,Float_t* Resol,Float_t* errResol,Float_t* ResolHisto,Float_t index){
 
   TTree* digiTree = (TTree*)file->Get("digi");
@@ -686,9 +781,6 @@ void Ris(TFile* file,Float_t* Resol,Float_t* errResol,Float_t* ResolHisto,Float_
   TF1* hyp_l = new TF1("hyp_l","[0]+[2]*x + [3]*x**2+[4]*x**3+[5]*x**4+[6]*x**5+ [7]/x",0.5*fit_l->GetParameter(1),1.2*fit_l->GetParameter(1));
 
 
-
-
-
   TF1* hyp_t = new TF1("hyp_t","[1]*x**2+[2]*x+[0]",-0.1,0.65);
 
   Proiezione(h2_l,h2_r,h2_t,nbinx,index);
@@ -701,7 +793,7 @@ void Ris(TFile* file,Float_t* Resol,Float_t* errResol,Float_t* ResolHisto,Float_
 
   h2_l->GetYaxis()->SetTitle("t_left-t_MCP [ns]");
 
-   h2_l->GetXaxis()->SetTitle("max.amplitude [mV]");
+  h2_l->GetXaxis()->SetTitle("max.amplitude [mV]");
   h2_l->Draw("COLZ");
   graph_l->Fit("hyp_l","0");
   graph_l->SetMarkerStyle(8);
@@ -759,10 +851,13 @@ void Ris(TFile* file,Float_t* Resol,Float_t* errResol,Float_t* ResolHisto,Float_
 	hc_t->Fill(time[1+LEDi]-time[2+LEDi]+hyp_r->Eval(amp_max[4]/max)-hyp_l->Eval(amp_max[3]/max),(time[1+LEDi]+time[2+LEDi])/2-time[0]-(hyp_r->Eval(amp_max[4]/max)+hyp_l->Eval(amp_max[3]/max))/2);
 
       }
-
+    
   }//chiudo for k
 
-    for(k=0;k<nbinx;k++){
+   ProjAWC(h2_r,"uncorr",nbinx,index);
+   ProjAWC(hc_r,"corr",nbinx,index);
+   
+   for(k=0;k<nbinx;k++){
     TH1D* histotemp_l;
     TH1D* histotemp_r;
     TH1D* histotemp_t;
