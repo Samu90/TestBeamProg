@@ -1,0 +1,21 @@
+#!/bin/bash                                                                     
+
+
+       
+	export CFG=cfg/MTDTB_T10_May2018/MTDTB_T10_May2018_\
+conf1.cfg
+       
+	export str=""
+        for((i=83;$i<=85;i=$(($i+1)))); do
+	     export tmpstr=~ratramon/reco_ntuples
+             ./bin/H4Reco.exe $CFG 114$i
+	     export tmpstr=$tmpstr"/114"$i".root"
+       
+             export str="$str $tmpstr"
+        done
+
+        hadd ConfT100-B72-1.2DCR500 $str
+
+exit 0
+
+case
