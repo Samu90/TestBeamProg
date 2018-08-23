@@ -11,6 +11,7 @@
 #include <TGraphErrors.h>
 #include <TStyle.h>
 #include <TSystem.h>
+#include <TROOT.h> 
 
 void ProjAWC(TH2D* histo,string name,Int_t nbinx,Float_t index,string time){
   bool EditCanvas=false;
@@ -25,11 +26,11 @@ void ProjAWC(TH2D* histo,string name,Int_t nbinx,Float_t index,string time){
  
   gaussFit->SetRange(projection->GetBinCenter(projection->GetMaximumBin())-1, projection->GetBinCenter(projection->GetMaximumBin())+1);
   
-  gStyle->SetOptFit(0111);
+  gStyle->SetOptFit(1111);
   gStyle->SetStatX(0.5);
 
   projection->Fit("projectionFit","R");
-  
+  gStyle->SetOptFit(1111);
   projection->Draw("");
   
   if(EditCanvas) gPad->WaitPrimitive();
@@ -363,8 +364,8 @@ void plotWF_lsig(TFile* file,Float_t* Resol,Float_t* errResol,Float_t index,Floa
   bool debug=false;
   Double_t max=0,tmax=0;
 
-  rxmin=-0.5;
-  rxmax=0.8;
+  rxmin=-0.3;
+  rxmax=0.6;
 
 
   
@@ -461,11 +462,11 @@ void plotWF_lsig(TFile* file,Float_t* Resol,Float_t* errResol,Float_t index,Floa
   TF1* g_m = new TF1(((string)"g_m"+to_string((int)index)).c_str(),"gaus",7,10);
   //  hyp_r->SetParameter(0,10);
   // hyp_l->SetParameter(0,10);
-  histotemp_m->Fit(((string)"g_m"+to_string((int)index)).c_str(),"0R");
+  histotemp_m->Fit(((string)"g_m"+to_string((int)index)).c_str(),"0");
  
   
-  gStyle->SetOptFit(0000);
-  
+  gStyle->SetOptStat("");
+  gStyle->SetOptFit();
   histotemp_r->SetLineColor(kRed);
   histotemp_l->SetLineColor(kBlue);
   
@@ -507,19 +508,18 @@ void plotWF_lsig(TFile* file,Float_t* Resol,Float_t* errResol,Float_t index,Floa
   TGraphErrors* graph_tc = new TGraphErrors(nbinx-1,xt,yt,0,RMS[2]);
 
   graph_tc->Fit("fit_tdiff","R0");
-
-  TCanvas * tdiffonly = new TCanvas("","",600,500);
-  tdiffonly->Divide(2,1);
-  tdiffonly->cd(1);
-  h2_m->Draw("COLZ");
-  graph_tc->Draw("SAMEp");
+  TCanvas * prova = new TCanvas("","",600,500);
+  histotempi->Draw("COLZ");
+  graph_tc->Draw("SAME");
   fit_tdiff->Draw("same");
- 
- 
- 
-   
-  for(k=0;k<digiTree->GetEntries();k++){
+  //prova->SaveAs(((string)"HDCRPlot/prova"+ to_string(index)+(string)".png").c_str());
+  prova->Close();
+       
 
+  
+
+  for(k=0;k<newtree->GetEntries();k++){
+    
     
     newtree->GetEntry(k);
     if (0.8*(fit_l->GetParameter(1)) < (amp_max[4]/max) && (amp_max[4]/max) < (3*fit_l->GetParameter(1)) && amp_max[0]/max > 0.4 && amp_max[0]/max < 0.75)
@@ -531,7 +531,7 @@ void plotWF_lsig(TFile* file,Float_t* Resol,Float_t* errResol,Float_t index,Floa
   }
   
   
-  TF1* retta = new TF1("retta","[0]+[1]*x",-0.3,0.6);
+  TF1* retta = new TF1("retta","[0]+[1]*x",txmin+0.3,txmax-0.3);
   for(k=0;k<nbinx;k++){
     TH1D* histotemp_t;
     histotemp_t=hc_tdiff->ProjectionY("hc_tprojY",k,k);
@@ -545,30 +545,21 @@ void plotWF_lsig(TFile* file,Float_t* Resol,Float_t* errResol,Float_t index,Floa
   TH1D* histo_ctdiff;
   TGraphErrors* graph_tcdiff = new TGraphErrors(nbinx-1,xt,yt,0,RMS[2]);
   graph_tcdiff->Fit("retta","0R");
-  tdiffonly->cd(2);
-  hc_tdiff->Draw("colz");
-  graph_tcdiff->Draw("samep");
-  retta->Draw("same");
-  tdiffonly->SaveAs(((string)"controlplots/tdiffonly"+to_string(index)+(string)".eps").c_str());
-  tdiffonly->Close();
   histo_ctdiff = hc_tdiff->ProjectionY("histo_ctdiff",0,nbinx);
   
   TF1* gaus_ctdiff = new TF1(((string)"gaus_ctdiff"+to_string((int)index)).c_str(),"gaus", 7, 10);
   TCanvas* tdiff = new TCanvas("tdiff","plot_tdiff",600,550);
-  gStyle->SetOptStat(0);
-  gStyle->SetOptFit(0000);
-  TLegend* l2=new TLegend();
+  TLegend* l2=new TLegend(0.1,0.7,0.48,0.9);
   g_m->SetLineColor(kBlack);
   
   // g_m->Draw("same");
   gaus_ctdiff->SetLineColor(kGreen);
   gaus_ctdiff->SetParameter(0,histo_ctdiff->GetBinContent(histo_ctdiff->GetMaximumBin()));
   gaus_ctdiff->SetParLimits(0,histo_ctdiff->GetBinContent(histo_ctdiff->GetMaximumBin())-5,TMath::Infinity());
- 
+  
   histo_ctdiff->Fit(((string)"gaus_ctdiff"+to_string((int)index)).c_str(),"0MR");
   histo_ctdiff->SetLineColor(kGreen);
-  g_m->Draw();
-  histo_ctdiff->Draw("same");
+  histo_ctdiff->Draw();
   gaus_ctdiff->Draw("same");
   histotemp_m->Draw("same");
   
@@ -580,7 +571,7 @@ void plotWF_lsig(TFile* file,Float_t* Resol,Float_t* errResol,Float_t index,Floa
   l2->AddEntry(g_m,("#sigma="+to_string(g_m->GetParameter(2))).c_str());
   l2->AddEntry(histo_ctdiff,"t_ave-t_MCP(tdiff corr)");
   l2->AddEntry(gaus_ctdiff,("#sigma="+to_string(gaus_ctdiff->GetParameter(2))).c_str());
-  l2->Draw();
+  //  l2->Draw();
   tdiff->SaveAs(("HDCRPlot/Gaussianenowalk"+to_string((int)index)+".pdf").c_str());
   tdiff->Close();
   
@@ -1115,7 +1106,7 @@ void Ris(TFile* file,Float_t* Resol,Float_t* errResol,Float_t* ResolHisto,Float_
 }
 
 //####################################################################################################################################################################################################################### 
-void RisVsDcr(){
+void RisVsDcr(string version){
   //Int_t nfiles=19;
   Int_t nfiles=5;
   
@@ -1133,7 +1124,9 @@ void RisVsDcr(){
   gSystem->Exec("mkdir HDCRPlot");
 
   for(i=0;i<nfiles;i++){
-    myfile[i]=TFile::Open(("Pd/DCR10072/"+to_string(i)+".root").c_str());    
+    if(version=="old")myfile[i]=TFile::Open(("Pd/DCR10072/"+to_string(i)+".root").c_str());    
+    if(version=="new")myfile[i]=TFile::Open(("Pd/NewRecoDcr/"+to_string(i)+".root").c_str());    
+    
   }
   
   TTree* info[nfiles];
