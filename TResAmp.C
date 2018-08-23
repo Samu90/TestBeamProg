@@ -349,10 +349,11 @@ void TResAmp(const char * filename){
      
    }//chiudo for k
 
-
-   
-   for (i=0;i<nbinx/10+1;i++){
-     cut[i] =rxmin+(Double_t)(rxmax-rxmin)*(i*10)/nbinx;  
+   int npoints = 10;
+   rxmin+=0.1;
+   rxmax-=0.2;
+   for (i=1;i<nbinx/npoints+1;i++){
+     cut[i] =rxmin+(Double_t)(rxmax-rxmin)*(i*npoints)/nbinx;  
    }
    
    TCanvas *proiettati;
@@ -367,7 +368,7 @@ void TResAmp(const char * filename){
      gSystem->Exec("mkdir HistoTResAmp");
    }
    
-   for (i=0;i<nbinx/10-1;i++){
+   for (i=1;i<nbinx/npoints+1;i++){
      fit = new TF1("fit","gaus",XMinPlot,XMaxPlot);
      fit->SetParameter(0,200);
      fit->SetParameter(1,0);
@@ -395,7 +396,7 @@ void TResAmp(const char * filename){
        
        //histotemp_t->GetXaxis()->SetLimits(XMinPlot,XMaxPlot);
        //fit->GetXaxis()->SetLimits(XMinPlot,XMaxPlot);
-       gStyle->SetOptFit(1111);
+       gStyle->SetOptFit(0110);
        fit->GetXaxis()->SetTitle("t_{ave}-t_{MCP} [ns]");
        fit->GetYaxis()->SetTitle("counts");
        fit->SetTitle(title);
@@ -409,7 +410,7 @@ void TResAmp(const char * filename){
      
      sigma[i]=sqrt((fit->GetParameter(2))*(fit->GetParameter(2))-0.015*0.015);
      erry[i]=fit->GetParError(2);
-     errx[i]= (rxmax-rxmin)*10/(2*nbinx);
+     errx[i]= (rxmax-rxmin)*npoints/(2*nbinx);
      
 
      delete histotemp_t;
@@ -420,21 +421,26 @@ void TResAmp(const char * filename){
    
 				     
    TCanvas* c_TresAmp = new TCanvas("c_TresAmp","c_rest_plot",600,550);
-   TGraphErrors* TResAmp = new TGraphErrors(nbinx/10-1,cut,sigma,errx,erry);
-   TF1* fitramp = new TF1("fitramp","[0]+[1]/sqrt(x)",rxmin,rxmax-0.06);
+   TGraphErrors* TResAmp = new TGraphErrors(nbinx/npoints-3,cut,sigma,errx,erry);
+   TF1* fitramp = new TF1("fitramp","[0]+[1]/sqrt(x)",rxmin,rxmax);
+   TLine* intercept = new TLine(0.82,0.03,1.8,0.03);
+   intercept->SetLineColor(kBlue);
    gStyle->SetOptFit(1111);
-   fitramp->SetParameter(0,0.029);
-   fitramp->SetParameter(1,1e-2);
-   TResAmp->Fit("fitramp","0R");
+
+   fitramp->SetParameter(0,0.0);
+   //fitramp->SetParLimits(0,0.0,10);
+   fitramp->SetParameter(1,100);
+   TResAmp->Fit("fitramp","0RL");
    TResAmp ->GetXaxis()->SetTitle("amp/mip peak");
    TResAmp ->GetYaxis()->SetTitle("sigma_{t_{ave}}(ns)");
    TResAmp ->SetMarkerStyle(8);
    TResAmp ->SetMarkerSize(.8);
-   TResAmp->GetXaxis()->SetLimits(0.0,3.0);
-   TResAmp->GetYaxis()->SetLimits(0.03,0.044);
-   
+
+   TResAmp->GetYaxis()->SetRangeUser(0.025,0.044);
+   TResAmp->GetXaxis()->SetLimits(0.82,1.8);
    TResAmp ->Draw("AP");
    fitramp->DrawF1(0,3,"same");
+   intercept->Draw("same");
 
       
 }
