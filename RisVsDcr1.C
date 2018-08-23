@@ -20,6 +20,7 @@
   
 
   }*/
+
 void ProjAWC(TH2D* histo,string name,Int_t nbinx,Float_t index,string time){
   bool EditCanvas=false;
 
@@ -53,7 +54,7 @@ void ProjAWC(TH2D* histo,string name,Int_t nbinx,Float_t index,string time){
 
 
 //####################################################################################################################################################################################################################### 
-void GaussianAmpWalk(TFile* file,Float_t index, vector <vector<Float_t> > & ranges,Float_t* NAWRes,Float_t* errNAWRes){
+void GaussianAmpWalk(TFile* file,Float_t index, Float_t ranges[][2],Float_t* NAWRes,Float_t* errNAWRes){
 TTree* digiTree = (TTree*)file->Get("digi");
 
   Float_t amp_max[54], time[54];
@@ -65,12 +66,12 @@ TTree* digiTree = (TTree*)file->Get("digi");
   rxmin=0;
   rxmax=0.5;
 
-  rymin_l=ranges[1][1];
-  rymax_l=ranges[1][2];
-  rymin_r=ranges[2][1];
-  rymax_r=ranges[2][2];
-  tymin=ranges[3][1];
-  tymax=ranges[3][2];
+  rymin_l=ranges[0][0];
+  rymax_l=ranges[0][1];
+  rymin_r=ranges[1][0];
+  rymax_r=ranges[1][1];
+  tymin=ranges[2][0];
+  tymax=ranges[2][1];
 
   const Int_t  nbinx=290,nbiny=150;
 
@@ -362,7 +363,7 @@ TTree* digiTree = (TTree*)file->Get("digi");
 
 //#######################################################################################################################################################################################################################
 
-void plotWF_lsig(TFile* file,Float_t* Resol,Float_t* errResol,Float_t index,Float_t* Resolc,Float_t* errResolc){
+void plotWF_lsig(TFile* file,Float_t* Resol,Float_t* errResol,Float_t index,Float_t* Resolc,Float_t* errResolc,Float_t ranges[][2]){
 
   TTree* digiTree = (TTree*)file->Get("digi");
   
@@ -380,14 +381,17 @@ void plotWF_lsig(TFile* file,Float_t* Resol,Float_t* errResol,Float_t index,Floa
 
 
   
-  const Int_t  nbinx=100,nbiny=50;
+  const Int_t  nbinx=300,nbiny=250;
 
-  rymin_l=6;
-  rymax_l=10;
-  rymin_r=6;
-  rymax_r=10;
-  tymin=7;
-  tymax=10;
+  rymin_l=ranges[0][0];
+  rymax_l=ranges[0][1];
+  rymin_r=ranges[1][0];
+  rymax_r=ranges[1][1];
+  tymin=ranges[2][0];
+  tymax=ranges[2][1];
+
+
+
   txmin =-0.5;
   txmax=0.8;
  
@@ -647,7 +651,7 @@ void Proiezione(TH2D* hl,TH2D* hr,TH2D* ht,Int_t nxbin,Float_t DCR){
 //####################################################################################################################################################################################################################### 
 
 
-void Ris(TFile* file,Float_t* Resol,Float_t* errResol,Float_t* ResolHisto,Float_t index,Float_t* NAWRes,Float_t* errNAWRes, vector< vector <Float_t > > & ranges){
+void Ris(TFile* file,Float_t* Resol,Float_t* errResol,Float_t* ResolHisto,Float_t index,Float_t* NAWRes,Float_t* errNAWRes, Float_t ranges[][2]){
 
   TTree* digiTree = (TTree*)file->Get("digi");
 
@@ -746,12 +750,12 @@ void Ris(TFile* file,Float_t* Resol,Float_t* errResol,Float_t* ResolHisto,Float_
  
   max=4096;
 
-  ranges[1][1]=rymin_l;
-  ranges[1][2]=rymax_l;
-  ranges[2][1]=rymin_r;
-  ranges[2][2]=rymax_r;
-  ranges[3][1]=tymin;
-  ranges[3][2]=tymax;
+  ranges[0][0]=rymin_l;
+  ranges[0][1]=rymax_l;
+  ranges[1][0]=rymin_r;
+  ranges[1][1]=rymax_r;
+  ranges[2][0]=tymin;
+  ranges[2][1]=tymax;
   
   
   cout<<"Exit"<<endl;
@@ -1141,7 +1145,7 @@ void Ris(TFile* file,Float_t* Resol,Float_t* errResol,Float_t* ResolHisto,Float_
 }
 
 //####################################################################################################################################################################################################################### 
-void RisVsDcr1(string conf){
+void RisVsDcr1(){
   //Int_t nfiles=19;
   Int_t nfiles=5;
   
@@ -1154,13 +1158,13 @@ void RisVsDcr1(string conf){
   Int_t i;
   Float_t bias[nfiles],NINOthr[nfiles],DCR[nfiles];
   Float_t biasPl[nfiles],NINOthrPl[nfiles],DCRPl[nfiles];
-  vector < vector < Float_t> > ranges(3,vector<Float_t>(2,0));
+  Float_t ranges[3][2];
   
   gSystem->Exec("rm -r -f HDCRPlot");
   gSystem->Exec("mkdir HDCRPlot");
   gStyle->SetOptFit(0111);
   for(i=0;i<nfiles;i++){
-    myfile[i]=TFile::Open(((string)"Pd/DCR"+conf+(string)"/"+to_string(i)+(string)".root").c_str());    
+    myfile[i]=TFile::Open(("Pd/DCR10072/"+to_string(i)+".root").c_str());    
   }
   
   TTree* info[nfiles];
@@ -1183,10 +1187,11 @@ void RisVsDcr1(string conf){
     DCRPl[i]=DCR[i];
 
     Ris(myfile[i],&sigma[i],&errsigma[i],&sigmaHisto[i],DCRPl[i],&NAWRes[i],&errNAWRes[i],ranges);
-
-    plotWF_lsig(myfile[i],&lsigma[i],&errlsigma[i],DCRPl[i],&lcsigma[i],&errlcsigma[i]);
+    //void Ris(TFile* file,Float_t* Resol,Float_t* errResol,Float_t* ResolHisto,Float_t index,Float_t* NAWRes,Float_t* errNAWRes, Float_t ranges[][2])
+    plotWF_lsig(myfile[i],&lsigma[i],&errlsigma[i],DCRPl[i],&lcsigma[i],&errlcsigma[i],ranges);
    
     GaussianAmpWalk(myfile[i],DCRPl[i],ranges,NAWRes,errNAWRes);
+    //void GaussianAmpWalk(TFile* file,Float_t index, Float_t ranges[][2],Float_t* NAWRes,Float_t* errNAWRes)
   }
   
   
