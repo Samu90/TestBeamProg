@@ -186,8 +186,8 @@ void Darkbkg(){
      cout << Mipl[0][i] << endl;
      erry_l[i]=sqrt(pow(sMipl[0][i],2)+ pow(sMipl[1][i],2));
      erry_r[i]=sqrt(pow(sMipr[0][i],2)+ pow(sMipr[1][i],2));
-     Mipl[0][i]-=Mipl[1][i];
-     Mipr[0][i]-=Mipr[1][i];
+     // Mipl[0][i]-=Mipl[1][i];
+     //Mipr[0][i]-=Mipr[1][i];
     
      bkg[0][i]->cd();
      gPad->SetTopMargin(0.0000000000000000);
@@ -251,15 +251,15 @@ void Darkbkg(){
    
  
   
-   TGraphErrors* leftcurrents = new TGraphErrors(4,DCR,Mipl[0],0,erry_l);
-   TGraphErrors* rightcurrents = new TGraphErrors(4,DCR,Mipr[0],0,erry_r);
+   TGraphErrors* leftcurrents = new TGraphErrors(4,DCR,Mipl[1],0,erry_l);
+   TGraphErrors* rightcurrents = new TGraphErrors(4,DCR,Mipr[1],0,erry_r);
 
    TCanvas* currents = new TCanvas("currents","plot_currents",600,550);
    TLegend* l2= new TLegend();
    
-   leftcurrents->GetYaxis()->SetRangeUser(-0.025,0.045);
+    leftcurrents->GetYaxis()->SetRangeUser(0.0,0.3);
    leftcurrents->GetXaxis()->SetTitle("SIPM (dark) current (#muA)");
-   leftcurrents->GetYaxis()->SetTitle("Peak_{Mip}-Peak_{Mip}^{DCR}(ns)");
+   leftcurrents->GetYaxis()->SetTitle("Peak_{Mip}^{DCR}(mV)");
    leftcurrents->SetMarkerSize(.8);
    rightcurrents->SetMarkerSize(.8);
    leftcurrents->SetMarkerStyle(8);
