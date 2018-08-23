@@ -23,7 +23,7 @@ for((i=83;$i<=89;i=$(($i+1)))); do
 	  
 	  cp $DATA$NAME/"00"$k.root ~/Files/"00"$k$NAME.root	  
 	  
-	  echo "00"$k$NAME.root 
+	  echo "00"$k$NAME.root >> list.txt
 	 	  
 	  #echo $DATA$NAME/"00"$k.root 
 	  #echo ~/Files/"00"$k$NAME.root

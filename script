@@ -1,7 +1,7 @@
 #!/bin/bash
 
 export PATHTODATA=/eos/cms/store/group/dpg_mtd/comm_mtd/TB/MTDTB_T10_May2018/raw/DataTree/
-export CFG=cfg/MTDTB_T10_May2018/MTDTB_T10_May2018_conf1.cfg
+export CFG=cfg/MTDTB_T10_May2018/
 export DIRDATA=~/public/TestBeamProg/Pd/NewRecoDcr/
 export DIRAN=~/public/H4Analysis
 
@@ -27,11 +27,11 @@ for((j=0;j<5;j=$(($j+1)))); do
 	export end=518
     fi
           
-#    for((i=$start;i<=$end;i=$(($i+1)))); do
+    for((i=$start;i<=$end;i=$(($i+1)))); do
    
-#	    ./bin/H4Reco.exe $CFG 11$i
+	    ./bin/H4Reco.exe cfg/MTDTB_T10_May2018/conf$j 11$i
 	 
- #   done
+    done
     
     cd $DIRDATA
     mkdir $j
@@ -41,6 +41,8 @@ for((j=0;j<5;j=$(($j+1)))); do
     cd $DIRAN
 
 done
+
+mv */[0-4].root ../.
 
 exit 0
 

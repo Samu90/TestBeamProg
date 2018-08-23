@@ -1,7 +1,50 @@
 //to run with ranges [0.125;2]right, [0.13;2]left on 4.1
 //to run with ranges [0.125;2]right, [0.13;2]left on 1.3
+#include <TFile.h>
+#include <TTree.h>
+#include <TH1F.h>
+#include <TH1D.h>
+#include <TH2D.h>
+#include <TF1.h>
+#include <TMath.h>
+#include <TLegend.h>
+#include <TLatex.h>
+#include <TH2F.h>
+#include <TCanvas.h>
+#include <TFile.h>
+#include <TGraphErrors.h>
+#include <TStyle.h>
+#include <TSystem.h>
+#include <TROOT.h> 
+#include <TLine.h>
+#include <TAxis.h>
 
 
+void GetH2MaximumBins(TH2D* histo, Int_t* XMaxBin, Int_t* YMaxBin){
+  
+  TH1D* proj;
+  Int_t k,nxbin,nybin;
+  Double_t maximum=0;
+  
+  nxbin=histo->GetXaxis()->GetNbins();
+  nybin=histo->GetYaxis()->GetNbins();
+   
+  for(k=0;k<nxbin;k++){
+    
+    proj=histo->ProjectionY("Yprojection",k,k);
+    proj->FindBin(proj->GetMaximum());
+    
+    if(maximum<proj->GetMaximum()){
+      cout<<k<<endl;
+      maximum=proj->GetMaximum();
+      *XMaxBin = k;
+      *YMaxBin = proj->GetMaximumBin();
+      
+    }
+  
+  }
+  cout<<"infunction_______________________xbin="<<*XMaxBin<<"/"<<nxbin<<"          ybin"<<*YMaxBin<<"/"<<nybin<<endl;
+}
 
 void GraficiTdiff(const char * filename){
 
@@ -26,12 +69,12 @@ void GraficiTdiff(const char * filename){
   Int_t nentries=digiTree->GetEntries();
   Float_t Times1[nentries],Times2[nentries],Times3[nentries];
 
-  const Int_t  nbinx=250,nbiny=200;
+  const Int_t  nbinx=500,nbiny=450;
   
   int i;
   Double_t sigma[50],erry[50],cut[50],errx[50];
   
-  txmin=-0.2;
+  txmin=-0.4;
   txmax=0.6;
   
   
@@ -118,9 +161,9 @@ for(k=0;k<digiTree->GetEntries();k++){
   hl_amp->Fit("f_l","RQ0");
 
 
-  TH2F* h2_l= new TH2F("h2_l", "histo h2_l",nbinx,rxmin,rxmax,nbiny,rymin_l,rymax_l);
-  TH2F* h2_r= new TH2F("h2_r", "histo h2_r",nbinx,rxmin,rxmax,nbiny,rymin_r,rymax_r);
-  TH2F* h2_t= new TH2F("h2_t", "histo h2_t",nbinx,txmin,txmax,nbiny,tymin,tymax);
+  TH2D* h2_l= new TH2D("h2_l", "histo h2_l",nbinx,rxmin,rxmax,nbiny,rymin_l,rymax_l);
+  TH2D* h2_r= new TH2D("h2_r", "histo h2_r",nbinx,rxmin,rxmax,nbiny,rymin_r,rymax_r);
+  TH2D* h2_t= new TH2D("h2_t", "histo h2_t",nbinx,txmin,txmax,nbiny,tymin,tymax);
 
   for(k=0;k<digiTree->GetEntries();k++){
 
@@ -238,10 +281,10 @@ for(k=0;k<digiTree->GetEntries();k++){
   tymax_c=tymax;
 
   
-  TH2F* hc_l= new TH2F("hc_l", "histo hc_l",nbinx,txmin,txmax,nbiny,rymin_lc,rymax_lc);
-  TH2F* hc_r= new TH2F("hc_r", "histo hc_r",nbinx,txmin,txmax,nbiny,rymin_rc,rymax_rc);
-  TH2F* hc_t= new TH2F("hc_t", "histo hc_t",nbinx,txmin,txmax,nbiny,tymin_c,tymax_c);
-  TH2F* hc_tdiff= new TH2F("hc_tdiff", "histo hc_tdiff",nbinx,txmin,txmax,nbiny,tymin_c,tymax_c);
+  TH2D* hc_l= new TH2D("hc_l", "histo hc_l",nbinx,txmin,txmax,nbiny,rymin_lc,rymax_lc);
+  TH2D* hc_r= new TH2D("hc_r", "histo hc_r",nbinx,txmin,txmax,nbiny,rymin_rc,rymax_rc);
+  TH2D* hc_t= new TH2D("hc_t", "histo hc_t",nbinx,txmin,txmax,nbiny,tymin_c,tymax_c);
+  TH2D* hc_tdiff= new TH2D("hc_tdiff", "histo hc_tdiff",nbinx,txmin,txmax,nbiny,tymin_c,tymax_c);
   
   
   
@@ -357,11 +400,21 @@ for(k=0;k<digiTree->GetEntries();k++){
    graph_tcdiff->SetMarkerStyle(8);
    graph_tcdiff->SetMarkerSize(.5);
    graph_tcdiff->Draw("P");
+   
+   Int_t MaxBinX,MaxBinY;
+   
+   GetH2MaximumBins(hc_tdiff, &MaxBinX, &MaxBinY);
+  
+   TLine* lineax= new TLine(hc_tdiff->GetXaxis()->GetBinCenter(MaxBinX),0,hc_tdiff->GetXaxis()->GetBinCenter(MaxBinX),10);
+   TLine* lineay= new TLine(-1,hc_tdiff->GetYaxis()->GetBinCenter(MaxBinY),10,hc_tdiff->GetYaxis()->GetBinCenter(MaxBinY));
+   
+   cout<<"____________________________________________________________________________maxX="<<hc_tdiff->GetXaxis()->GetBinCenter(MaxBinX)<<"    maxY="<<hc_tdiff->GetYaxis()->GetBinCenter(MaxBinY)<<endl; 
+   lineax->Draw("SAME");
+   lineay->Draw("SAME");
 
   
 
-   // TCanvas* plottini = new TCanvas("altroCanvas","",800,600);
-   // plottini->Divide(2,1);
+   
    hc_r->Reset();
    hc_l->Reset();
    
@@ -435,16 +488,25 @@ for(k=0;k<digiTree->GetEntries();k++){
    canvino->Divide(3,2);
    
    TH1D* istogrammi[3][6];
-   
+
+ 
+   Int_t DeltaBin;
    for (i=0;i<6;i++){
+     
+     
      fittino[0][i] = new TF1("argaerg"+i ,"gaus",6,8);
      fittino[1][i] = new TF1("xzcbxcn"+i ,"gaus",6,8);
      fittino[2][i] = new TF1("jklnjbm"+i ,"gaus",6,8);
      
-     istogrammi[0][i]=hc_tdiff->ProjectionY("ghijklxz"+i,hc_tdiff->GetXaxis()->FindBin(TMath::Max(-cut[i],(Double_t)txmin)), hc_tdiff->GetXaxis()->FindBin(cut[i]));
+     Double_t XCenter=hc_tdiff->GetXaxis()->GetBinCenter(MaxBinX);
+     DeltaBin= (int)(hc_tdiff->GetXaxis()->FindBin(XCenter+cut[i])-hc_tdiff->GetXaxis()->FindBin(XCenter-cut[i]))/2;
+     
+  
+     istogrammi[0][i]=hc_tdiff->ProjectionY("ghijklxz"+i,MaxBinX-DeltaBin,MaxBinX+DeltaBin);
      istogrammi[1][i]=hc_l->ProjectionY("abcdefuv"+i, hc_l->GetXaxis()->FindBin(TMath::Max(-cut[i],(Double_t)txmin)), hc_l->GetXaxis()->FindBin(cut[i]));
      istogrammi[2][i]=hc_r->ProjectionY("mnopqrst"+i, hc_r->GetXaxis()->FindBin(TMath::Max(-cut[i],(Double_t)txmin)), hc_r->GetXaxis()->FindBin(cut[i]));
 
+     
      istogrammi[0][i]->SetLineColor(kBlack);
      istogrammi[1][i]->SetLineColor(kBlue);
      istogrammi[2][i]->SetLineColor(kRed);
@@ -455,7 +517,7 @@ for(k=0;k<digiTree->GetEntries();k++){
      istogrammi[2][i]->GetXaxis()->SetTitle("t_{ave}-t_{MCP}");
      istogrammi[2][i]->GetYaxis()->SetTitle("counts");
      
-     cout<<"__________________"<< hc_tdiff->GetXaxis()->FindBin(TMath::Max(-cut[i],(Double_t)txmin))<<"     "<<hc_tdiff->GetXaxis()->FindBin(cut[i])<<"______________"<<TMath::Max(-cut[i],(Double_t)txmin)<<"        "<<cut[i]<<endl;
+     cout<<"__________________"<<MaxBinX-DeltaBin <<"     "<<MaxBinX+DeltaBin<<"__________"<<hc_tdiff->GetXaxis()->GetBinCenter(MaxBinX-DeltaBin) <<"        "<<hc_tdiff->GetXaxis()->GetBinCenter(MaxBinX+DeltaBin) <<endl;
 
      //canvino->cd(i+1);
      istogrammi[0][i]->Fit("argaerg"+i,"0");
@@ -488,7 +550,7 @@ for(k=0;k<digiTree->GetEntries();k++){
      fittino[0][i]->Draw("SAME");
      //fittino[1][i]->Draw("SAME");
      //fittino[2][i]->Draw("SAME");
-     LegSigma.Append(to_string(fittino[0][i]->GetParameter(2)));
+     LegSigma.Append(to_string(sqrt(fittino[0][i]->GetParameter(2)*fittino[0][i]->GetParameter(2)-0.015*0.015)));
      legenda[i] = new TLegend();
      legenda[i]->AddEntry(fittino[0][i],LegSigma);
      legenda[i]->AddEntry(istogrammi[0][i],TTempo);
