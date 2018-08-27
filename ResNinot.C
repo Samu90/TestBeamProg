@@ -399,23 +399,13 @@ void plotWF_tdiff(const char * filename,Double_t* sigma,Double_t* ssigma,int ind
    histo_cr->Fit("gaus_cr");
    if (blind==true) histo_ct->Fit("gaus_ct");
 
-   /*
-  
-   histo_cr->Draw("same");
-  
-   histo_cl->Draw("same");
-
-   l1->Draw();
-   */
-
-
    TLegend* l2=new TLegend(0.1,0.7,0.48,0.9);
    l2->SetHeader("time stamps");
    // l2->AddEntry(histo_ct,"t_ave-t_MCP");
    l2->AddEntry(histo_ctdiff[index],"t_ave-t_MCP(tdiff corr)");
    // gaus_ctdiff->SetLineColor(kGreen);
    histo_ctdiff[index]->Fit(((string)("gaus_ctdiff"+to_string(index))).c_str());
-   *sigma=gaus_ctdiff[index]->GetParameter(2);
+   *sigma=sqrt(gaus_ctdiff[index]->GetParameter(2)*gaus_ctdiff[index]->GetParameter(2)-0.015*0.015);
    *ssigma= gaus_ctdiff[index]->GetParError(2); 
    // histo_ctdiff->SetLineColor(kGreen);
    // histo_ct->Draw();
