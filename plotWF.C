@@ -36,10 +36,13 @@ void plotWF(const char * filename,int i){
 
     startime[0]=digi_time[1+LED300];
     startime[1]=digi_time[2+LED300];
+    
     TCanvas* wf_c =new TCanvas("wf","Plot wf",1000,650);
     TGraph* graph[6];
     TLine* start[2];
     wf_c->Divide(3,2);
+
+    TLegend* leg[2];
     
     for (j=0;j<6;j++){  
       graph[j] = new TGraph(wf_sample/6,wf_time,ch[j]);
@@ -53,11 +56,17 @@ void plotWF(const char * filename,int i){
 	start[0]=new TLine(startime[0],0,startime[0],500);
 	start[0]->SetLineColor(kRed);
 	start[0]->Draw("same");
+	leg[0]=new TLegend();
+	leg[0]->AddEntry(start[0],(to_string(startime[0])).c_str());
+	leg[0]->Draw("SAME");
       }
       if(j==2){
 	start[1]=new TLine(startime[1],0,startime[1],500);
 	start[1]->SetLineColor(kRed);
 	start[1]->Draw("same");
+	leg[1]=new TLegend();
+	leg[1]->AddEntry(start[1],(to_string(startime[1])).c_str());
+	leg[1]->Draw("SAME");
       }
     }//chiudo for j
     
