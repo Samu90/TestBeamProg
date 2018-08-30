@@ -54,7 +54,9 @@ void ProjAWC(TH2D* histo,string name,Int_t nbinx,Float_t index,string time){
 
 
 //####################################################################################################################################################################################################################### 
-void GaussianAmpWalk(TFile* file,Float_t index, Float_t ranges[][2],Float_t* NAWRes,Float_t* errNAWRes){
+
+void GaussianAmpWalk(TFile* file,Float_t index, Float_t ranges[][2],Float_t* NAWRes,Float_t* errNAWRes,TF1* newfit[][2],int ind){
+
 TTree* digiTree = (TTree*)file->Get("digi");
 
   Float_t amp_max[54], time[54];
@@ -73,6 +75,9 @@ TTree* digiTree = (TTree*)file->Get("digi");
   tymin=ranges[2][0];
   tymax=ranges[2][1];
 
+  cout << "************************************************************************************" << rymin_l << "*******" << rymax_l << endl;
+  cout << "************************************************************************************" << rymin_r << "*******" << rymax_r << endl;
+  cout << "************************************************************************************" << tymin << "*******" << tymax << endl;
   const Int_t  nbinx=290,nbiny=150;
 
   int i;
@@ -126,6 +131,7 @@ TTree* digiTree = (TTree*)file->Get("digi");
 
   }/*chiudo for */
 
+  digiTree->GetEntry(3);
   LEDi=LED300;
   hr_amp->Scale(1/(hr_amp->Integral()));
   hl_amp->Scale(1/(hl_amp->Integral()));
@@ -232,8 +238,8 @@ TTree* digiTree = (TTree*)file->Get("digi");
   TGraphErrors* graphGAmp_r=new TGraphErrors(npoint,x_r,y_r,0,rmsy_r);
   TGraphErrors* graphGAmp_l=new TGraphErrors(npoint,x_l,y_l,0,rmsy_l);
 
-  TF1* FitLog_r = new TF1("FitLog_r","[0]+[2]*log(x+[1])",0.8*fit_r->GetParameter(1),1.5*fit_r->GetParameter(1));
-  TF1* FitLog_l = new TF1("FitLog_l","[0]+[2]*log(x+[1])",0.5*fit_l->GetParameter(1),1.2*fit_l->GetParameter(1));
+  TF1* FitLog_r = new TF1(((string)"FitLog_r"+to_string(index)).c_str(),"[0]+[2]*log(x+[1])",0.8*fit_r->GetParameter(1),3*fit_r->GetParameter(1));
+  TF1* FitLog_l = new TF1(((string)"FitLog_l"+to_string(index)).c_str(),"[0]+[2]*log(x+[1])",0.5*fit_l->GetParameter(1),3*fit_l->GetParameter(1));
   
   gStyle->SetOptFit();
   
@@ -261,7 +267,7 @@ TTree* digiTree = (TTree*)file->Get("digi");
   graphGAmp_l->SetMarkerStyle(8);
   graphGAmp_l->SetMarkerSize(.8);
   graphGAmp_l->Draw("SAMEP");
-  graphGAmp_l->Fit("FitLog_l");
+  graphGAmp_l->Fit(((string)"FitLog_l"+to_string(index)).c_str(),"R");
 
   CanvAmpGauss->cd(2);
   h2_r->GetYaxis()->SetTitle("t_right-t_MCP [ns]");
@@ -270,14 +276,15 @@ TTree* digiTree = (TTree*)file->Get("digi");
   graphGAmp_r->SetMarkerStyle(8);
   graphGAmp_r->SetMarkerSize(.8);
   graphGAmp_r->Draw("SAMEP");
-  graphGAmp_r->Fit("FitLog_r");
+  graphGAmp_r->Fit(((string)"FitLog_r"+to_string(index)).c_str(),"R");
   
   CanvAmpGauss->cd(3);
   h2_t->GetYaxis()->SetTitle("t_right-t_MCP [ns]");
   h2_t->GetXaxis()->SetTitle("max.amplitude [mV]");
   h2_t->Draw("COLZ");
   
-
+  newfit[ind][0]= FitLog_l;
+  newfit[ind][1]= FitLog_r;
 
   rymin_lc=rymin_l-FitLog_l->Eval(fit_l->GetParameter(1)+0.5*fit_l->GetParameter(2))+FitLog_l->GetParameter(0);
   rymax_lc=rymax_l-FitLog_l->Eval(fit_l->GetParameter(1)+0.5*fit_l->GetParameter(2))+FitLog_l->GetParameter(0);
@@ -323,8 +330,7 @@ TTree* digiTree = (TTree*)file->Get("digi");
   hc_t->GetXaxis()->SetTitle("t_{left}-t_{right} [ns]");
   hc_t->Draw("COLZ");
 
-  ProjAWC(h2_r,"uncorrNAW",nbinx,index,"NAW");
-  ProjAWC(hc_r,"corrNAW",nbinx,index,"NAW");
+ 
   
   if(controlFit) gPad->WaitPrimitive();
   CanvAmpGauss->SaveAs(("HDCRPlot/GaussianeAmp"+to_string((int)index)+".pdf").c_str());
@@ -332,7 +338,7 @@ TTree* digiTree = (TTree*)file->Get("digi");
   if(controlFit) gROOT->SetBatch(kTRUE);
 
   
-  TH1D* tProjection = hc_t->ProjectionY("ProjectionTave",0,nbinx);
+  TH1D* tProjection = hc_r->ProjectionY("ProjectionTave",0,nbinx);
   TCanvas* RisDef = new TCanvas("RisDef","",1200,700);
 
   TF1* fitgaussiano = new TF1("fitgaussiano","gaus");
@@ -348,6 +354,11 @@ TTree* digiTree = (TTree*)file->Get("digi");
   *NAWRes=fitgaussiano->GetParameter(2);
   *errNAWRes=fitgaussiano->GetParError(2);
 
+  ProjAWC(h2_r,"uncorrNAW",nbinx,index,"NAW");
+  ProjAWC(hc_r,"corrNAW",nbinx,index,"NAW");
+
+  cout << "_______________________________________________________________________________________SIGMAAAAAAA" <<  *NAWRes << endl;
+  
   delete hr_amp;
   delete hl_amp;
   delete h2_l;
@@ -651,7 +662,7 @@ void Proiezione(TH2D* hl,TH2D* hr,TH2D* ht,Int_t nxbin,Float_t DCR){
 //####################################################################################################################################################################################################################### 
 
 
-void Ris(TFile* file,Float_t* Resol,Float_t* errResol,Float_t* ResolHisto,Float_t index,Float_t* NAWRes,Float_t* errNAWRes, Float_t ranges[][2]){
+void Ris(TFile* file,Float_t* Resol,Float_t* errResol,Float_t* ResolHisto,Float_t index,Float_t* NAWRes,Float_t* errNAWRes, Float_t ranges[][2],TF1* oldfit[][2], int ind){
 
   TTree* digiTree = (TTree*)file->Get("digi");
 
@@ -856,8 +867,8 @@ void Ris(TFile* file,Float_t* Resol,Float_t* errResol,Float_t* ResolHisto,Float_
   TGraphErrors* graph_t=new TGraphErrors(nbinx-1,xt,yt,0,rmsyt);
 
 
-  TF1* hyp_r = new TF1("hyp_r","[0]+[2]*x + [3]*x**2+[4]*x**3+[5]*x**4+[6]*x**5+ [7]/x",0.8*fit_r->GetParameter(1),1.5*fit_r->GetParameter(1));
-  TF1* hyp_l = new TF1("hyp_l","[0]+[2]*x + [3]*x**2+[4]*x**3+[5]*x**4+[6]*x**5+ [7]/x",0.5*fit_l->GetParameter(1),1.2*fit_l->GetParameter(1));
+  TF1* hyp_r = new TF1(((string)"hyp_r"+to_string(index)).c_str(),"[0]+[2]*x + [3]*x**2+[4]*x**3+[5]*x**4+[6]*x**5+ [7]/x",0.8*fit_r->GetParameter(1),3*fit_r->GetParameter(1));
+  TF1* hyp_l = new TF1(((string)"hyp_l"+to_string(index)).c_str(),"[0]+[2]*x + [3]*x**2+[4]*x**3+[5]*x**4+[6]*x**5+ [7]/x",0.5*fit_l->GetParameter(1),2.8*fit_l->GetParameter(1));
 
 
   TF1* hyp_t = new TF1("hyp_t","[1]*x**2+[2]*x+[0]",-0.1,0.65);
@@ -874,33 +885,37 @@ void Ris(TFile* file,Float_t* Resol,Float_t* errResol,Float_t* ResolHisto,Float_
 
   h2_l->GetXaxis()->SetTitle("max.amplitude [mV]");
   h2_l->Draw("COLZ");
-  graph_l->Fit("hyp_l","0");
+  graph_l->Fit(((string)"hyp_l"+to_string(index)).c_str(),"0R");
   graph_l->SetMarkerStyle(8);
   graph_l->SetMarkerSize(.5);
   graph_l->Draw("SAMEP");
-  hyp_l->DrawF1(0,0.5,"same");
+  hyp_l->Draw("same");
+  //  hyp_l->DrawF1(0,0.5,"same");
 
 
   wf_c->cd(2);
   h2_r->GetYaxis()->SetTitle("t_right-t_MCP [ns]");
   h2_r->GetXaxis()->SetTitle("max.amplitude [mV]");
   h2_r->Draw("COLZ");
-  graph_r->Fit("hyp_r","0");
+  graph_r->Fit(((string)"hyp_r"+to_string(index)).c_str(),"0R");
   graph_r->SetMarkerStyle(8);
   graph_r->SetMarkerSize(.5);
   graph_r->Draw("SAMEP");
-  hyp_r->DrawF1(0,0.5,"same");
+  hyp_r->Draw("same");
+  // hyp_r->DrawF1(0,0.5,"same");
   
   wf_c->cd(3);
   h2_t->GetYaxis()->SetTitle("t_ave-t_MCP [ns]");
   h2_t->GetXaxis()->SetTitle("t_left-t_right [ns]");
   h2_t->Draw("COLZ");
-  graph_t->Fit("hyp_t","0");
+  graph_t->Fit("hyp_t","0R");
   graph_t->SetMarkerStyle(8);
   graph_t->SetMarkerSize(.5);
   graph_t->Draw("SAMEP");
   hyp_t->DrawF1(txmin,txmax,"same");
 
+  oldfit[ind][0]= hyp_l;
+  oldfit[ind][1]= hyp_r;
 
   rymin_lc=rymin_l-hyp_l->Eval(fit_l->GetParameter(1)+0.5*fit_l->GetParameter(2))/*+hyp_l->GetParameter(0)*/;
   rymax_lc=rymax_l-hyp_l->Eval(fit_l->GetParameter(1)+0.5*fit_l->GetParameter(2))/*+hyp_l->GetParameter(0)*/;
@@ -1156,15 +1171,27 @@ void RisVsDcr1(){
 
 
   Int_t i;
+  Float_t xmin,xmax,ymin,ymax;
   Float_t bias[nfiles],NINOthr[nfiles],DCR[nfiles];
   Float_t biasPl[nfiles],NINOthrPl[nfiles],DCRPl[nfiles];
   Float_t ranges[3][2];
+
+
+
+  TF1* fitsold[nfiles][2];
+  TF1* fitsnew[nfiles][2];
+
+
   
   gSystem->Exec("rm -r -f HDCRPlot");
   gSystem->Exec("mkdir HDCRPlot");
   gStyle->SetOptFit(0111);
   for(i=0;i<nfiles;i++){
-    myfile[i]=TFile::Open(("Pd/DCR10072/"+to_string(i)+".root").c_str());    
+
+    myfile[i]=TFile::Open(("Pd/DCR"+conf+"/"+to_string(i)+".root").c_str());    
+
+       
+
   }
   
   TTree* info[nfiles];
@@ -1186,11 +1213,13 @@ void RisVsDcr1(){
     NINOthrPl[i]= NINOthr[i];
     DCRPl[i]=DCR[i];
 
-    Ris(myfile[i],&sigma[i],&errsigma[i],&sigmaHisto[i],DCRPl[i],&NAWRes[i],&errNAWRes[i],ranges);
+
+    Ris(myfile[i],&sigma[i],&errsigma[i],&sigmaHisto[i],DCRPl[i],&NAWRes[i],&errNAWRes[i],ranges,fitsold,i);
     //void Ris(TFile* file,Float_t* Resol,Float_t* errResol,Float_t* ResolHisto,Float_t index,Float_t* NAWRes,Float_t* errNAWRes, Float_t ranges[][2])
     plotWF_lsig(myfile[i],&lsigma[i],&errlsigma[i],DCRPl[i],&lcsigma[i],&errlcsigma[i],ranges);
    
-    GaussianAmpWalk(myfile[i],DCRPl[i],ranges,NAWRes,errNAWRes);
+    GaussianAmpWalk(myfile[i],DCRPl[i],ranges,&NAWRes[i],&errNAWRes[i],fitsnew,i);
+
     //void GaussianAmpWalk(TFile* file,Float_t index, Float_t ranges[][2],Float_t* NAWRes,Float_t* errNAWRes)
   }
   
@@ -1256,8 +1285,8 @@ void RisVsDcr1(){
     ncsigma->GetYaxis()->SetRangeUser(0.03,0.25);
     ncsigma->GetYaxis()->SetTitle("#sigma_{t_{ave}}(ns)");
     ncsigma->SetMarkerStyle(20);
-    graph->SetMarkerColor(kRed);
-    graph->SetLineColor(kRed);
+    ncsigma->SetMarkerColor(kRed);
+    ncsigma->SetLineColor(kRed);
     
     ncsigma->SetMarkerSize(1.3);
     csigma->SetMarkerStyle(20);
@@ -1273,7 +1302,7 @@ void RisVsDcr1(){
 
     ncsigma->Draw("AP");
     csigma->Draw("SAMEP");
-    graph->Draw("SAMEP");
+    graph->Draw("samep");
     NAWGraph->Draw("SAMEP");
     l3->AddEntry(ncsigma,"uncorr. #sigma ","P");
     l3->AddEntry(csigma,"tdiff_corr. #sigma ","P");
@@ -1286,5 +1315,99 @@ void RisVsDcr1(){
     for(i=0;i<nfiles;i++){
       cout << DCRPl[i] << "   " <<sigmaHisto[i] << "  " << sigma[i] << "   " << errsigma[i]<< "      ____      "<<NAWRes[i]<<"    " << errNAWRes[i] << endl;
     }
+
+    TCanvas* compareamp = new TCanvas("compareamp","plot comapreamp", 1200, 550);
+
+    xmin = 0;
+    xmax = 0.5;
+    ymin = 4;
+    ymax= 10;
+    TH2F* rangels = new TH2F("a","a",100,0,xmax,100,ymin,ymax);
+    TH2F* rangers = new TH2F("a","a",100,0,xmax,100,ymin,ymax);
+    TH2F* rangel = new TH2F("a","a",100,0,xmax,100,ymin,ymax);
+    TH2F* ranger = new TH2F("a","a",100,0,xmax,100,ymin,ymax);
+    TLegend* l5l = new TLegend();
+    
+    compareamp->Divide(2,2);
+    compareamp->cd(1);
+    rangels->SetTitle("Old Amp walk left SiPM");
+    l5l->AddEntry(fitsold[0][0],(to_string((int)DCR[0])+" DCR").c_str(),"L");
+    rangels->GetXaxis()->SetTitle("amp_max (mV)");
+    fitsold[0][0]->GetXaxis()->SetRangeUser(0.0,0.5);
+    rangels->GetYaxis()->SetTitle("t_{left}-t_{MCP} (mV)");
+    fitsold[0][0]->GetYaxis()->SetRangeUser(ymin,ymax);
+    rangels->Draw();
+    fitsold[0][0]->Draw("same");
+    for(i=1;i<nfiles;i++){
+      
+      fitsold[i][0]->SetLineColor(i+2);
+      l5l->AddEntry(fitsold[i][0],(to_string((int)DCR[i])+" DCR").c_str(),"L");
+      fitsold[i][0]->Draw("same");
+    }
+    l5l->Draw();
+
+    TLegend* l5r = new TLegend();
+    compareamp->cd(2);
+    rangers->SetTitle("Old Amp walk right SiPM");
+    l5r->AddEntry(fitsold[0][1],(to_string((int)DCR[0])+" DCR").c_str(),"L");
+    rangers->GetXaxis()->SetTitle("amp_max (mV)");
+    fitsold[0][1]->GetXaxis()->SetRangeUser(0.0,0.5);
+    rangers->GetYaxis()->SetTitle("t_{right}-t_{MCP} (mV)");
+    fitsold[0][1]->GetYaxis()->SetRangeUser(ymin,ymax);
+    rangers->Draw();
+    fitsold[0][1]->Draw("same");
+    for(i=1;i<nfiles;i++){
+      
+      fitsold[i][1]->SetLineColor(i+2);
+      l5r->AddEntry(fitsold[i][0],(to_string((int)DCR[i])+" DCR").c_str(),"L");
+      fitsold[i][1]->Draw("same");
+    }
+    l5r->Draw();
+
+    TLegend* n5l = new TLegend();
+    compareamp->cd(3);
+    rangel->SetTitle("New Amp walk left SiPM");
+    n5l->AddEntry(fitsnew[0][0],(to_string((int)DCR[0])+" DCR").c_str(),"L");
+
+    rangel->GetXaxis()->SetTitle("amp_max (mV)");
+    
+    rangel->GetYaxis()->SetTitle("t_{left}-t_{MCP} (mV)");
+
+    rangel->Draw();
+    fitsnew[0][0]->Draw("same");
+
+    for(i=1;i<nfiles;i++){
+      
+      fitsnew[i][0]->SetLineColor(i+2);
+      n5l->AddEntry(fitsnew[i][0],(to_string((int)DCR[i])+" DCR").c_str(),"L");
+      fitsnew[i][0]->Draw("same");
+
+      
+    }
+    n5l->Draw();
+
+
+    TLegend* n5r = new TLegend();
+    compareamp->cd(4);
+    ranger->SetTitle("New Amp walk right SiPM");
+    n5r->AddEntry(fitsnew[0][1],(to_string((int)DCR[0])+" DCR").c_str(),"L");
+    ranger->GetXaxis()->SetTitle("amp_max (mV)");
+   
+    ranger->GetYaxis()->SetTitle("t_{right}-t_{MCP} (mV)");
+   
+    ranger->Draw();
+    fitsnew[0][1]->Draw("same");
+    for(i=1;i<nfiles;i++){
+      
+      fitsnew[i][1]->SetLineColor(i+2);
+      n5r->AddEntry(fitsnew[i][1],(to_string((int)DCR[i])+"DCR").c_str(),"L");
+      // fitsnew[i][1]->GetXaxis()->SetRange(xmin,xmax);
+      fitsnew[i][1]->Draw("same");
+    }
+
+
+    n5r->Draw();
+
 }
+
 //####################################################################################################################################################################################################################### 
