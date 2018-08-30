@@ -1,12 +1,28 @@
 //pioooo
 //pippo
+#include <TFile.h>
+#include <TTree.h>
+#include <TH1F.h>
+#include <TF1.h>
+#include <TMath.h>
+#include <TLegend.h>
+#include <TLatex.h>
+#include <TH2F.h>
+#include <TCanvas.h>
+#include <TFile.h>
+#include <TGraphErrors.h>
+#include <TStyle.h>
+#include <TSystem.h>
+#include <TROOT.h> 
+#include <TLine.h>
+
 void plotWF(const char * filename,int i){
   
   TFile *  file= new TFile(filename);
   TTree * WFTree = (TTree*)file->Get("wf");
   TTree * digiTree = (TTree*)file->Get("digi");
  
-  Float_t tot_WF[6144],wf_time[6144],digi_time[54];
+  Float_t tot_WF[6144],wf_time[6144],digi_time[60];
   Float_t ch[6][1024], time[1024],startime[2];
   int wf_sample,step[6144];
   int j,k,LED300;
@@ -14,12 +30,14 @@ void plotWF(const char * filename,int i){
   
   WFTree->SetBranchAddress("WF_time",&wf_time);
   WFTree->SetBranchAddress("WF_val",&tot_WF);
-  // WFTree->SetBranchAddress("Instance",&step);
+
   WFTree->SetBranchAddress("WF_samples",&wf_sample);
   digiTree->SetBranchAddress("time",&digi_time);
   digiTree->SetBranchAddress("LED300",&LED300);
   int p;
   p=i;
+
+  
   
   for(k=0;k<WFTree->GetEntries();k++){
 
@@ -59,6 +77,7 @@ void plotWF(const char * filename,int i){
 	leg[0]=new TLegend();
 	leg[0]->AddEntry(start[0],(to_string(startime[0])).c_str());
 	leg[0]->Draw("SAME");
+	cout<< startime[0]<<endl;
       }
       if(j==2){
 	start[1]=new TLine(startime[1],0,startime[1],500);
@@ -67,6 +86,7 @@ void plotWF(const char * filename,int i){
 	leg[1]=new TLegend();
 	leg[1]->AddEntry(start[1],(to_string(startime[1])).c_str());
 	leg[1]->Draw("SAME");
+	cout<< startime[1]<<endl;
       }
     }//chiudo for j
     

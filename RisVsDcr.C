@@ -23,12 +23,12 @@ void ProjAWC(TH2D* histo,string name,Int_t nbinx,Float_t index,string time){
   if(EditCanvas) gROOT->SetBatch(kFALSE);
   TCanvas* projAW = new TCanvas("proiezioni AW","",1200,800);
   TF1* gaussFit = new TF1("projectionFit","gaus");
- 
+  
   gaussFit->SetRange(projection->GetBinCenter(projection->GetMaximumBin())-1, projection->GetBinCenter(projection->GetMaximumBin())+1);
   
   gStyle->SetOptFit(1111);
   gStyle->SetStatX(0.5);
-
+  
   projection->Fit("projectionFit","R");
   gStyle->SetOptFit(1111);
   projection->Draw("");
@@ -213,7 +213,7 @@ void GaussianAmpWalk(TFile* file,Float_t index, Double_t rymin_l,Double_t rymax_
     delete ProiezioniTemp;
     delete gaush_l;
     delete gaush_r;
-    //delete mcp_amp;
+    
   
   }//chiudo for
   
@@ -346,7 +346,7 @@ void GaussianAmpWalk(TFile* file,Float_t index, Double_t rymin_l,Double_t rymax_
   delete hc_t;
   delete RisDef;
   delete fitgaussiano;
-
+  delete mcp_amp;
 }//CHIUDO FUNZIONE
 
 //#######################################################################################################################################################################################################################
@@ -642,7 +642,7 @@ void Ris(TFile* file,Float_t* Resol,Float_t* errResol,Float_t* ResolHisto,Float_
 
 
 
-  const Int_t  nbinx=290,nbiny=200;
+  const Int_t  nbinx=370,nbiny=280;
 
   int i;
   Double_t sigma[50],erry[50],cut[50],errx[50];
@@ -1126,7 +1126,9 @@ void RisVsDcr(string version){
   for(i=0;i<nfiles;i++){
     if(version=="old")myfile[i]=TFile::Open(("Pd/DCR10072/"+to_string(i)+".root").c_str());    
     if(version=="new")myfile[i]=TFile::Open(("Pd/NewRecoDcr/"+to_string(i)+".root").c_str());    
-    
+    if(version=="500")myfile[i]=TFile::Open(("Pd/DCRTH500/"+to_string(i)+".root").c_str());   
+    if(version=="DCRfix")myfile[i]=TFile::Open(("Pd/DCR500fix/"+to_string(i)+".root").c_str());   
+    if(version=="smart")myfile[i]=TFile::Open(("Pd/SmartAnalysisDcr/"+to_string(i)+".root").c_str());   
   }
   
   TTree* info[nfiles];
@@ -1158,23 +1160,24 @@ void RisVsDcr(string version){
 
   TCanvas* defcanv = new TCanvas("RisvsDCR","",600,400);
   //defcanv->SetLogy();
-  defcanv->SetLogy();
-  TGraphErrors* graph = new TGraphErrors(nfiles,DCRPl,sigma,0,errsigma);
+  //defcanv->SetLogy();
+  TGraphErrors* graph = new TGraphErrors(nfiles,DCR,sigma,0,errsigma);
   graph->SetMarkerStyle(8);
-  graph->SetMarkerSize(.8);
-  graph->SetTitle("NINOthr=100 d.u. bias SiPM=72 ");
+  graph->SetMarkerSize(1.1);
+  //  graph->SetMarkerColor(kBlack);
+  graph->SetTitle(("NINOthr="+to_string(NINOthrPl[2])).c_str());
   
   
   TGraphErrors* graphHisto = new TGraphErrors(nfiles,DCR,sigmaHisto,0,0);
 
-  graphHisto->GetXaxis()->SetTitle("DCR [#muA]");
-  graphHisto->GetYaxis()->SetTitle("#sigma_{t_{ave}} [ns]");
+  graph->GetXaxis()->SetTitle("NINOthr [d.u.]");
+  graph->GetYaxis()->SetTitle("#sigma_{t_{ave}} [ns]");
   graphHisto->SetMarkerStyle(8);
-  graphHisto->SetMarkerSize(.8);
+  graphHisto->SetMarkerSize(1.1);
   graphHisto->SetMarkerColor(kBlue);
 
   graph->SetLineColor(kBlack);
-  graphHisto->GetXaxis()->SetLimits(-40.0,2100.0);
+  //graphHisto->GetXaxis()->SetLimits(-40.0,2100.0);
   
   TLegend* legenda= new TLegend();
   legenda->SetHeader("#sigma(DCR)");
@@ -1187,9 +1190,9 @@ void RisVsDcr(string version){
   defcanv->SaveAs("HDCRPlot/plot.pdf");
 
   //defcanv->Close();
-  /*  TLatex* tex[nfiles];
+  /*TLatex* tex[nfiles];
   
-   for(i=0;i<nfiles;i++){
+     for(i=0;i<nfiles;i++){
     
     tex[i]= new TLatex(DCRPl[i],sigma[i],( (to_string((int)NINOthrPl[i]))+"   "+to_string((int)biasPl[i])).c_str());
     tex[i]->SetTextSize(0.035);
@@ -1201,29 +1204,31 @@ void RisVsDcr(string version){
   
 
    TCanvas* nocorr_sigma = new TCanvas("nocorr_sigma","nocorr_#sigma plot",600,550);
-
+   
+      
    TGraphErrors* ncsigma = new TGraphErrors(nfiles,DCR,lsigma,0,errlsigma);
    TGraphErrors* csigma = new TGraphErrors(nfiles,DCR,lcsigma,0,errlcsigma);
    TGraphErrors* NAWGraph = new TGraphErrors(nfiles,DCR,NAWRes,0,errNAWRes);
    
    TLegend* l3 = new TLegend();
    
-   //nocorr_sigma->cd();
-    ncsigma->GetXaxis()->SetTitle("DCR [#muA]");
+   
+   ncsigma->GetXaxis()->SetTitle("DCR [#muA]");
 
     ncsigma->GetXaxis()->Set(8,-70,2070);
     ncsigma->GetYaxis()->SetRangeUser(0.03,0.25);
     ncsigma->GetYaxis()->SetTitle("#sigma_{t_{ave}}(ns)");
     ncsigma->SetMarkerStyle(8);
-    graph->SetMarkerColor(kRed);
+     graph->SetMarkerColor(kRed);
     
-    ncsigma->SetMarkerSize(.8);
+    ncsigma->SetMarkerSize(1.1);
     csigma->SetMarkerStyle(8);
-    csigma->SetMarkerSize(.8);
-    graph->SetMarkerSize(.8);
+    csigma->SetMarkerSize(1.1);
+    graph->SetMarkerSize(1.1);
     csigma->SetMarkerColor(kBlue);
     NAWGraph->SetMarkerStyle(24);
-    NAWGraph->SetMarkerSize(.8);
+    NAWGraph->SetMarkerSize(1.1);
+    NAWGraph->SetMarkerColor(kRed);
     
 
 
@@ -1240,7 +1245,7 @@ void RisVsDcr(string version){
 
 
     for(i=0;i<nfiles;i++){
-      cout << DCRPl[i] << "   " <<sigmaHisto[i] << "  " << sigma[i] << "   " << errsigma[i]<< "      ____      "<<NAWRes[i]<<"    " << errNAWRes[i] << endl;
+      cout << DCRPl[i]<< NINOthrPl[i]<< "   " <<sigmaHisto[i] << "  " << sigma[i]<<"    "<< lsigma[i] << "   " << errsigma[i]<< "      ____      "<<NAWRes[i]<<"    " << errNAWRes[i] << endl;
     }
 }
 //####################################################################################################################################################################################################################### 
