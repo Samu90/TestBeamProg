@@ -1201,6 +1201,7 @@ void RisVsDcr(string version){
   
 
    TCanvas* nocorr_sigma = new TCanvas("nocorr_sigma","nocorr_#sigma plot",600,550);
+
    TGraphErrors* ncsigma = new TGraphErrors(nfiles,DCR,lsigma,0,errlsigma);
    TGraphErrors* csigma = new TGraphErrors(nfiles,DCR,lcsigma,0,errlcsigma);
    TGraphErrors* NAWGraph = new TGraphErrors(nfiles,DCR,NAWRes,0,errNAWRes);
@@ -1234,7 +1235,7 @@ void RisVsDcr(string version){
     l3->AddEntry(csigma,"tdiff_corr. #sigma ","P");
     l3->AddEntry(graph,"amp walk+ tdiff corr. #sigma","P");
     l3->AddEntry(NAWGraph,"new amp walk #sigma","P");
-    l3->Draw();
+    l3->Draw("SAME");
  
 
 

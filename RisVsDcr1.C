@@ -21,8 +21,6 @@
 
   }*/
 
-
-  
 void ProjAWC(TH2D* histo,string name,Int_t nbinx,Float_t index,string time){
   bool EditCanvas=false;
 
@@ -56,7 +54,9 @@ void ProjAWC(TH2D* histo,string name,Int_t nbinx,Float_t index,string time){
 
 
 //####################################################################################################################################################################################################################### 
+
 void GaussianAmpWalk(TFile* file,Float_t index, Float_t ranges[][2],Float_t* NAWRes,Float_t* errNAWRes,TF1* newfit[][2],int ind){
+
 TTree* digiTree = (TTree*)file->Get("digi");
 
   Float_t amp_max[54], time[54];
@@ -1160,7 +1160,7 @@ void Ris(TFile* file,Float_t* Resol,Float_t* errResol,Float_t* ResolHisto,Float_
 }
 
 //####################################################################################################################################################################################################################### 
-void RisVsDcr1(string conf){
+void RisVsDcr1(){
   //Int_t nfiles=19;
   Int_t nfiles=5;
   
@@ -1177,15 +1177,21 @@ void RisVsDcr1(string conf){
   Float_t ranges[3][2];
 
 
+
   TF1* fitsold[nfiles][2];
   TF1* fitsnew[nfiles][2];
+
 
   
   gSystem->Exec("rm -r -f HDCRPlot");
   gSystem->Exec("mkdir HDCRPlot");
   gStyle->SetOptFit(0111);
   for(i=0;i<nfiles;i++){
+
     myfile[i]=TFile::Open(("Pd/DCR"+conf+"/"+to_string(i)+".root").c_str());    
+
+       
+
   }
   
   TTree* info[nfiles];
@@ -1207,11 +1213,13 @@ void RisVsDcr1(string conf){
     NINOthrPl[i]= NINOthr[i];
     DCRPl[i]=DCR[i];
 
+
     Ris(myfile[i],&sigma[i],&errsigma[i],&sigmaHisto[i],DCRPl[i],&NAWRes[i],&errNAWRes[i],ranges,fitsold,i);
     //void Ris(TFile* file,Float_t* Resol,Float_t* errResol,Float_t* ResolHisto,Float_t index,Float_t* NAWRes,Float_t* errNAWRes, Float_t ranges[][2])
     plotWF_lsig(myfile[i],&lsigma[i],&errlsigma[i],DCRPl[i],&lcsigma[i],&errlcsigma[i],ranges);
    
     GaussianAmpWalk(myfile[i],DCRPl[i],ranges,&NAWRes[i],&errNAWRes[i],fitsnew,i);
+
     //void GaussianAmpWalk(TFile* file,Float_t index, Float_t ranges[][2],Float_t* NAWRes,Float_t* errNAWRes)
   }
   

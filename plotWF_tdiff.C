@@ -20,7 +20,7 @@ void plotWF_tdiff(const char * filename){
 
 
 
-  const Int_t  nbinx=200,nbiny=300;
+  const Int_t  nbinx=300,nbiny=400;
 
   int i;
   Double_t sigma[50],erry[50],cut[50],errx[50];
@@ -407,9 +407,9 @@ void plotWF_tdiff(const char * filename){
    
    l2->SetHeader("t_{ave}-t_{MCP} distrib");
    l2->AddEntry(histo_ct,"t_ave-t_MCP");
-   l2->AddEntry(gaus_ct,("#sigma="+to_string(gaus_ct->GetParameter(2))).c_str());
+   l2->AddEntry(gaus_ct,("#sigma="+to_string(sqrt(gaus_ct->GetParameter(2)*gaus_ct->GetParameter(2)-0.015*0.015))).c_str());
    l2->AddEntry(histo_ctdiff,"t_ave-t_MCP(tdiff corr)");
-   l2->AddEntry(gaus_ctdiff,("#sigma="+to_string(gaus_ctdiff->GetParameter(2))).c_str());
+   l2->AddEntry(gaus_ctdiff,("#sigma="+to_string(sqrt(gaus_ctdiff->GetParameter(2)*gaus_ctdiff->GetParameter(2)-0.015*0.015))).c_str());
    l2->Draw();
    
    
@@ -463,7 +463,7 @@ void plotWF_tdiff(const char * filename){
    bool ConfrontoTdiff=true;
    
    if(ConfrontoTdiff){
-     TCanvas* ConfCanv = new TCanvas("confronto","",1200,800);
+     TCanvas* ConfCanv = new TCanvas("confronto","",1200,450);
      gStyle->SetOptFit();
      ConfCanv->Divide(3,1);
      
@@ -476,12 +476,13 @@ void plotWF_tdiff(const char * filename){
      hc_t->GetXaxis()->SetTitle("t_left-t_right [ns]");
      hc_t->Draw("COLZ");
      graph_tc->Draw("P");
-     fit_tdiff->Draw("SAME");
+     fit_tdiff->DrawF1(-2.0,2.0,"SAME");
 
      ConfCanv->cd(3);
      hc_tdiff->Draw("COLZ");
      graph_tcdiff->Draw("P");
      graph_tcdiff->Fit("retta");
+
    }
 
    

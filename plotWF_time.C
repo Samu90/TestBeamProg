@@ -1,6 +1,18 @@
 //to run with ranges [0.125;2]right, [0.13;2]left on 4.1
 //to run with ranges [0.125;2]right, [0.13;2]left on 1.3
-
+#include <TFile.h>
+#include <TTree.h>
+#include <TH1F.h>
+#include <TF1.h>
+#include <TMath.h>
+#include <TLegend.h>
+#include <TLatex.h>
+#include <TH2F.h>
+#include <TCanvas.h>
+#include <TFile.h>
+#include <TGraphErrors.h>
+#include <TStyle.h>
+#include <TSystem.h>
 
 
 void plotWF_time(const char * filename){
@@ -25,12 +37,12 @@ void plotWF_time(const char * filename){
   rxmax=0.5;
 
 
-  const Int_t  nbinx=200,nbiny=500;
+  const Int_t  nbinx=300,nbiny=500;
 
   
 
-  txmin=-0.6;
-  txmax=0.6;
+  txmin=-0.5;
+  txmax=0.9;
 
 
   Float_t x_r[nbinx],y_r[nbiny], x_l[nbinx],y_l[nbiny],rmsy_l[nbiny],rmsy_r[nbiny];
@@ -162,31 +174,29 @@ void plotWF_time(const char * filename){
   TGraphErrors* graph_l=new TGraphErrors(nbinx-1,x_l,y_l,0,rmsy_l);
   TGraphErrors* graph_t=new TGraphErrors(nbinx-1,xt,yt,0,rmsyt);
  
-  
-  TF1* hyp_r = new TF1("hyp_r","[0]-[1]*log(x+[2])",0.135,0.35);
-  TF1* hyp_l = new TF1("hyp_l","[0]-[1]*log(x+[2])",0.11,0.35);
-  TF1* hyp_t = new TF1("hyp_t","[0]*x+[1]",0.7,txmax);
+    
+  TF1* hyp_r = new TF1("hyp_r","[0]+[2]*log(x+[1])",0.8*fit_r->GetParameter(1),1.5*fit_r->GetParameter(1));
+  TF1* hyp_l = new TF1("hyp_l","[0]+[2]*log(x+[1])",0.5*fit_l->GetParameter(1),1.2*fit_l->GetParameter(1));
 
+  TF1* hyp_t = new TF1("hyp_t","[1]*x**2+[2]*x+[0]",-0.1,0.65);
 
     /* SetParameters*/
   hyp_l->SetParameter(0, 8.51);
   hyp_l->SetParameter(1, 5);
   hyp_l->SetParameter(2, 1.2);
   // hyp_l->SetParameter(3, -2.43e-2);
-  
-  hyp_r->SetParameter(0, 7);
+  hyp_r->SetParameter(0, 8.51);
   hyp_r->SetParameter(1, 5);
   hyp_r->SetParameter(2, 1.2);
+
   
-
-
   wf_c->Divide(3,2);
 
   wf_c->cd(1);
   h2_l->GetYaxis()->SetTitle("t_left-t_MCP [ns]");
   h2_l->GetXaxis()->SetTitle("max.amplitude [mV]");
   h2_l->Draw("COLZ");
-  graph_l->Fit("hyp_l","0RL");
+  graph_l->Fit("hyp_l","0");
   graph_l->SetMarkerStyle(8);
   graph_l->SetMarkerSize(.5);
   graph_l->Draw("P");
@@ -195,6 +205,8 @@ void plotWF_time(const char * filename){
   
   
   wf_c->cd(2);
+  h2_r->GetYaxis()->SetTitle("t_right-t_MCP [ns]");
+  h2_r->GetXaxis()->SetTitle("max.amplitude [mV]");
   h2_r->Draw("COLZ");
   graph_r->Fit("hyp_r","0");
   graph_r->SetMarkerStyle(8);
@@ -204,7 +216,7 @@ void plotWF_time(const char * filename){
 
   wf_c->cd(3);
   h2_t->Draw("COLZ");
-  graph_t->Fit("hyp_t","R");
+  graph_t->Fit("hyp_t","0");
   
   graph_t->SetMarkerStyle(8);
   graph_t->SetMarkerSize(.5);
@@ -381,7 +393,7 @@ void plotWF_time(const char * filename){
  
   TF1* fitg_l = new TF1("fitg_l","[0]+x*[1]",tymin,tymax);
   TF1* fitg_r = new TF1("fitg_r","[0]+x*[1]",tymin,tymax);
-  TF1* fitg_t = new TF1("fitg_t","[0]+x*[1]",tymin,tymax);
+  TF1* fitg_t = new TF1("fitg_t","[0]+x*[1]",-0.2,0.4);
 
   fitg_l->SetLineColor(kRed);
   fitg_r->SetLineColor(kBlue); 
@@ -402,6 +414,7 @@ void plotWF_time(const char * filename){
   g_l->SetMarkerColor(kRed);
   g_l->SetMarkerStyle(8);
   g_l->SetMarkerSize(.5);
+  gStyle->SetOptFit(0);  
   g_l->Fit("fitg_l");
   g_l->Draw("AP");
  
@@ -419,13 +432,14 @@ void plotWF_time(const char * filename){
   cout << "*********************************" <<endl;
   cout << "*********************************" <<endl;
   g_t->Draw("SAMEP");
-  l2->Draw();
+  fitg_t->DrawF1(-2.0,2.0,"SAME");
+  
 
 
   
   
   TH2D* htdiff= new TH2D("hc_tdiff", "histo hc_tdiff",nbinx,txmin,txmax,nbiny,tymin,tymax);
-  g_t->Fit("fitg_t");
+  g_t->Fit("fitg_t","R");
 
   for(k=0;k<digiTree->GetEntries();k++){
 
@@ -434,7 +448,7 @@ void plotWF_time(const char * filename){
     if (0.8*(fit_l->GetParameter(1)) < (amp_max[3]/max) && (amp_max[3]/max) < (3*fit_l->GetParameter(1)) && amp_max[0]/max > 0.4 && amp_max[0]/max < 0.75)
       {
 
-	htdiff->Fill(time[1+LEDi]-time[2+LEDi]-(hyp_r->Eval(amp_max[4]/max)-hyp_r->GetParameter(0)-hyp_l->Eval(amp_max[3]/max)+hyp_l->GetParameter(0)),(time[1+LEDi]+time[2+LEDi])/2-time[0]-(hyp_r->Eval(amp_max[4]/max)-hyp_r->GetParameter(0)+hyp_l->Eval(amp_max[3]/max)-hyp_l->GetParameter(0))/2-fitg_t->Eval(time[1+LEDi]-time[2+LEDi]-(hyp_r->Eval(amp_max[4]/max)-hyp_r->GetParameter(0)-hyp_l->Eval(amp_max[3]/max)+hyp_l->GetParameter(0)))+fitg_t->GetParameter(0)); //GIUSTAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
+	htdiff->Fill(time[1+LEDi]-time[2+LEDi]+hyp_r->Eval(amp_max[4]/max)-hyp_r->GetParameter(0)-hyp_l->Eval(amp_max[3]/max)+hyp_l->GetParameter(0),(time[1+LEDi]+time[2+LEDi])/2-time[0]-(hyp_r->Eval(amp_max[4]/max)-hyp_r->GetParameter(0)+hyp_l->Eval(amp_max[3]/max)-hyp_l->GetParameter(0))/2-fitg_t->Eval(time[1+LEDi]-time[2+LEDi]+hyp_r->Eval(amp_max[4]/max)-hyp_r->GetParameter(0)-hyp_l->Eval(amp_max[3]/max)+hyp_l->GetParameter(0))+fitg_t->GetParameter(0));
       }
 
   }//chiudo for k 
@@ -467,6 +481,7 @@ void plotWF_time(const char * filename){
   g_tdiff->Fit("fitc_tdiff");
   cout << "__________________________" << endl;
   g_tdiff->Draw("SAMEP");
+  l2->AddEntry(fitc_tdiff,"t_{ave}-t_{MCP}(t_diff)","L");
   l2->Draw();
   
   wf_c->cd(4);
