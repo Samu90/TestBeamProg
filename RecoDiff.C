@@ -13,7 +13,7 @@
 #include <TSystem.h>
 #include <TROOT.h> 
 
-void GaussianAmpWalk(TFile* file,Float_t DCRval,Float_t* NAWRes,Float_t* errNAWRes){
+void GaussianAmpWalk(TFile* file,Float_t DCRval,Double_t* NAWRes,Double_t* errNAWRes,string version){
 TTree* digiTree = (TTree*)file->Get("digi");
 
   Float_t amp_max[54], time[54];
@@ -130,7 +130,7 @@ TTree* digiTree = (TTree*)file->Get("digi");
   hl_amp->Fit("f_l","R0");
 
   bool DebugLand=true;
-  
+
   if(DebugLand){
     TCanvas* LandCanv = new TCanvas("mycanvas","",1200,700);
     LandCanv->Divide(2,1);
@@ -143,7 +143,7 @@ TTree* digiTree = (TTree*)file->Get("digi");
     hr_amp->Draw();
     fit_r->Draw("SAME");
     
-    LandCanv->SaveAs(("ControlliRecoDiff/Landaubis"+to_string((int)DCRval)+".pdf").c_str());
+    LandCanv->SaveAs(("ControlliRecoDiff/Landau"+version+to_string((int)DCRval)+".png").c_str());
     LandCanv->Close();
   }
 
@@ -173,7 +173,7 @@ TTree* digiTree = (TTree*)file->Get("digi");
   TCanvas* ProiezioniTemp;
   Int_t npoint=50;
   
-  gSystem->Exec(("mkdir ControlliRecoDiff/Gauss"+to_string((int)DCRval)).c_str());
+  
   
   for(i=0;i<npoint;i++){
     x_r[i]=0;
@@ -183,7 +183,8 @@ TTree* digiTree = (TTree*)file->Get("digi");
     rmsy_r[i]=0;
     rmsy_l[i]=0;
   }
-    
+  gSystem->Exec(("mkdir ControlliRecoDiff/Gauss"+version+to_string((int)DCRval)).c_str());
+  
   for(i=0;i<npoint;i++){
     
     histohampl=h2_l->ProjectionY("FettaAmpL",h2_l->FindBin(rxmin+(rxmax-rxmin)/npoint*i),h2_l->FindBin(rxmin+(rxmax-rxmin)/npoint*(i+1)));
@@ -212,7 +213,7 @@ TTree* digiTree = (TTree*)file->Get("digi");
     rmsy_r[i]=gaush_r->GetParError(1);
    
     
-    ProiezioniTemp->SaveAs(("ControlliRecoDiff/Gauss"+to_string((int)DCRval)+"/GaussianeAmp"+to_string(i)+".pdf").c_str());
+    ProiezioniTemp->SaveAs(("ControlliRecoDiff/Gauss"+to_string((int)DCRval)+"/GaussianeAmp"+version+to_string(i)+".png").c_str());
     ProiezioniTemp->Close();
     delete ProiezioniTemp;
     delete gaush_l;
@@ -227,7 +228,7 @@ TTree* digiTree = (TTree*)file->Get("digi");
   TF1* FitLog_r = new TF1("FitLog_r","[0]+[2]*log(x+[1])",0.8*fit_r->GetParameter(1),1.5*fit_r->GetParameter(1));
   TF1* FitLog_l = new TF1("FitLog_l","[0]+[2]*log(x+[1])",0.5*fit_l->GetParameter(1),1.2*fit_l->GetParameter(1));
   
-  gStyle->SetOptFit();
+  gStyle->SetOptFit(0);
   
      /* SetParameters*/
   FitLog_l->SetParameter(0, 8.51);
@@ -278,7 +279,7 @@ TTree* digiTree = (TTree*)file->Get("digi");
   tymin_c=tymin-(FitLog_l->Eval(0.25)-FitLog_l->GetParameter(0)+FitLog_r->Eval(0.25)-FitLog_r->GetParameter(0))/2;
   tymax_c=tymax-(FitLog_l->Eval(0.25)-FitLog_l->GetParameter(0)+FitLog_r->Eval(0.25)-FitLog_r->GetParameter(0))/2;
   
-
+  gStyle->SetOptFit(1110);
 
   TH2D* hc_l= new TH2D("hc_l", "histo hc_l",nbinx,rxmin,rxmax,nbiny,rymin_lc,rymax_lc);
   TH2D* hc_r= new TH2D("hc_r", "histo hc_r",nbinx,rxmin,rxmax,nbiny,rymin_rc,rymax_rc);
@@ -296,7 +297,7 @@ TTree* digiTree = (TTree*)file->Get("digi");
       }
     
   }//chiudo for k
-  gSystem->Exec("mkdir ControlliRecoDiff/NAW");
+  
 
   gStyle->SetOptFit();
   
@@ -316,7 +317,7 @@ TTree* digiTree = (TTree*)file->Get("digi");
   hc_t->Draw("COLZ");
   
   if(controlFit) gPad->WaitPrimitive();
-  CanvAmpGauss->SaveAs(("ControlliRecoDiff/GaussianeAmp"+to_string((int)DCRval)+".pdf").c_str());
+  CanvAmpGauss->SaveAs(("ControlliRecoDiff/GaussianeNewAmp"+version+to_string((int)DCRval)+".png").c_str());
   CanvAmpGauss->Close();
   if(controlFit) gROOT->SetBatch(kTRUE);
 
@@ -331,11 +332,18 @@ TTree* digiTree = (TTree*)file->Get("digi");
   tProjection->Fit("fitgaussiano","R");
   tProjection->Draw("SAME");
   cout<< "E IL FIT??_________________________________________________________________________________________________________"<<endl;
-  RisDef->SaveAs(("ControlliRecoDiff/NewAWTimeRes"+to_string((int)DCRval)+".pdf").c_str());
+  RisDef->SaveAs(("ControlliRecoDiff/TimeRes"+version+to_string((int)DCRval)+".png").c_str());
   RisDef->Close();
   
-  *NAWRes=fitgaussiano->GetParameter(2);
+  
+
+  *NAWRes=sqrt(fitgaussiano->GetParameter(2)*fitgaussiano->GetParameter(2)-0.015*0.015);
   *errNAWRes=fitgaussiano->GetParError(2);
+
+  
+
+
+
 
   delete hr_amp;
   delete hl_amp;
@@ -351,59 +359,83 @@ TTree* digiTree = (TTree*)file->Get("digi");
 }//CHIUDO FUNZIONE
 
 
-
-
+    
+    
 void RecoDiff(){
+  gSystem->Exec("mkdir ControlliRecoDiff");
   
-  Int_t nfiles;
-  TFile* FNoCorr[nfiles]
+  Int_t i;
+  Int_t nfiles=5;
+  TFile* FNoCorr[nfiles];
   TFile* FWindowCorr[nfiles];
   TFile* FSmartAnalysis[nfiles];
-    
-  TTree* infoNoCorr[3][nfiles];
-    
+  
+  TTree* info[3][nfiles];
+  
   Double_t Ris[3][nfiles], errRis[3][nfiles];
-  Float_t DCR[3][nfilens];
-  Double_t DCRPl[3][nfilens];
+  Float_t DCR[3][nfiles];
+  Double_t DCRPl[3][nfiles];
 
   for(i=0;i<nfiles;i++){
     FNoCorr[i]=TFile::Open(("Pd/DCR10072/"+to_string(i)+".root").c_str());
-    FWindowCorr[i]=TFile::Open(("Pd/NewRecoDcr/"+to_string(i)+".root").c_str());
-    FSmartAnalysis[i]==TFile::Open(("Pd/SmartAnalysisDcr/"+to_string(i)+".root").c_str());;
+    //FWindowCorr[i]=TFile::Open(("Pd/NewRecoDcr/"+to_string(i)+".root").c_str());
+    FSmartAnalysis[i]=TFile::Open(("Pd/SmartAnalysisDcr/"+to_string(i)+".root").c_str());;
   }
   
 
   
   for(i=0;i<nfiles;i++){
     info[0][i]=(TTree*)FNoCorr[i]->Get("info");
-    info[1][i]=(TTree*)FWindowCorr[i]->Get("info");
+    //info[1][i]=(TTree*)FWindowCorr[i]->Get("info");
     info[2][i]=(TTree*)FSmartAnalysis[i]->Get("info");
     
     info[0][i]->SetBranchAddress("SiPMCurrent_bar",&DCR[0][i]);
-    info[1][i]->SetBranchAddress("SiPMCurrent_bar",&DCR[1][i]);
+    //info[1][i]->SetBranchAddress("SiPMCurrent_bar",&DCR[1][i]);
     info[2][i]->SetBranchAddress("SiPMCurrent_bar",&DCR[2][i]);
     
+    info[0][i]->GetEntry(1);
+    info[2][i]->GetEntry(1);
+
     DCRPl[0][i]=DCR[0][i];
-    DCRPl[1][i]=DCR[1][i];
+    //DCRPl[1][i]=DCR[1][i];
     DCRPl[2][i]=DCR[2][i];
+    
     
   }
   //(TFile* file,Float_t DCRval,Float_t* NAWRes,Float_t* errNAWRes)
-  
+  gROOT->SetBatch(kTRUE);
   for(i=0;i<nfiles;i++){
     
-    GaussianAmpWalk(FNoCorr[i],DCRPl[0][i],&Ris[0][i],&errRis[0][i]);
-    GaussianAmpWalk(FWindowCorr[i],DCRPl[1][i],&Ris[1][i],&errRis[1][i]);
-    GaussianAmpWalk(FSmartAnalysis[i],DCRPl[2][i],&Ris[2][i],&errRis[2][i]);
+    GaussianAmpWalk(FNoCorr[i], DCRPl[0][i], &Ris[0][i], &errRis[0][i],"OldReco");
+    //GaussianAmpWalk(FWindowCorr[i], DCRPl[1][i], &Ris[1][i], &errRis[1][i]);
+    GaussianAmpWalk(FSmartAnalysis[i], DCRPl[2][i], &Ris[2][i], &errRis[2][i],"NewReco");
   
   }
+  
+  gROOT->SetBatch(kFALSE);
+  
+  
+  TGraphErrors* graph1 = new TGraphErrors(nfiles,DCRPl[0],Ris[0],0,errRis[0]);
+  TGraphErrors* graph2 = new TGraphErrors(nfiles,DCRPl[2],Ris[2],0,errRis[2]);
+  
+  TCanvas* canvas = new TCanvas("uncanvas","",1300,1200);
+  
+  graph1->Draw("AP");
+  graph1->SetMarkerStyle(8);
+  graph1->SetMarkerSize(1);
+  graph1->SetMarkerColor(kRed);
 
   
-  
-  
-  
-  
+  graph2->Draw("SAMEP");
+  graph2->SetMarkerStyle(8);
+  graph2->SetMarkerSize(1);
+  graph2->SetMarkerColor(kBlack);
 
-
+  TLegend* leg=new TLegend();
+  leg->AddEntry(graph1,"oldReco");
+  leg->AddEntry(graph2,"newReco");
+  leg->Draw("SAME");
+  
+  canvas->SaveAs("ControlloRecoDiff/diff.png");
 
 }//chiudo main

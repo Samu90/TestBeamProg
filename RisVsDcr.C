@@ -16,7 +16,6 @@
 void ProjAWC(TH2D* histo,string name,Int_t nbinx,Float_t index,string time){
   bool EditCanvas=false;
 
-  cout<<"STO QUA_________________________________________________________________________________________________________________________"<<endl;
 
   TH1D* projection;
   projection=histo->ProjectionY("Proiezione",0,nbinx);
@@ -35,7 +34,7 @@ void ProjAWC(TH2D* histo,string name,Int_t nbinx,Float_t index,string time){
   
   if(EditCanvas) gPad->WaitPrimitive();
   
-  projAW->SaveAs(("HDCRPlot/"+time+"/ProiezioniR"+to_string((int)index)+name+".pdf").c_str());
+  projAW->SaveAs(("HDCRPlot/"+time+"/ProiezioniR"+to_string((int)index)+name+".png").c_str());
   projAW->Close();
   
   if(EditCanvas) gROOT->SetBatch(kTRUE);
@@ -61,7 +60,7 @@ void GaussianAmpWalk(TFile* file,Float_t index, Double_t rymin_l,Double_t rymax_
 
 
 
-  const Int_t  nbinx=290,nbiny=150;
+  const Int_t  nbinx=230,nbiny=150;
 
   int i;
   Double_t sigma[50],erry[50],cut[50],errx[50];
@@ -139,7 +138,7 @@ void GaussianAmpWalk(TFile* file,Float_t index, Double_t rymin_l,Double_t rymax_
     hr_amp->Draw();
     fit_r->Draw("SAME");
     
-    LandCanv->SaveAs(("HDCRPlot/Landaubis"+to_string((int)index)+".pdf").c_str());
+    LandCanv->SaveAs(("HDCRPlot/Landaubis"+to_string((int)index)+".png").c_str());
     LandCanv->Close();
   }
 
@@ -208,7 +207,7 @@ void GaussianAmpWalk(TFile* file,Float_t index, Double_t rymin_l,Double_t rymax_
     rmsy_r[i]=gaush_r->GetParError(1);
    
     
-    ProiezioniTemp->SaveAs(("HDCRPlot/Gauss"+to_string((int)index)+"/GaussianeAmp"+to_string(i)+".pdf").c_str());
+    ProiezioniTemp->SaveAs(("HDCRPlot/Gauss"+to_string((int)index)+"/GaussianeAmp"+to_string(i)+".png").c_str());
     ProiezioniTemp->Close();
     delete ProiezioniTemp;
     delete gaush_l;
@@ -312,7 +311,7 @@ void GaussianAmpWalk(TFile* file,Float_t index, Double_t rymin_l,Double_t rymax_
   hc_t->Draw("COLZ");
   
   if(controlFit) gPad->WaitPrimitive();
-  CanvAmpGauss->SaveAs(("HDCRPlot/GaussianeAmp"+to_string((int)index)+".pdf").c_str());
+  CanvAmpGauss->SaveAs(("HDCRPlot/GaussianeAmp"+to_string((int)index)+".png").c_str());
   CanvAmpGauss->Close();
   if(controlFit) gROOT->SetBatch(kTRUE);
 
@@ -327,7 +326,7 @@ void GaussianAmpWalk(TFile* file,Float_t index, Double_t rymin_l,Double_t rymax_
   tProjection->Fit("fitgaussiano","R");
   tProjection->Draw("SAME");
   
-  RisDef->SaveAs(("HDCRPlot/NewAWTimeRes"+to_string((int)index)+".pdf").c_str());
+  RisDef->SaveAs(("HDCRPlot/NewAWTimeRes"+to_string((int)index)+".png").c_str());
   RisDef->Close();
   
   *NAWRes=fitgaussiano->GetParameter(2);
@@ -484,7 +483,7 @@ void plotWF_lsig(TFile* file,Float_t* Resol,Float_t* errResol,Float_t index,Floa
   g_m->Draw("same");
 
 
-  wf_c->SaveAs(("HDCRPlot/LargeGaus"+to_string((int)index)+".pdf").c_str());
+  wf_c->SaveAs(("HDCRPlot/LargeGaus"+to_string((int)index)+".png").c_str());
   wf_c->Close();
 
   
@@ -572,7 +571,7 @@ void plotWF_lsig(TFile* file,Float_t* Resol,Float_t* errResol,Float_t index,Floa
   l2->AddEntry(histo_ctdiff,"t_ave-t_MCP(tdiff corr)");
   l2->AddEntry(gaus_ctdiff,("#sigma="+to_string(gaus_ctdiff->GetParameter(2))).c_str());
   //  l2->Draw();
-  tdiff->SaveAs(("HDCRPlot/Gaussianenowalk"+to_string((int)index)+".pdf").c_str());
+  tdiff->SaveAs(("HDCRPlot/Gaussianenowalk"+to_string((int)index)+".png").c_str());
   tdiff->Close();
   
   delete histo_ctdiff;
@@ -614,7 +613,7 @@ void Proiezione(TH2D* hl,TH2D* hr,TH2D* ht,Int_t nxbin,Float_t DCR){
     proj[2]->SetTitle("t_{ave}");
     proj[2]->Draw("SAME");
     
-    pro->SaveAs(("HDCRPlot/ProiezioniLR"+to_string((int)DCR)+".pdf").c_str());
+    pro->SaveAs(("HDCRPlot/ProiezioniLR"+to_string((int)DCR)+".png").c_str());
     
     
     pro->Close();
@@ -642,7 +641,7 @@ void Ris(TFile* file,Float_t* Resol,Float_t* errResol,Float_t* ResolHisto,Float_
 
 
 
-  const Int_t  nbinx=370,nbiny=280;
+  const Int_t  nbinx=250,nbiny=250;
 
   int i;
   Double_t sigma[50],erry[50],cut[50],errx[50];
@@ -760,7 +759,7 @@ void Ris(TFile* file,Float_t* Resol,Float_t* errResol,Float_t* ResolHisto,Float_
     hr_amp->Draw();
     fit_r->Draw("SAME");
     
-    LandCanv->SaveAs(("HDCRPlot/Landau"+to_string((int)index)+".pdf").c_str());
+    LandCanv->SaveAs(("HDCRPlot/Landau"+to_string((int)index)+".png").c_str());
     LandCanv->Close();
   }
 
@@ -1000,7 +999,7 @@ void Ris(TFile* file,Float_t* Resol,Float_t* errResol,Float_t* ResolHisto,Float_
    graph_tcdiff->SetMarkerSize(.5);
    graph_tcdiff->Draw("P");
    
-   wf_c->SaveAs(("HDCRPlot/Controllo"+to_string((int)index)+".pdf").c_str());
+   wf_c->SaveAs(("HDCRPlot/Controllo"+to_string((int)index)+".png").c_str());
    wf_c->Close();
 
    
@@ -1058,7 +1057,7 @@ void Ris(TFile* file,Float_t* Resol,Float_t* errResol,Float_t* ResolHisto,Float_
    l2->AddEntry(gaus_ctdiff,("#sigma="+to_string(gaus_ctdiff->GetParameter(2))).c_str());
    l2->AddEntry(histo_ctdiff,("#sigma_{histo}="+to_string(histo_ctdiff->GetRMS())).c_str());
    l2->Draw();
-   tdiff->SaveAs(("HDCRPlot/Gaussiane"+to_string((int)index)+".pdf").c_str());
+   tdiff->SaveAs(("HDCRPlot/Gaussiane"+to_string((int)index)+".png").c_str());
    tdiff->Close();
 
    
@@ -1087,7 +1086,7 @@ void Ris(TFile* file,Float_t* Resol,Float_t* errResol,Float_t* ResolHisto,Float_
      graph_tcdiff->Fit("retta","0");
      retta->DrawF1(-1,1,"SAME");
      
-     ConfCanv->SaveAs(("HDCRPlot/Confronto"+to_string((int)index)+".pdf").c_str());
+     ConfCanv->SaveAs(("HDCRPlot/Confronto"+to_string((int)index)+".png").c_str());
      ConfCanv->Close();
    }
 
@@ -1187,7 +1186,7 @@ void RisVsDcr(string version){
   graphHisto->Draw("AP");
   graph->Draw("SAMEP");
   legenda->Draw();
-  defcanv->SaveAs("HDCRPlot/plot.pdf");
+  defcanv->SaveAs("HDCRPlot/plot.png");
 
   //defcanv->Close();
   /*TLatex* tex[nfiles];
