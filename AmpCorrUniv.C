@@ -368,8 +368,9 @@ void AmpCorrUniv(const char * filename){
    
    TCanvas* canv= new TCanvas();
    histo_ct->Draw();
-   histo_cr->Draw("SAME");
-   histo_cl->Draw("SAME");
+   
+   //   histo_cr->Draw("SAME");
+   //histo_cl->Draw("SAME");
 
    
   }

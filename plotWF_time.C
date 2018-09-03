@@ -432,14 +432,14 @@ void plotWF_time(const char * filename){
   cout << "*********************************" <<endl;
   cout << "*********************************" <<endl;
   g_t->Draw("SAMEP");
-  fitg_t->DrawF1(-2.0,2.0,"SAME");
+  fitg_t->Draw("SAME");
   
 
 
   
   
   TH2D* htdiff= new TH2D("hc_tdiff", "histo hc_tdiff",nbinx,txmin,txmax,nbiny,tymin,tymax);
-  g_t->Fit("fitg_t","R");
+  g_t->Fit("fitg_t");
 
   for(k=0;k<digiTree->GetEntries();k++){
 
@@ -486,7 +486,7 @@ void plotWF_time(const char * filename){
   
   wf_c->cd(4);
   ht->Draw("COLZ");
-  g_t->Fit("fitg_t","0L");
+  g_t->Fit("fitg_t","0");
   g_t->SetMarkerStyle(8);
   g_t->SetMarkerSize(.5);
   g_t->Draw("P");
